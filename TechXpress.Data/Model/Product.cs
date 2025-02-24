@@ -12,7 +12,7 @@ namespace TechXpress.Data.Model
         public string Name { get; set; } = string.Empty;
         public double Price { get; set; }
         public string Description { get; set; } = string.Empty;
-        public byte[]? Image { get; set; }
+        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
         public int CategoryId { get; set; } //FK
         public Category? Category { get; set; }  //Navigation Property
     }

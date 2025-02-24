@@ -1,0 +1,9 @@
+﻿using TechXpress.Data.Model;
+@model TechXpress.Data.Model.Product
+
+<h2>Product Details</h2>
+<p><strong>Name:</strong> @Model.Name</p>
+<p><strong>Price:</strong> @Model.Price</p>
+<p><strong>Category:</strong> @Model.Category?.Name</p>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

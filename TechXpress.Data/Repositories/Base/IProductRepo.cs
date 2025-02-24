@@ -9,6 +9,6 @@ namespace TechXpress.Data.Repositories.Base
 {
     public interface IProductRepo : IRepository<Product>
     {
-        Task<IEnumerable<Product>> GetProductsByCategory(int CategoryId);
+        Task<IEnumerable<Product>> GetProductsByCategoryId(int CategoryId);
     }
 }

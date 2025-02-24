@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TechXpress.Data;
 using TechXpress.Data.Model;
 using TechXpress.Data.Repositories;
 using TechXpress.Data.Repositories.Base;
+using TechXpress.Services;
+using TechXpress.Services.Base;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +16,11 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped(typeof(Repository<>),typeof(IRepository<>));
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 // Add services to the container.
@@ -47,3 +51,48 @@ app.MapControllerRoute(
 
 
 app.Run();
+/*
+async Task SeedAdminUserAsync(IServiceProvider services)
+{
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    string adminEmail = "admin@techxpress.com";
+    string adminPassword = "Admin@123";
+
+    //  Ensure Admin Role Exists
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    //  Ensure Admin User Exists
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        var newAdmin = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            FirstName = "Admin",
+            LastName = "User",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(newAdmin, adminPassword);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(newAdmin, "Admin");
+            Console.WriteLine(" Admin user created successfully!");
+        }
+        else
+        {
+            Console.WriteLine("Failed to create admin user.");
+        }
+    }
+    else
+    {
+        Console.WriteLine("✅ Admin user already exists.");
+    }
+}
+*/

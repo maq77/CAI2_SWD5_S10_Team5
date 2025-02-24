@@ -1,0 +1,27 @@
+﻿@model List<TechXpress.Services.DTOs.UserDTO>
+
+<h2>Manage Users</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Roles</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td>@user.FirstName @user.LastName</td>
+                <td>@string.Join(", ", user.Roles)</td>
+                <td>
+                    <a asp-action="AssignRole" asp-route-email="@user.Email" asp-route-role="Admin" class="btn btn-primary">Make Admin</a>
+                    <a asp-action="DeleteUser" asp-route-email="@user.Email" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

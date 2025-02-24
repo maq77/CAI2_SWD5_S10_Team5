@@ -16,7 +16,7 @@ namespace TechXpress.Data.Repositories
             _dp = dp;
         }
         private readonly AppDbContext _dp;
-        public async Task<IEnumerable<Product>> GetProductsByCategory(int CategoryId)
+        public async Task<IEnumerable<Product>> GetProductsByCategoryId(int CategoryId)
         {
             return await _dp.Products
                             .Include(p=>p.Category) ///eager loading

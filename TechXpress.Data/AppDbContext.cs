@@ -17,6 +17,7 @@ namespace TechXpress.Data
             
         }
         public DbSet<Product>  Products { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
@@ -35,6 +36,7 @@ namespace TechXpress.Data
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
             builder.Entity<OrderDetail>()
                 .HasOne(od => od.Order)
                 .WithMany(o => o.OrderDetails)
@@ -47,6 +49,13 @@ namespace TechXpress.Data
                 .HasForeignKey(od => od.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<ProductImage>()
+                .HasOne(p => p.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(p => p.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
+
     }
 }
