@@ -10,7 +10,7 @@ namespace TechXpress.Data.Repositories.Base
     public interface IUnitOfWork : IDisposable
     {
         IProductRepo Products { get; }
-        IRepository<Order> Orders { get; }
+        IRepository<ProductImage> ProductImages { get; }
         IRepository<Category> Categories { get; }
         IRepository<OrderDetail> OrderDetails { get; }
         Task<bool> SaveAsync();

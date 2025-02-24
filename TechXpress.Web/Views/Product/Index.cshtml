@@ -1,10 +1,12 @@
-﻿@model IEnumerable<TechXpress.Data.Model.Product>
+﻿@model IEnumerable<TechXpress.Services.DTOs.ProductDTO>
+
 <h2>Product List</h2>
 <a asp-action="Create" class="btn btn-primary">Add Product</a>
 
 <table class="table">
     <thead>
         <tr>
+            <th>Images</th>
             <th>Name</th>
             <th>Price</th>
             <th>Category</th>
@@ -15,11 +17,19 @@
         @foreach (var product in Model)
         {
             <tr>
-                <td>@product.Name</td>
-                <td>@product.Price</td>
-                <td>@product.Category?.Name</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@product.Id" class="btn btn-info">Details</a>
+                    @if (product.Images != null && product.Images.Any())
+                    {
+                        @foreach (var image in product.Images)
+                        {
+                            <img src="@image.ImagePath" width="100" style="margin-right:5px;" />
+                        }
+                    }
+                </td>
+                <td>@product.Name</td>
+                <td>@product.Price.ToString("C")</td>
+                <td>@product.CategoryName</td>
+                <td>
                     <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning">Edit</a>
                     <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-danger">Delete</a>
                 </td>

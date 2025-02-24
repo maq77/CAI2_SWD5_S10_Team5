@@ -17,12 +17,14 @@ namespace TechXpress.Data.Repositories
             Categories = new Repository<Category>(dp);
             Orders = new Repository<Order>(dp);
             OrderDetails = new Repository<OrderDetail>(dp);
+            ProductImages = new Repository<ProductImage>(dp);
 
         }
         private readonly AppDbContext _dp;
         public IProductRepo Products { get; private set; }
         public IRepository<Category> Categories { get; private set; }
         public IRepository<Order> Orders { get; private set; }
+        public IRepository<ProductImage> ProductImages { get; private set; }
         public IRepository<OrderDetail> OrderDetails { get; private set; }
 
         public void Dispose()

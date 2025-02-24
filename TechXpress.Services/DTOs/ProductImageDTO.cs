@@ -4,14 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TechXpress.Data.Model
+namespace TechXpress.Services.DTOs
 {
-    public class ProductImage
+    public class ProductImageDTO
     {
         public int Id { get; set; }
-        public int ProductId { get; set; }
-        public Product? Product { get; set; }
-
         public string ImagePath { get; set; } = string.Empty;
     }
 }

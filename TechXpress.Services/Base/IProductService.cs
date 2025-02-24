@@ -11,11 +11,10 @@ namespace TechXpress.Services.Base
 {
     public interface IProductService
     {
-        Task<IEnumerable<Product>> GetAllProducts();
-        Task<Product?> GetProductById(int id);
-        Task<IEnumerable<Product>> GetProductsByCategoryId(int categoryId);
-        Task AddProduct(ProductDTO product, List<IFormFile>? image);
-        Task UpdateProduct(Product product);
-        Task DeleteProduct(int id);
+        Task<IEnumerable<ProductDTO>> GetAllProducts();
+        Task<ProductDTO?> GetProductById(int id);
+        Task<bool> AddProduct(ProductDTO model, List<IFormFile>? images);
+        Task<bool> UpdateProduct(ProductDTO model, List<IFormFile>? images);
+        Task<bool> DeleteProduct(int id);
     }
 }

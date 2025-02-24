@@ -9,13 +9,16 @@ namespace TechXpress.Services.DTOs
 {
     public class ProductDTO
     {
-        [Required]
+        public int Id { get; set; }
+        //[Required]
         public string Name { get; set; } = string.Empty;
-        [Required]
+        //[Required]
         public string Description { get; set; } = string.Empty;
         [Required]
         public double Price { get; set; } = double.MaxValue;
-        [Required]
+        //[Required]
         public int CategoryId { get; set; } = int.MaxValue;
+        public string? CategoryName { get; set; } = "UnCategorized";
+        public List<ProductImageDTO>? Images { get; set; } = new();
     }
 }

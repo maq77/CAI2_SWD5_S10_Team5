@@ -36,6 +36,12 @@ namespace TechXpress.Data.Repositories
             await _Set.AddAsync(entity);
             await _dp.SaveChangesAsync();
         }
+        public async Task AddRange(IEnumerable<T> entities, Action<string> logAction)
+        {
+            logAction?.Invoke($"Adding new entities to the Database !");
+            await _Set.AddRangeAsync(entities);
+            await _dp.SaveChangesAsync();
+        }
 
         public async Task Update(T entity, Action<string> logAction)
         {

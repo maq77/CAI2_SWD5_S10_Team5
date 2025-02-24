@@ -1,5 +1,4 @@
-﻿
-@model TechXpress.Data.Model.Product
+﻿@model TechXpress.Services.DTOs.ProductDTO
 
 <h2>Add Product</h2>
 
@@ -8,24 +7,21 @@
         <label>Name</label>
         <input asp-for="Name" class="form-control" required />
     </div>
-
     <div class="form-group">
         <label>Description</label>
-        <input asp-for="Description" class="form-control"/>
+        <input asp-for="Description" class="form-control" />
     </div>
-
     <div class="form-group">
         <label>Price</label>
         <input asp-for="Price" class="form-control" required />
     </div>
-
     <div class="form-group">
         <label>Category</label>
         <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
     </div>
     <div class="form-group">
-        <label>Image</label>
-        <input type="file" name="image" class="form-control" accept="image/*" />
+        <label>Images (Upload Multiple)</label>
+        <input type="file" name="images" class="form-control" accept="image/*" multiple />
     </div>
     <button type="submit" class="btn btn-primary">Add Product</button>
 </form>
