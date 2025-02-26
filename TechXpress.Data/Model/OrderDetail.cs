@@ -16,6 +16,6 @@ namespace TechXpress.Data.Model
         public Product? Product { get; set; }  // Navigation Property
 
         public int Quantity { get; set; }
-        public double Price { get; set; }
+        public double Price { get; set; }  ///UnitPrice
     }
 }

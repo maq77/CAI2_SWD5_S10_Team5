@@ -1,0 +1,24 @@
+﻿@model TechXpress.Services.DTOs.OrderDTO
+
+<h2>Edit Order</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label class="form-label">User ID</label>
+        <input type="text" asp-for="UserId" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Total Price</label>
+        <input type="text" asp-for="TotalAmount" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select asp-for="Status" asp-items="ViewBag.StatusList" class="form-control"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Order</button>
+</form>

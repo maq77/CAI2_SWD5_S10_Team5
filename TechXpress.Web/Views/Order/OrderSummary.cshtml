@@ -1,0 +1,43 @@
+﻿@model TechXpress.Services.DTOs.OrderDTO
+
+<h2>Order Summary</h2>
+
+<p>Thank you for your purchase! Your order has been placed successfully.</p>
+
+<table class="table">
+    <tr>
+        <th>Order ID</th>
+        <td>@Model.Id</td>
+    </tr>
+    <tr>
+        <th>Total Price</th>
+        <td>@Model.TotalAmount.ToString("C")</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>@Model.Status</td>
+    </tr>
+</table>
+
+<h3>Order Items</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <tr>
+                <td>@item.ProductId</td>
+                <td>@item.Quantity</td>
+                <td>@item.Price.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-primary">Back to Orders</a>

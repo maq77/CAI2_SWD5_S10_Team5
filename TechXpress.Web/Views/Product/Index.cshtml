@@ -1,39 +1,65 @@
-﻿@model IEnumerable<TechXpress.Services.DTOs.ProductDTO>
+﻿@model X.PagedList.IPagedList<TechXpress.Services.DTOs.ProductDTO>
+
+@{
+    ViewData["Title"] = "Product List";
+}
+
+@section Scripts {
+    <script src="~/js/jquery-3.7.1.min.js"></script>
+    <script src="~/js/product-page.js"></script> <!-- ✅ Ensure the script is loaded -->
+}
 
 <h2>Product List</h2>
-<a asp-action="Create" class="btn btn-primary">Add Product</a>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Images</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var product in Model)
-        {
-            <tr>
-                <td>
-                    @if (product.Images != null && product.Images.Any())
-                    {
-                        @foreach (var image in product.Images)
-                        {
-                            <img src="@image.ImagePath" width="100" style="margin-right:5px;" />
-                        }
-                    }
-                </td>
-                <td>@product.Name</td>
-                <td>@product.Price.ToString("C")</td>
-                <td>@product.CategoryName</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@product.Id" class="btn btn-danger">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="row mb-3">
+    <!-- ✅ Search Box -->
+    <div class="col-md-4">
+        <input type="text" id="searchBox" class="form-control" placeholder="Search for products..." />
+    </div>
+
+    <!-- ✅ Sorting Options -->
+    <div class="col-md-6">
+        <label>Sort By:</label>
+        <div class="btn-group">
+            <a href="#" class="btn btn-light sort-button" data-sort="name_desc">Name Z-A</a>
+            <a href="#" class="btn btn-light sort-button" data-sort="price_asc">Price Low-High</a>
+            <a href="#" class="btn btn-light sort-button" data-sort="price_desc">Price High-Low</a>
+            <a href="#" class="btn btn-light sort-button" data-sort="newest">Newest</a>
+            <a href="#" class="btn btn-light sort-button" data-sort="oldest">Oldest</a>
+        </div>
+    </div>
+
+    <!-- ✅ Category Filter -->
+    <div class="col-md-3">
+        <select id="categoryFilter" class="form-control">
+            <option value="0">All Categories</option>
+            @if (ViewBag.Categories != null)
+            {
+                @foreach (var category in ViewBag.Categories as IEnumerable<TechXpress.Services.DTOs.CategoryDTO>)
+                {
+                    <option value="@category.Id">@category.Name</option>
+                }
+            }
+        </select>
+    </div>
+
+
+    <div class="col-md-2">
+        <button id="searchButton" class="btn btn-primary">Search</button>
+    </div>
+</div>
+
+<!-- ✅ Product List -->
+<div id="productList">
+    @await Html.PartialAsync("_ProductList", Model) <!-- ✅ Loads initial products -->
+</div>
+
+<!-- ✅ Pagination Controls -->
+<div id="paginationControls">
+    @await Html.PartialAsync("_Pagination", Model) <!-- ✅ Ensure pagination works -->
+</div>
+
+<!-- ✅ Load More Button -->
+<div class="text-center mt-3">
+    <button id="loadMoreButton" class="btn btn-secondary">Load More</button>
+</div>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace TechXpress.Services.DTOs
         //[Required]
         public int CategoryId { get; set; } = int.MaxValue;
         public string? CategoryName { get; set; } = "UnCategorized";
-        public List<ProductImageDTO>? Images { get; set; } = new();
+        public List<ProductImageDTO> Images { get; set; } = new();
+        public List<IFormFile>? UploadedImages { get; set; }
     }
 }

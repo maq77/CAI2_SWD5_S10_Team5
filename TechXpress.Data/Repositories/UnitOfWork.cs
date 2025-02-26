@@ -15,7 +15,7 @@ namespace TechXpress.Data.Repositories
             _dp = dp;
             Products = new ProductRepo(dp);
             Categories = new Repository<Category>(dp);
-            Orders = new Repository<Order>(dp);
+            Orders = new OrderRepo(dp);
             OrderDetails = new Repository<OrderDetail>(dp);
             ProductImages = new Repository<ProductImage>(dp);
 
@@ -23,7 +23,7 @@ namespace TechXpress.Data.Repositories
         private readonly AppDbContext _dp;
         public IProductRepo Products { get; private set; }
         public IRepository<Category> Categories { get; private set; }
-        public IRepository<Order> Orders { get; private set; }
+        public IOrderRepo Orders { get; private set; }
         public IRepository<ProductImage> ProductImages { get; private set; }
         public IRepository<OrderDetail> OrderDetails { get; private set; }
 

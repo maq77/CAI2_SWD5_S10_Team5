@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechXpress.Data.Enums;
 
 namespace TechXpress.Data.Model
 {
@@ -13,7 +15,10 @@ namespace TechXpress.Data.Model
         public User? User { get; set; }  // Navigation Property
 
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-        public decimal TotalAmount { get; set; }
+        public double TotalAmount { get; set; }
+
+        [Required]
+        public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public ICollection<OrderDetail>? OrderDetails { get; set; }  // 1-M Relation
     }

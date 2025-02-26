@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - TechXpress.Web</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/js/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" />
 </head>
@@ -31,6 +32,9 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>

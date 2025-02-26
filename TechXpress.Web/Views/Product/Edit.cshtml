@@ -2,22 +2,43 @@
 
 <h2>Edit Product</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" required />
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label>Price</label>
-        <input asp-for="Price" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label>Category ID</label>
-        <input asp-for="CategoryId" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-warning">Update</button>
-</form>
 
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    <div class="form-group">
+        <label asp-for="Price"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CategoryId"></label>
+        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+    </div>
+
+    <!--  Display Existing Images -->
+    <div class="form-group">    
+        <label>Current Images</label>
+        <div>
+            @foreach (var image in Model.Images)
+            {
+                <img src="@image.ImagePath" width="100" class="img-thumbnail" />
+            }
+        </div>
+    </div>
+
+    <!-- Upload New Images -->
+    <div class="form-group">
+        <label>Upload New Images</label>
+        <input type="file" name="images" class="form-control" multiple />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Product</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
