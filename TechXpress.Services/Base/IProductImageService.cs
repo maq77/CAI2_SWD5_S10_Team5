@@ -12,5 +12,7 @@ namespace TechXpress.Services.Base
     {
         public Task<List<ProductImageDTO>> UploadImages(int productId, List<IFormFile> images);
         public Task<bool> DeleteImage(int imageId);
+        public Task<List<ProductImageDTO>> GetImagesByProductId(int productId);
+
     }
 }

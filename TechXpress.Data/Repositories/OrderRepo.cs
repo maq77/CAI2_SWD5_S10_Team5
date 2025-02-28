@@ -29,6 +29,9 @@ namespace TechXpress.Data.Repositories
             {
                 query = query.Where(filter);
             }
+            if(query is null){
+                throw new InvalidOperationException("There is no Orders!");
+            }
 
             return await query.ToListAsync();
         }

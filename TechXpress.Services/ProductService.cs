@@ -20,7 +20,9 @@ namespace TechXpress.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMemoryCache _cache;
-        private const string CacheKey = "ProductList";
+        private const string ProductCacheKey = "ProductList";
+        private const string PopularProductCacheKey = "PopularProducts";
+        private const string CategoryCacheKey = "Categories";
 
         public ProductService(IUnitOfWork unitOfWork, IMemoryCache cache)
         {
@@ -73,12 +75,14 @@ namespace TechXpress.Services
                     await _unitOfWork.SaveAsync();
                 }
             }
+            _cache.Remove(ProductCacheKey);
+            _cache.Remove(PopularProductCacheKey);
             return true;
         }
 
         public async Task<IEnumerable<ProductDTO>> GetAllProducts()
         {
-            if (!_cache.TryGetValue(CacheKey, out IEnumerable<ProductDTO> products))
+            if (!_cache.TryGetValue(ProductCacheKey, out IEnumerable<ProductDTO> products))
             {
                 var productEntities = await _unitOfWork.Products.GetAllProducts();
                 products = productEntities.Select(p => new ProductDTO
@@ -91,11 +95,12 @@ namespace TechXpress.Services
                     Images = p.Images.Select(img => new ProductImageDTO
                     {
                         Id = img.Id,
-                        ImagePath = img.ImagePath
+                        ImagePath = img.ImagePath ?? "/images/default-product.png"
                     }).ToList()
                 });
 
-                _cache.Set(CacheKey, products, TimeSpan.FromMinutes(10)); // Cache for 10 minutes
+                // Cache for 10 minutes
+                _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(10));
             }
 
             return products;
@@ -142,7 +147,7 @@ namespace TechXpress.Services
                 Images = p.Images.Select(img => new ProductImageDTO
                 {
                     Id = img.Id,
-                    ImagePath = img.ImagePath
+                    ImagePath = img.ImagePath ?? "/images/default-product.png"
                 }).ToList()
             });
         }
@@ -177,6 +182,43 @@ namespace TechXpress.Services
 
             return  productDTOs.ToPagedList(pageNumber, pageSize);
         }
+
+        public async Task<IEnumerable<ProductDTO>> GetPopularProducts(int top = 6)
+        {
+            if (!_cache.TryGetValue(PopularProductCacheKey, out IEnumerable<ProductDTO> popularProducts))
+            {
+                var products = await _unitOfWork.Products.GetAllProducts();
+                var orderDetails = await _unitOfWork.OrderDetails.GetAll();
+
+                var salesData = orderDetails
+                    .GroupBy(o => o.ProductId)
+                    .Select(g => new { ProductId = g.Key, TotalSales = g.Sum(o => o.Quantity) })
+                    .ToDictionary(x => x.ProductId, x => x.TotalSales);
+
+                popularProducts = products
+                    .OrderByDescending(p => salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0)
+                    .Take(top)
+                    .Select(p => new ProductDTO
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.Price,
+                        CategoryId = p.CategoryId,
+                        CategoryName = p.Category?.Name ?? "Uncategorized",
+                        SalesCount = salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0,
+                        Images = p.Images.Select(img => new ProductImageDTO
+                        {
+                            Id = img.Id,
+                            ImagePath = img.ImagePath ?? "/images/default-product.png"
+                        }).ToList()
+                    });
+
+                //  Cache for 30 minutes
+                _cache.Set(PopularProductCacheKey, popularProducts, TimeSpan.FromMinutes(30));
+            }
+
+            return popularProducts;
+        }
         public async Task<ProductDTO?> GetProductById(int id)
         {
             var product = await _unitOfWork.Products.GetById(id);
@@ -195,6 +237,7 @@ namespace TechXpress.Services
                     ImagePath = img.ImagePath
                 }).ToList()
             };
+
         }
 
         public async Task<bool> UpdateProduct(ProductDTO model)
@@ -203,15 +246,18 @@ namespace TechXpress.Services
             if (product == null) return false;
 
             product.Name = model.Name;
+            product.Description = model.Description;
             product.Price = model.Price;
             product.CategoryId = model.CategoryId;
+            
 
             await _unitOfWork.Products.Update(product, log=>Console.WriteLine(log));
             var saved = await _unitOfWork.SaveAsync();
 
             if (saved)
             {
-                _cache.Remove(CacheKey); 
+                _cache.Remove(ProductCacheKey);
+                _cache.Remove(PopularProductCacheKey);
             }
 
             return saved;
@@ -220,7 +266,16 @@ namespace TechXpress.Services
         public async Task<bool> DeleteProduct(int id)
         {
             await _unitOfWork.Products.Delete(id, log => Console.WriteLine(log));
-            return await _unitOfWork.SaveAsync();
+            var saved = await _unitOfWork.SaveAsync();
+            if (saved)
+            {
+                _cache.Remove(ProductCacheKey);
+                _cache.Remove(PopularProductCacheKey);
+            }
+            return saved;
         }
+
+
+
     }
 }

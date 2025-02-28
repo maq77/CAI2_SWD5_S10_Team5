@@ -16,6 +16,7 @@ namespace TechXpress.Services.Base
         Task<IEnumerable<ProductDTO>> GetProductsByCategory(int categoryId);
         Task<IEnumerable<ProductDTO>> SearchProducts(string? searchTerm);
         public Task<IPagedList<ProductDTO>> GetPagedProducts(int pageNumber, int pageSize, int? categoryId, string? searchTerm);
+        public Task<IEnumerable<ProductDTO>> GetPopularProducts(int top = 6);
         Task<ProductDTO?> GetProductById(int id);
         Task<bool> AddProduct(ProductDTO model, List<IFormFile>? images);
         Task<bool> UpdateProduct(ProductDTO model);

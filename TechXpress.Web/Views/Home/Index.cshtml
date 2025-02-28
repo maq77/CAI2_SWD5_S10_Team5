@@ -1,8 +1,48 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model TechXpress.Services.DTOs.HomePageDTO
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Welcome to TechXpress</h2>
+
+<!-- 🔹 Shop by Category -->
+<h3>Browse by Category</h3>
+<div class="row mb-3">
+    @foreach (var category in Model.Categories)
+    {
+        <div class="col-md-3">
+            <a asp-controller="Home" asp-action="Index" asp-route-categoryId="@category.Id" class="btn btn-outline-primary w-100">
+                @category.Name
+            </a>
+        </div>
+    }
 </div>
+
+<h3>Best Sellers</h3>
+<div class="row">
+    @foreach (var product in Model.FeaturedProducts)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <img src="@Url.Content(product.Images.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")" class="card-img-top" alt="@product.Name">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <p class="card-text">@product.Price.ToString("C")</p>
+                    <p class="text-muted">Sold: @product.SalesCount</p> <!--  Display total sales -->
+                    <a asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@product.Id" class="btn btn-primary">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- 🔹 Load More Products -->
+<h3>More Products</h3>
+<div id="productList" class="row">
+    @await Html.PartialAsync("_ProductList", Model.PaginatedProducts)
+</div>
+
+<div class="text-center mt-4">
+    <button id="loadMoreBtn" class="btn btn-secondary">Load More</button>
+</div>
+
+@section Scripts {
+    <script src="~/js/home.js"></script>
+}

@@ -1,0 +1,15 @@
+﻿@model X.PagedList.IPagedList<TechXpress.Services.DTOs.ProductDTO>
+
+@foreach (var product in Model)
+{
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <img src="@Url.Content(product.Images.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")" class="card-img-top" alt="@product.Name">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <p class="card-text">@product.Price.ToString("C")</p>
+                    <a asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@product.Id" class="btn btn-primary">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+}

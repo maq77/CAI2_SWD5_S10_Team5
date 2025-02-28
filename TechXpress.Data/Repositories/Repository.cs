@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using TechXpress.Data.Model;
 using TechXpress.Data.Repositories.Base;
 
 namespace TechXpress.Data.Repositories
@@ -18,9 +19,16 @@ namespace TechXpress.Data.Repositories
         }
         private readonly AppDbContext _dp;
         private readonly DbSet<T> _Set;
-        public async Task<IEnumerable<T>> GetAll()
+        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null)
         {
-            return await _Set.ToListAsync();
+            IQueryable<T> query = _Set;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return await query.ToListAsync();
         }
         public async Task<T?> GetById(int id)
         {

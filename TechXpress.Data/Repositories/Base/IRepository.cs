@@ -9,7 +9,7 @@ namespace TechXpress.Data.Repositories.Base
 {
     public interface IRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAll();
+        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null);
         Task<T?> GetById(int id);
         Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate);
         Task Add(T entity, Action<string> logAction);

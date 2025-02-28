@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Caching.Memory;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
+using TechXpress.Services.DTOs.ViewModels;
 using X.PagedList.Extensions;
 
 namespace TechXpress.Web.Controllers
@@ -12,59 +12,59 @@ namespace TechXpress.Web.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly IProductImageService _productImageService;
-        private readonly IMemoryCache _cache;
 
-        private const string ProductCacheKey = "ProductList";
-        private const string CategoryCacheKey = "CategoryList";
-
-        public ProductController(IProductService productService, ICategoryService categoryService, IProductImageService productImageService, IMemoryCache cache)
+        public ProductController(
+            IProductService productService,
+            ICategoryService categoryService,
+            IProductImageService productImageService)
+        
         {
             _productService = productService;
             _categoryService = categoryService;
             _productImageService = productImageService;
-            _cache = cache;
         }
 
-        // ✅ Index - Show Filtered Products
+        // GET: Product/Index
         public async Task<IActionResult> Index(int? categoryId, string? searchTerm, string? sortOrder, int page = 1, int pageSize = 10)
         {
             await LoadCategoriesToViewBag(categoryId);
+
             var products = await GetFilteredProducts(categoryId, searchTerm, sortOrder);
             var paginatedProducts = products.ToPagedList(page, pageSize);
 
-            ViewBag.CurrentCategory = categoryId;
-            ViewBag.CurrentSort = sortOrder;
-            ViewBag.CurrentSearch = searchTerm;
+            SetViewBagParameters(categoryId, searchTerm, sortOrder);
 
             return View(paginatedProducts);
         }
 
-        // ✅ Search - Return Filtered Products as Partial View (for AJAX requests)
-        public async Task<IActionResult> Search(string? searchTerm, int? categoryId, string? sortOrder, int pageNumber = 1, int pageSize = 10)
+        // GET: Product/Search (for AJAX requests)
+        public async Task<IActionResult> Search(string? searchTerm, int? categoryId, string? sortOrder, int page = 1, int pageSize = 10)
         {
-            await LoadCategoriesToViewBag(categoryId);
             var products = await GetFilteredProducts(categoryId, searchTerm, sortOrder);
-            var paginatedProducts = products.ToPagedList(pageNumber, pageSize);
+            var paginatedProducts = products.ToPagedList(page, pageSize);
+
             return PartialView("_ProductList", paginatedProducts);
         }
 
-        // ✅ Load More Products (for pagination & infinite scrolling)
-        public async Task<IActionResult> LoadMoreProducts(int pageNumber = 1, int pageSize = 10, string? searchTerm = null, int? categoryId = null, string? sortOrder = null)
+        // GET: Product/LoadMoreProducts (for infinite scrolling)
+        public async Task<IActionResult> LoadMoreProducts(int page = 1, int pageSize = 10, string? searchTerm = null, int? categoryId = null, string? sortOrder = null)
         {
-            await LoadCategoriesToViewBag(categoryId);
             var products = await GetFilteredProducts(categoryId, searchTerm, sortOrder);
-            var paginatedProducts = products.ToPagedList(pageNumber, pageSize);
+            var paginatedProducts = products.ToPagedList(page, pageSize);
+
             return PartialView("_ProductList", paginatedProducts);
         }
 
-        // ✅ Create Product (Form)
+        // GET: Product/Create
         public async Task<IActionResult> Create()
         {
             await LoadCategoriesToViewBag();
             return View();
         }
 
+        // POST: Product/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductDTO model, List<IFormFile>? images)
         {
             if (!ModelState.IsValid)
@@ -74,109 +74,165 @@ namespace TechXpress.Web.Controllers
             }
 
             await _productService.AddProduct(model, images);
-            _cache.Remove(ProductCacheKey); // ✅ Clear cache after adding a product
-
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Product Details
+        // GET: Product/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var product = await _productService.GetProductById(id);
-            return product == null ? NotFound() : View(product);
-        }
+            if (product == null)
+            {
+                return NotFound();
+            }
 
-        // ✅ Edit Product (Form)
-        public async Task<IActionResult> Edit(int id)
-        {
-            var product = await _productService.GetProductById(id);
-            if (product == null) return NotFound();
-
-            await LoadCategoriesToViewBag(product.CategoryId);
             return View(product);
         }
 
+        // GET: Product/Edit/5
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var product = await _productService.GetProductById(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var model = new ProductEditViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                ExistingImages = await _productImageService.GetImagesByProductId(product.Id) ?? new List<ProductImageDTO>(),
+                Categories = await GetCategorySelectList()
+            };
+
+            return View(model);
+        }
+
+        // POST: Product/Edit/5
         [HttpPost]
-        public async Task<IActionResult> Edit(ProductDTO model, List<IFormFile>? images)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ProductEditViewModel model, List<int>? deleteImageIds, List<IFormFile>? newImages)
         {
             if (!ModelState.IsValid)
             {
-                await LoadCategoriesToViewBag(model.CategoryId);
+                model.Categories = await GetCategorySelectList();
                 return View(model);
             }
 
-            if (images != null && images.Count > 0)
+            var product = await _productService.GetProductById(model.Id);
+            if (product == null)
             {
-                await _productImageService.UploadImages(model.Id, images);
+                return NotFound();
             }
 
-            var result = await _productService.UpdateProduct(model);
-            if (!result)
+            // Update product properties
+            product.Name = model.Name;
+            product.Price = model.Price;
+            if (model.CategoryId.HasValue)
             {
-                ModelState.AddModelError("", "Failed to update product.");
-                await LoadCategoriesToViewBag(model.CategoryId);
-                return View(model);
+                product.CategoryId = model.CategoryId.Value;
             }
 
-            _cache.Remove(ProductCacheKey); // ✅ Clear cache after product update
+            // Handle image deletions
+            if (deleteImageIds?.Count > 0)
+            {
+                foreach (var imageId in deleteImageIds)
+                {
+                    await _productImageService.DeleteImage(imageId);
+                }
+            }
+
+            // Handle new image uploads
+            if (newImages?.Count > 0)
+            {
+                await _productImageService.UploadImages(product.Id, newImages);
+            }
+
+            await _productService.UpdateProduct(product);
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Delete Product (Confirmation Page)
+        // POST: Product/RemoveImage/5
+        [HttpPost]
+        public async Task<IActionResult> RemoveImage(int imageId)
+        {
+            var success = await _productImageService.DeleteImage(imageId);
+            return success ? Ok() : BadRequest("Failed to delete image.");
+        }
+
+        // GET: Product/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var product = await _productService.GetProductById(id);
-            return product == null ? NotFound() : View(product);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
+        // POST: Product/Delete/5
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _productService.DeleteProduct(id);
-            _cache.Remove(ProductCacheKey); // ✅ Clear cache after deletion
             return RedirectToAction(nameof(Index));
         }
 
-        // ✅ Load Categories with Caching
+        // GET: Product/GetPagination
+        public async Task<IActionResult> GetPagination(int page = 1, int pageSize = 5)
+        {
+            var products = await _productService.GetAllProducts();
+            var pagedProducts = products.ToPagedList(page, pageSize);
+
+            return PartialView("_Pagination", pagedProducts);
+        }
+
+        #region Private Helper Methods
+
+        private async Task<List<SelectListItem>> GetCategorySelectList()
+        {
+            var categories = await _categoryService.GetAllCategories();
+            return categories
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                .ToList();
+        }
+
         private async Task LoadCategoriesToViewBag(int? selectedCategoryId = null)
         {
-            if (!_cache.TryGetValue(CategoryCacheKey, out IEnumerable<CategoryDTO>? categories))
-            {
-                categories = await _categoryService.GetAllCategories();
-                _cache.Set(CategoryCacheKey, categories, TimeSpan.FromMinutes(30));
-            }
-
-            // ✅ Store as List<CategoryDTO> Instead of SelectList
+            var categories = await _categoryService.GetAllCategories();
             ViewBag.Categories = categories;
         }
 
-        // ✅ Get Cached Products
-        private async Task<IEnumerable<ProductDTO>> GetCachedProducts()
-        {
-            if (!_cache.TryGetValue(ProductCacheKey, out IEnumerable<ProductDTO>? products))
-            {
-                products = await _productService.GetAllProducts();
-                _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(10));
-            }
-            return products;
-        }
-
-        // ✅ Filter Products
         private async Task<IEnumerable<ProductDTO>> GetFilteredProducts(int? categoryId, string? searchTerm, string? sortOrder)
         {
-            var products = await GetCachedProducts();
+            var products = await _productService.GetAllProducts();
 
+            // Filter by category
             if (categoryId.HasValue && categoryId.Value > 0)
             {
                 products = products.Where(p => p.CategoryId == categoryId.Value);
             }
 
+            // Filter by search term
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();
                 products = products.Where(p => p.Name.ToLower().Contains(searchTerm));
             }
 
+            // Apply sorting
+            return ApplySorting(products, sortOrder);
+        }
+
+        private IEnumerable<ProductDTO> ApplySorting(IEnumerable<ProductDTO> products, string? sortOrder)
+        {
             return sortOrder switch
             {
                 "name_desc" => products.OrderByDescending(p => p.Name),
@@ -184,21 +240,17 @@ namespace TechXpress.Web.Controllers
                 "price_desc" => products.OrderByDescending(p => p.Price),
                 "newest" => products.OrderByDescending(p => p.Id),
                 "oldest" => products.OrderBy(p => p.Id),
-                _ => products.OrderBy(p => p.Name)
+                _ => products.OrderBy(p => p.Name) // Default sort by name ascending
             };
         }
 
-        // ✅ Paginate Products
-        private IEnumerable<ProductDTO> PaginateProducts(IEnumerable<ProductDTO> products, int pageNumber, int pageSize)
+        private void SetViewBagParameters(int? categoryId, string? searchTerm, string? sortOrder)
         {
-            return products.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            ViewBag.CurrentCategory = categoryId;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.CurrentSearch = searchTerm;
         }
 
-        public async Task<IActionResult> GetPagination(int page = 1, int pageSize = 5)
-        {
-            var products = await _productService.GetAllProducts();
-            var pagedProducts = products.ToPagedList(page, pageSize);
-            return PartialView("_Pagination", pagedProducts);
-        }
+        #endregion
     }
 }

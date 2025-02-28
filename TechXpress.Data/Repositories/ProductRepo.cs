@@ -38,5 +38,6 @@ namespace TechXpress.Data.Repositories
 
             return await query.ToListAsync();
         }
+        
     }
 }

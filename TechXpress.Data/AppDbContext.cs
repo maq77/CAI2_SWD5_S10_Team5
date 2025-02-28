@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using TechXpress.Data.Model;
@@ -30,6 +31,13 @@ namespace TechXpress.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId) 
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Product>()
+                 .Navigation(p => p.Category).AutoInclude();
+
+            
+            builder.Entity<Product>()
+                .Navigation(p => p.Images).AutoInclude();
 
             builder.Entity<Order>()
                 .HasOne(o => o.User)

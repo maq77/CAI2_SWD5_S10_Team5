@@ -9,6 +9,6 @@ namespace TechXpress.Services.DTOs
     public class ProductImageDTO
     {
         public int Id { get; set; }
-        public string ImagePath { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = "/images/default-product.png";
     }
 }

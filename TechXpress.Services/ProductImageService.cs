@@ -21,6 +21,16 @@ namespace TechXpress.Services
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<List<ProductImageDTO>> GetImagesByProductId(int productId)
+        {
+            var images = await _unitOfWork.ProductImages.GetAll();
+            return images.Select(img => new ProductImageDTO
+            {
+                Id = img.Id,
+                ImagePath = img.ImagePath
+            }).ToList();
+        }
+
         public async Task<List<ProductImageDTO>> UploadImages(int productId, List<IFormFile> images)
         {
             var uploadedImages = new List<ProductImage>();

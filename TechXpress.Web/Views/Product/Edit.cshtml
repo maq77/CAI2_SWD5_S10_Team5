@@ -1,44 +1,76 @@
-﻿@model TechXpress.Services.DTOs.ProductDTO
+﻿@model TechXpress.Services.DTOs.ViewModels.ProductEditViewModel
 
-<h2>Edit Product</h2>
+@{
+    ViewData["Title"] = "Edit Product";
+}
 
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
 
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
+    <label>Name</label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
 
-    <div class="form-group">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
+    <label>Price</label>
+    <input asp-for="Price" class="form-control" />
+    <span asp-validation-for="Price" class="text-danger"></span>
 
-    <div class="form-group">
-        <label asp-for="CategoryId"></label>
-        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
-    </div>
+    <label>Category</label>
+    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
+        <option value="">-- Select Category --</option>
+    </select>
 
-    <!--  Display Existing Images -->
-    <div class="form-group">    
-        <label>Current Images</label>
-        <div>
-            @foreach (var image in Model.Images)
+    <label>Existing Images (Check to Delete)</label>
+    <div>
+        @if (Model.ExistingImages != null && Model.ExistingImages.Any())
+        {
+            @foreach (var image in Model.ExistingImages)
             {
-                <img src="@image.ImagePath" width="100" class="img-thumbnail" />
+                <div>
+                    <input type="checkbox" name="deleteImageIds" value="@image.Id" />
+                    <img src="@image.ImagePath" width="100" />
+                </div>
             }
-        </div>
+        }
+        else
+        {
+            <p>No existing images.</p>
+        }
     </div>
 
-    <!-- Upload New Images -->
-    <div class="form-group">
-        <label>Upload New Images</label>
-        <input type="file" name="images" class="form-control" multiple />
-    </div>
 
-    <button type="submit" class="btn btn-primary">Update Product</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <label>New Images</label>
+    <input asp-for="NewImages" type="file" name="newImages" multiple class="form-control" />
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Validation Errors:</strong>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".remove-image").forEach(button => {
+                button.addEventListener("click", function () {
+                    const imageUrl = this.getAttribute("data-url");
+                    if (confirm("Are you sure you want to remove this image?")) {
+                        fetch(`/Product/RemoveImage?imageUrl=${encodeURIComponent(imageUrl)}`, { method: 'POST' })
+                            .then(response => response.ok ? this.parentElement.remove() : alert("Failed to remove image"));
+                    }
+                });
+            });
+        });
+    </script>
+}

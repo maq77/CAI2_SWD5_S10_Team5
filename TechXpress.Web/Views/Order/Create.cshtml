@@ -23,7 +23,7 @@
                 <tr>
                     <td><input type="number" name="Items[@item.ProductId].ProductId" value="@item.ProductId" class="form-control" readonly /></td>
                     <td><input type="number" name="Items[@item.ProductId].Quantity" value="@item.Quantity" class="form-control" /></td>
-                    <td><input type="number" name="Items[@item.ProductId].UnitPrice" value="@item.Price" class="form-control" readonly /></td>
+                    <td><input type="number" name="Items[@item.ProductId].Price" value="@item.Price" class="form-control" readonly /></td>
                 </tr>
             }
         </tbody>
@@ -31,7 +31,6 @@
 
     <button type="submit" class="btn btn-primary">Place Order</button>
 </form>
-
 
 @section Scripts {
     <script>
