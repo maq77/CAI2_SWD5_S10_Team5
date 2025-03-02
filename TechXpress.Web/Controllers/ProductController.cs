@@ -56,25 +56,39 @@ namespace TechXpress.Web.Controllers
         }
 
         // GET: Product/Create
+        [HttpGet]
         public async Task<IActionResult> Create()
         {
-            await LoadCategoriesToViewBag();
-            return View();
+            var model = new ProductCreateViewModel
+            {
+                Categories = (await _categoryService.GetAllCategories())
+                            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                            .ToList()
+            };
+
+            return View(model);
         }
 
         // POST: Product/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductDTO model, List<IFormFile>? images)
+        public async Task<IActionResult> Create(ProductCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                await LoadCategoriesToViewBag();
-                return View(model);
+                return BadRequest(new { message = "Validation failed.", errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
             }
 
-            await _productService.AddProduct(model, images);
-            return RedirectToAction(nameof(Index));
+            var productDTO = new ProductDTO
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Price = model.Price,
+                CategoryId = model.CategoryId
+            };
+
+            await _productService.AddProduct(productDTO, model.Images);
+            return Json(new { success = true, message = "Product added successfully!" });
         }
 
         // GET: Product/Details/5

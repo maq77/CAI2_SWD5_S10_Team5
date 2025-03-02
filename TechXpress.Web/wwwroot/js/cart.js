@@ -1,4 +1,4 @@
-﻿(function () {
+﻿$(function () {
     // ✅ Add to Cart
     $(".add-to-cart").on("click",function (e) {
         e.preventDefault();

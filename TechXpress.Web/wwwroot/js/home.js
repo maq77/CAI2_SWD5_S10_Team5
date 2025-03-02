@@ -1,4 +1,4 @@
-﻿(function () {
+﻿$(function () {
     let page = 1;
 
     $("#loadMorBtn").on("click", function () {

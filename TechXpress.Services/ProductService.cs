@@ -252,15 +252,12 @@ namespace TechXpress.Services
             
 
             await _unitOfWork.Products.Update(product, log=>Console.WriteLine(log));
-            var saved = await _unitOfWork.SaveAsync();
+            await _unitOfWork.SaveAsync();
 
-            if (saved)
-            {
-                _cache.Remove(ProductCacheKey);
-                _cache.Remove(PopularProductCacheKey);
-            }
+            _cache.Remove(ProductCacheKey);
+            _cache.Remove(PopularProductCacheKey);
 
-            return saved;
+            return true;
         }
 
         public async Task<bool> DeleteProduct(int id)

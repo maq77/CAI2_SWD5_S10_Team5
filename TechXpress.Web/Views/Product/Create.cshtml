@@ -1,30 +1,54 @@
-﻿@model TechXpress.Services.DTOs.ProductDTO
+﻿@model TechXpress.Services.DTOs.ViewModels.ProductCreateViewModel
 
 <h2>Add Product</h2>
 
 <form asp-action="Create" method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label>Name</label>
+        <label asp-for="Name"></label>
         <input asp-for="Name" class="form-control" required />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label>Description</label>
+        <label asp-for="Description"></label>
         <input asp-for="Description" class="form-control" />
     </div>
+
     <div class="form-group">
-        <label>Price</label>
+        <label asp-for="Price"></label>
         <input asp-for="Price" class="form-control" required />
+        <span asp-validation-for="Price" class="text-danger"></span>
     </div>
+
     <div class="form-group">
-        <label>Category</label>
-        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control"></select>
+        <label asp-for="CategoryId">Category</label>
+        <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
+            <option value="">Select a category</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label>Images (Upload Multiple)</label>
-        <input type="file" name="images" class="form-control" accept="image/*" multiple />
+        <input type="file" asp-for="Images" class="form-control" accept="image/*" multiple />
     </div>
+
     <button type="submit" class="btn btn-primary">Add Product</button>
 </form>
-
-
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <strong>Validation Errors:</strong>
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
 <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
