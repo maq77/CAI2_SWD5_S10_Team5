@@ -23,7 +23,7 @@ namespace TechXpress.Services
 
         public async Task<List<ProductImageDTO>> GetImagesByProductId(int productId)
         {
-            var images = await _unitOfWork.ProductImages.GetAll();
+            var images = await _unitOfWork.ProductImages.GetAll(p=>p.ProductId==productId);
             return images.Select(img => new ProductImageDTO
             {
                 Id = img.Id,

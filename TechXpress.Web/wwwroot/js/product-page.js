@@ -1,6 +1,6 @@
 ﻿$(function () {  // ✅ Ensures jQuery is Ready
     let pageNumber = 1; // ✅ Track current page
-    let pageSize = 5;
+    let pageSize = 100;
     let isLoading = false;
     let hasMoreProducts = true;
 
@@ -77,6 +77,11 @@
         loadProducts(true); // ✅ Append products instead of replacing
     });
 
+    $("#loadMoreButtonv2").on("click", function () {
+        pageNumber = $(this).data("page");
+        loadProducts(true); // ✅ Append products instead of replacing
+    });
+
     // ✅ Reset Products & Load New Data
     function resetProducts() {
         pageNumber = 1; // ✅ Reset to first page
@@ -137,15 +142,17 @@
             success: function (data) {
                 if (data.trim() === "") {
                     hasMoreProducts = false;
-                    $("#loadMoreButton").hide();
+                    $("#loadMoreButtonv2").hide();
                 } else {
                     if (append) {
                         $("#productList").append(data); // ✅ Append products
                     } else {
                         $("#productList").html(data); // ✅ Replace products
                     }
-                    $("#loadMoreButton").text("Load More").prop("disabled", false);
-                    updatePaginationControls();
+                    $("#loadMoreButtonv2").remove();
+                    if ($(data).find("#loadMoreButtonv2").length) {
+                        $("#paginationControls").append($(data).find("#loadMoreButtonv2")); // ✅ Add new Load More button if exists
+                    }
                 }
                 isLoading = false;
             },
@@ -165,5 +172,5 @@
             }
         });
     }
-    loadProducts(false);
+    //loadProducts(false);
 });
