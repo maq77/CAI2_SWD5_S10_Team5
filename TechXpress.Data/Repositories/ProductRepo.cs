@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace TechXpress.Data.Repositories
 {
     public class ProductRepo : Repository<Product>, IProductRepo
     {
-        public ProductRepo(AppDbContext dp)  : base(dp)
+        public ProductRepo(AppDbContext dp, ILogger<Repository<Product>> logger) : base(dp, logger)
         {
             _dp = dp;
         }

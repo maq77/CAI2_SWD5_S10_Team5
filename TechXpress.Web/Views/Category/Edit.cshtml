@@ -2,11 +2,11 @@
 
 <h2>Edit Category</h2>
 
-<form asp-action="Edit" method="post">
-    <input asp-for="Id" type="hidden" />
+<form id="editCategoryForm" method="post" asp-action="Edit">
+    <input type="hidden" id="Id" name="Id" value="@Model.Id">
     <div class="form-group">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" required />
+        <label for="Name">Category Name</label>
+        <input type="text" id="Name" name="Name" class="form-control" value="@Model.Name" required>
     </div>
-    <button type="submit" class="btn btn-primary">Update Category</button>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>

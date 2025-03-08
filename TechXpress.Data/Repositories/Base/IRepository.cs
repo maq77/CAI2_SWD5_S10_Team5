@@ -12,10 +12,10 @@ namespace TechXpress.Data.Repositories.Base
         Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null);
         Task<T?> GetById(int id);
         Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate);
-        Task Add(T entity, Action<string> logAction);
-        Task AddRange(IEnumerable<T> entities, Action<string> logAction);
-        Task Update(T entity, Action<string> logAction);
-        Task Delete(int id, Action<string> logAction);
+        Task Add(T entity, Action<string>? logAction);
+        Task AddRange(IEnumerable<T> entities, Action<string>? logAction);
+        Task Update(T entity, Action<string>? logAction);
+        Task Delete(int id, Action<string>? logAction);
         Task<bool> SaveChanges();
     }
 }

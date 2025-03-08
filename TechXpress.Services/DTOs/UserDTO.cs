@@ -17,6 +17,6 @@ namespace TechXpress.Services.DTOs
         [Required]
         public string LastName { get; set; } = string.Empty;
         [Required]
-        public List<string>? Roles { get; set; }
+        public List<string>? Roles { get; set; } = new();
     }
 }

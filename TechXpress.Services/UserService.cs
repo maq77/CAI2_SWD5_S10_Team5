@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TechXpress.Data.Model;
@@ -14,23 +15,24 @@ namespace TechXpress.Services
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UserService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ILogger<UserService> logger)
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<(bool, string)> RegisterAsync(RegisterDTO model)
+        public async Task<(bool Success, string Message, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
             try
             {
                 if (await _userManager.Users.AnyAsync(u => u.Email == model.Email))
                 {
-                    _logger.LogWarning("Registration failed: Email {Email} is already in use.", model.Email);
-                    return (false, "This email is already registered.");
+                    return (false, "This email is already registered.", "");
                 }
 
                 var user = new User
@@ -47,55 +49,58 @@ namespace TechXpress.Services
                 if (!result.Succeeded)
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    _logger.LogWarning("User registration failed: {Errors}", errors);
-                    return (false, errors);
+                    return (false, errors, "");
                 }
 
-                await AssignRoleAsync(user.Email, "Customer"); 
-
+                await AssignRoleAsync(user.Email, "Customer");
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                _logger.LogInformation("User {Email} registered successfully", user.Email);
-                return (true, "Registration successful.");
+                return (true, "Registration successful.", "/Home/Index"); // Ensure the redirect URL is returned
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception in RegisterAsync for {Email}", model.Email);
-                return (false, "An error occurred while registering.");
+                return (false, "An error occurred while registering.", "");
             }
         }
 
-        public async Task<string?> LoginAsync(LoginDTO model)
+
+        public async Task<(bool Success, string RedirectUrl)> LoginAsync(LoginDTO model)
         {
             try
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (!result.Succeeded)
                 {
-                    _logger.LogWarning("Failed login attempt for {Email}", model.Email);
-                    return null;
+                    return (false, "");
                 }
 
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null) return null;
+                if (user == null) return (false, "");
 
-                if (await _userManager.IsInRoleAsync(user, "Admin"))
-                {
-                    return "/Admin/Index";
-                }
-
-                return "/Home/Index";
+                string redirectUrl = await _userManager.IsInRoleAsync(user, "Admin") ? "/Admin/Index" : "/Home/Index";
+                return (true, redirectUrl);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception in LoginAsync for {Email}", model.Email);
-                return null;
+                return (false, "");
             }
         }
 
-        public async Task LogoutAsync()
+
+        public async Task<bool> LogoutAsync()
         {
-            await _signInManager.SignOutAsync();
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while logging out.");
+                return false;
+            }
         }
 
         public async Task<bool> AssignRoleAsync(string email, string role)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +15,14 @@ namespace TechXpress.Data.Repositories
     {
         private readonly AppDbContext _dp;
 
-        public OrderRepo(AppDbContext dp) : base(dp)
+        public OrderRepo(AppDbContext dp, ILogger<Repository<Order>> logger) : base(dp, logger)
         {
             _dp = dp;
         }
         public async Task<IEnumerable<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null)
         {
             IQueryable<Order> query = _dp.Orders
-                .Include(o => o.OrderDetails)
+                .Include(o => (IEnumerable<OrderDetail>)o.OrderDetails!)
                 .ThenInclude(d => d.Product)
                 .AsNoTracking();
 
@@ -33,7 +34,13 @@ namespace TechXpress.Data.Repositories
                 throw new InvalidOperationException("There is no Orders!");
             }
 
-            return await query.ToListAsync();
+            var orders = await query.ToListAsync();
+
+            if (orders.Count == 0) // Check if the result set is empty
+            {
+                throw new InvalidOperationException("There are no orders available!");
+            }
+            return orders;
         }
     }
 }

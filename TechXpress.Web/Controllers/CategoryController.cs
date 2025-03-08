@@ -27,11 +27,13 @@ namespace TechXpress.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CategoryDTO model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data!" });
 
             await _categoryService.AddCategory(model);
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = true });
         }
+
         public async Task<IActionResult> Edit(int id)
         {
             var category = await _categoryService.GetCategoryById(id);
@@ -43,28 +45,37 @@ namespace TechXpress.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(CategoryDTO model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data!" });
 
             await _categoryService.UpdateCategory(model);
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = true });
         }
+
         /*public async Task<IActionResult> Delete(int id)
         {
             await _categoryService.DeleteCategory(id);
             return RedirectToAction(nameof(Index));
         }*/
-        public async Task<IActionResult> Delete(int id)
+        /*public async Task<IActionResult> Delete(int id)
         {
             var cat = await _categoryService.GetCategoryById(id);
-            if (cat == null) return NotFound();
-            return View(cat);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _categoryService.DeleteCategory(id);
+            if (cat == null) return NotFound($"No Category with {id} !");
             return RedirectToAction(nameof(Index));
+        }*/
+
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category = await _categoryService.GetCategoryById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            await _categoryService.DeleteCategory(id);
+            return Json(new { success = true });
         }
     }
 }

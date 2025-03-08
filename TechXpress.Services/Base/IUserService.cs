@@ -11,9 +11,9 @@ namespace TechXpress.Services.Base
 {
     public interface IUserService
     {
-        Task<(bool, string)> RegisterAsync(RegisterDTO model);
-        Task<string?> LoginAsync(LoginDTO model);
-        Task LogoutAsync();
+        Task<(bool Success, string Message, string RedirectUrl)> RegisterAsync(RegisterDTO model);
+        Task<(bool Success, string RedirectUrl)> LoginAsync(LoginDTO model);
+        Task<bool> LogoutAsync();
         Task<bool> AssignRoleAsync(string email, string role);
         Task<List<UserDTO>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(string email);

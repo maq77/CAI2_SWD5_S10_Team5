@@ -16,38 +16,40 @@ namespace TechXpress.Web.Controllers
         public IActionResult Register() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterDTO model)
+        public async Task<IActionResult> Register([FromBody] RegisterDTO model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var (isSuccess, message) = await _userService.RegisterAsync(model);
-
-            if (isSuccess)
-                return RedirectToAction("Index", "Home");
-
-            ModelState.AddModelError("", message);
-            return View(model);
+            var (success, message, redirectUrl) = await _userService.RegisterAsync(model);
+            if (success)
+            {
+                return Json(new { success, message, redirectUrl });
+            }
+            return BadRequest(new { success, message });
         }
+
 
         public IActionResult Login() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginDTO model)
+        public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var redirectUrl = await _userService.LoginAsync(model);
-            if (redirectUrl != null)
-                return Redirect(redirectUrl); 
-
-            ModelState.AddModelError("", "Invalid login attempt.");
-            return View(model);
+            var (success, redirectUrl) = await _userService.LoginAsync(model);
+            if (success)
+            {
+                return Json(new { success, redirectUrl });
+            }
+            return BadRequest(new { success, message = "Invalid credentials." });
         }
 
+
+        [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await _userService.LogoutAsync();
-            return RedirectToAction("Index", "Home");
+            var success = await _userService.LogoutAsync();
+            if (success)
+            {
+                return Json(new { success = true, redirectUrl = "/Account/Login" });
+            }
+            return BadRequest(new { success = false, message = "Logout failed." });
         }
     }
 }

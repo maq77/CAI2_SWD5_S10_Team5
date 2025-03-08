@@ -6,20 +6,24 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Name</th>
+            <th>#</th>
+            <th>Category Name</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var category in Model)
         {
-            <tr>
+            <tr id="row-@category.Id">
+                <td>@category.Id</td>
                 <td>@category.Name</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger">Delete</a>
+                    <a href="@Url.Action("Edit", "Category", new { id = category.Id })" class="btn btn-warning">Edit</a>
+                    <button class="btn btn-danger delete-category" data-id="@category.Id">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<script src="~/js/category.js"></script>

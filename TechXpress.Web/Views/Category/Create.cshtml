@@ -2,10 +2,10 @@
 
 <h2>Create Category</h2>
 
-<form asp-action="Create" method="post">
+<form id="createCategoryForm" method="post" asp-action="Create">
     <div class="form-group">
-        <label>Name</label>
-        <input asp-for="Name" class="form-control" required />
+        <label for="Name">Category Name</label>
+        <input type="text" id="Name" name="Name" class="form-control" required>
     </div>
-    <button type="submit" class="btn btn-primary">Add Category</button>
+    <button type="submit" class="btn btn-primary">Create</button>
 </form>
