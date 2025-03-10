@@ -29,3 +29,147 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+
+/* Add this to your site.css file */
+
+/* Reset troublesome margins */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Fix container alignment */
+.container {
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Ensure buttons display correctly */
+.btn, button {
+    display: inline-block;
+    position: relative;
+}
+
+/* Fix header alignment */
+#top-header, #header {
+    width: 100%;
+    position: relative;
+}
+
+/* Ensure navigation displays properly */
+#navigation {
+    width: 100%;
+    position: relative;
+    z-index: 99;
+}
+
+/* Fix main content area */
+main {
+    padding: 20px 0;
+}
+
+/* Footer positioning */
+footer, #footer {
+    width: 100%;
+    position: relative;
+}
+
+/* Add to your site.css */
+.search-btn {
+    height: 40px;
+    width: auto;
+    padding: 0 15px;
+    border: none;
+}
+
+.newsletter-btn {
+    height: 40px;
+    min-width: 120px;
+    margin-left: -2px;
+}
+
+.cart-dropdown .cart-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.cart-dropdown .cart-btns a {
+        display: inline-block;
+        padding: 8px 12px;
+    }
+
+/* Footer specific fixes */
+#footer {
+    background-color: #15161D;
+    color: #B9BABC;
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+    padding-top: 30px;
+}
+
+    #footer .footer {
+        margin: 15px 0px;
+    }
+
+    #footer .footer-title {
+        color: #FFFFFF;
+        text-transform: uppercase;
+        font-size: 18px;
+        margin: 0px 0px 20px;
+    }
+
+    #footer .footer-links {
+        padding-left: 0;
+        list-style-type: none;
+    }
+
+        #footer .footer-links li {
+            margin-bottom: 10px;
+        }
+
+            #footer .footer-links li a {
+                color: #B9BABC;
+                text-decoration: none;
+            }
+
+                #footer .footer-links li a:hover {
+                    color: #FFFFFF;
+                }
+
+                #footer .footer-links li a i {
+                    margin-right: 10px;
+                    color: #D10024;
+                }
+
+#bottom-footer {
+    background-color: #1E1F29;
+    padding: 20px 0px;
+}
+
+    #bottom-footer .footer-payments {
+        list-style-type: none;
+        display: flex;
+        justify-content: center;
+        padding-left: 0;
+    }
+
+        #bottom-footer .footer-payments li {
+            margin: 0px 5px;
+        }
+
+    #bottom-footer .copyright {
+        margin-top: 15px;
+        display: block;
+        text-align: center;
+        color: #B9BABC;
+    }
+
+        #bottom-footer .copyright a {
+            color: #D10024;
+        }

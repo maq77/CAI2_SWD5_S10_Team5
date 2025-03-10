@@ -2,70 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<!-- Make sure viewport is correctly set -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
     <title>@ViewData["Title"] - TechXpress.Web</title>
     <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <script src="~/js/jquery-3.7.1.min.js"></script>
-    <script src="~/js/auth.js"></script>
-    <script src="~/js/cart.js"></script>
-    <script src="~/js/category.js"></script>
-    <script src="~/js/product-page.js"></script>
-    <script src="~/js/site.js"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+	<!-- Ensure CSS loading order is correct -->
+	<link rel="stylesheet" href="~/css/bootstrap.min.css" asp-append-version="true" />
+
+	<!-- Third-party plugins next -->
+	<link type="text/css" rel="stylesheet" href="~/css/slick.css" />
+	<link type="text/css" rel="stylesheet" href="~/css/slick-theme.css" />
+	<link type="text/css" rel="stylesheet" href="~/css/nouislider.min.css" />
+	<!-- Update Font Awesome to use a CDN instead -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" 
+	integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" 
+	crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<!-- Custom CSS last -->
+	<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+	@* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" />
+
+	@* <script src="~/js/jquery-3.7.1.min.js"></script>
+	<script src="~/js/electro.js"></script>
+	<script src="~/js/auth.js"></script>
+	<script src="~/js/cart.js"></script>
+	<script src="~/js/category.js"></script>
+	<script src="~/js/product-page.js"></script>
+	<script src="~/js/site.js"></script> *@
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TechXpress.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Product" asp-action="Index">Products</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
-                        </li>
-                        @* <li class="nav-item">
-                            <a class="btn btn-danger" id="logoutBtn">Admin Dashboard</a>
-                        </li> *@
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+	<div class="container-fluid p-0">
+		<!-- Navbar Partial -->
+		@await Html.PartialAsync("_Navbar")
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - TechXpress.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+		<!-- Body -->
+
+		<div class="container-fluid">
+			<div class="container">
+				<main role="main" class="pb-3">
+					@RenderBody()
+				</main>
+			</div>
+		</div>
+
+		<!-- /Body -->
+
+		<!-- Footer Partial -->
+		@await Html.PartialAsync("_Footer")
+	
+	
+	</div>
+	<!-- Place at the end of your body -->
+	<script src="~/js/jquery-3.7.1.min.js"></script>
+	<script src="~/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/slick.min.js"></script>
+	<script src="~/js/nouislider.min.js"></script>
+	<script src="~/js/jquery.zoom.min.js"></script>
+	<!-- <script src="~/js/electro.js" asp-append-version="true"></script> -->
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/auth.js"></script>
+	<script src="~/js/cart.js"></script>
+	<script src="~/js/category.js"></script>
+	<script src="~/js/product-page.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
