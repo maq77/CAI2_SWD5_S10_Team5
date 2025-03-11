@@ -5,7 +5,7 @@ using TechXpress.Services.DTOs;
 using TechXpress.Services.DTOs.ViewModels;
 using X.PagedList.Extensions;
 
-namespace TechXpress.Web.Controllers
+namespace TechXpress.Web.Controllers.Admin
 {
     public class ProductController : Controller
     {
@@ -17,7 +17,7 @@ namespace TechXpress.Web.Controllers
             IProductService productService,
             ICategoryService categoryService,
             IProductImageService productImageService)
-        
+
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -99,6 +99,14 @@ namespace TechXpress.Web.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["PageTitle"] = product.Name;
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+            {
+                ("/", "Home"),
+                ("/Products", "Product"),
+                ($"/Products/Details/{id}", product.Name)
+            };
 
             return View(product);
         }

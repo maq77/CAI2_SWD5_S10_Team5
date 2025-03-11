@@ -36,8 +36,14 @@
 </head>
 <body>
 	<div class="container-fluid p-0">
+		<!-- Header Partial -->
+		@await Html.PartialAsync("_Header")
+
 		<!-- Navbar Partial -->
 		@await Html.PartialAsync("_Navbar")
+
+		<!-- Breadcrumb Partial -->
+		@await Html.PartialAsync("_Breadcrumb")
 
 		<!-- Body -->
 

@@ -4,7 +4,7 @@ using TechXpress.Data.Model;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
 
-namespace TechXpress.Web.Controllers
+namespace TechXpress.Web.Controllers.Admin
 {
     //[Authorize(Roles = "Admin")]
     public class CategoryController : Controller

@@ -96,7 +96,7 @@
     function searchProducts() {
         if (!hasMoreProducts || isLoading) return;
         if (!pageNumber) pageNumber = 1;
-        var searchTerm = $("#searchBox").val();
+        var searchTerm = $("#searchBox").val() || "";
         var sortOrder = $(".sort-button.active").data("sort") || "";
         var categoryId = $("#categoryFilter").val() || 0;
 

@@ -21,7 +21,14 @@ namespace TechXpress.Services
         {
             var session = _httpContextAccessor.HttpContext?.Session;
             var cartJson = session?.GetString(CartSessionKey);
-            return cartJson != null ? JsonConvert.DeserializeObject<List<OrderDetailDTO>>(cartJson) : new List<OrderDetailDTO>();
+            if (cartJson != null)
+            {
+                return JsonConvert.DeserializeObject<List<OrderDetailDTO>>(cartJson);
+            }
+            else
+            {
+                return new List<OrderDetailDTO>();
+            }
         }
 
         public void AddToCart(OrderDetailDTO item)

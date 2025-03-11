@@ -1,0 +1,28 @@
+﻿@{
+    var pageTitle = ViewData["PageTitle"] as string ?? "Page";
+    var breadcrumbPath = ViewData["BreadcrumbPath"] as List<(string Url, string Name)> ?? new List<(string, string)>
+    {
+        ("/", "Home"),
+        ("#", "Current Page")
+    };
+}
+
+<!-- BREADCRUMB -->
+<div id="breadcrumb" class="section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="breadcrumb-header">@pageTitle</h3>
+                <ul class="breadcrumb-tree">
+                    @foreach (var item in breadcrumbPath)
+                    {
+                        <li class="@(item == breadcrumbPath.Last() ? "active" : "")">
+                            <a href="@item.Url">@item.Name</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /BREADCRUMB -->

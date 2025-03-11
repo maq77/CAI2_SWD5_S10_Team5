@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
+using TechXpress.Services.DTOs.ViewModels;
 
-namespace TechXpress.Web.Controllers
+namespace TechXpress.Web.Controllers.Customer
 {
     public class CartController : Controller
     {
@@ -17,9 +18,27 @@ namespace TechXpress.Web.Controllers
 
         public IActionResult Index()
         {
+            ViewData["PageTitle"] = "Shopping Cart";
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+            {
+                  ("/", "Home"),
+                  ("/Cart", "Shopping Cart")
+             };
             var cartItems = _cartService.GetCart();
-            return View(cartItems);
+            var cartViewModel = new CartViewModel
+            {
+                Items = cartItems ?? new List<OrderDetailDTO>() // Ensure it's never null
+            };
+
+            return View(cartViewModel);
         }
+        public IActionResult Summary()
+        {
+            var cartItems = _cartService.GetCart();
+            var cartViewModel = new CartViewModel { Items = cartItems };
+            return PartialView("_CartSummary", cartViewModel);
+        }
+
 
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
@@ -30,7 +49,8 @@ namespace TechXpress.Web.Controllers
             {
                 ProductId = product.Id,
                 Quantity = quantity,
-                Price = product.Price
+                Price = product.Price,
+                Product = product
             };
 
             _cartService.AddToCart(item);

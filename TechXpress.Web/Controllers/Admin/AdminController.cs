@@ -2,13 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Services.Base;
 
-namespace TechXpress.Web.Controllers
+namespace TechXpress.Web.Controllers.Admin
 {
     public class AdminController : Controller
     {
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
+            ViewData["PageTitle"] = "Admin Dashboard";
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+            {
+                ("/", "Admin")
+            };
             return View();
         }
         private readonly IUserService _userService;

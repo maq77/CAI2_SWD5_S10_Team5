@@ -7,7 +7,7 @@ using TechXpress.Data.Model;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
 
-namespace TechXpress.Web.Controllers
+namespace TechXpress.Web.Controllers.Customer
 {
     //[Authorize]
     public class OrderController : Controller
@@ -115,7 +115,7 @@ namespace TechXpress.Web.Controllers
                 UserId = user.Id,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Pending,
-               // Items = cartItems
+                // Items = cartItems
             };
 
             await _orderService.CreateOrder(orderDto);
