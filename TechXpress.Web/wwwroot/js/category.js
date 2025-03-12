@@ -9,7 +9,7 @@
         };
 
         $.ajax({
-            url: "/Category/Create",
+            url: "/Admin/Category/Create",
             type: "POST",
             data: formData,
             success: function (response) {
@@ -36,7 +36,7 @@
         };
 
         $.ajax({
-            url: "/Category/Edit",
+            url: "/Admin/Category/Edit",
             type: "POST",
             data: formData,
             success: function (response) {
@@ -59,7 +59,7 @@
 
         if (confirm("Are you sure you want to delete this category?")) {
             $.ajax({
-                url: "/Category/Delete",
+                url: "/Admin/Category/Delete",
                 type: "POST",
                 data: { id: categoryId },
                 success: function (response) {

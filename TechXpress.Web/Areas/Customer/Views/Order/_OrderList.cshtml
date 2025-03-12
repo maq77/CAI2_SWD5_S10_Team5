@@ -1,0 +1,40 @@
+﻿@model IEnumerable<TechXpress.Services.DTOs.OrderDTO>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>Total Price</th>
+                @* <th>Status</th> *@
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>@order.Id</td>
+                    <td>@order.UserId</td>
+                    <td>@order.TotalAmount.ToString("C")</td>
+                    <td>@order.Status</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">Details</a>
+                        <a asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* <!-- ✅ Pagination Controls --> *@
+    @* <div id="paginationControls"> *@
+    @*     @await Html.PartialAsync("_Pagination", Model) *@
+    @* </div> *@
+}
+else
+{
+    <p class="text-center text-muted">No Orders found.</p>
+}

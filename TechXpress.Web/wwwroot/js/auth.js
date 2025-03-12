@@ -70,7 +70,7 @@ $("#logoutBtn").on("click",function () {
         success: function (response) {
             console.log("Logout Response:", response);
             if (response.success) {
-                window.location.href = response.redirectUrl; // Redirect to login page
+                window.location.href = response.redirectUrl || "/"; // Redirect to login page
             } else {
                 alert("Logout failed.");
             }

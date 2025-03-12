@@ -22,8 +22,8 @@ namespace TechXpress.Data.Repositories
         public async Task<IEnumerable<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null)
         {
             IQueryable<Order> query = _dp.Orders
-                .Include(o => (IEnumerable<OrderDetail>)o.OrderDetails!)
-                .ThenInclude(d => d.Product)
+                .Include(o => o.OrderDetails!)
+                .ThenInclude(d => d.Product!)
                 .AsNoTracking();
 
             if (filter != null)
@@ -36,11 +36,11 @@ namespace TechXpress.Data.Repositories
 
             var orders = await query.ToListAsync();
 
-            if (orders.Count == 0) // Check if the result set is empty
+            /*if (orders.Count == 0) // Check if the result set is empty
             {
                 throw new InvalidOperationException("There are no orders available!");
-            }
-            return orders;
+            }*/
+            return orders ?? new List<Order>();
         }
     }
 }

@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - | TechXpress</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+
+    <!-- Third-party plugins next -->
+    <link type="text/css" rel="stylesheet" href="~/css/slick.css" />
+    <link type="text/css" rel="stylesheet" href="~/css/slick-theme.css" />
+    <link type="text/css" rel="stylesheet" href="~/css/nouislider.min.css" />
+    <!-- Update Font Awesome to use a CDN instead -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+          integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Custom CSS last -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
+    <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false) <!-- Optional styles section -->
+</head>
+<body>
+    <!-- Header Partial -->
+    @await Html.PartialAsync("_Header")
+
+    <!-- Navbar Partial -->
+    @await Html.PartialAsync("_Navbar")
+
+    <!-- Breadcrumb Partial -->
+    @await Html.PartialAsync("_Breadcrumb")
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <!-- Footer Partial -->
+    @await Html.PartialAsync("_Footer")
+
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Place at the end of your body -->
+    <script src="~/js/jquery-3.7.1.min.js"></script>
+    <!--<script src="~/js/bootstrap.bundle.min.js"></script>-->
+    <script src="~/js/slick.min.js"></script>
+    <script src="~/js/nouislider.min.js"></script>
+    <script src="~/js/jquery.zoom.min.js"></script>
+    <!-- <script src="~/js/electro.js" asp-append-version="true"></script> -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/auth.js"></script>
+    <script src="~/js/cart.js"></script>
+    <script src="~/js/category.js"></script>
+    <script src="~/js/product-page.js"></script>
+    @RenderSection("Scripts", required: false) <!-- Optional scripts section -->
+</body>
+</html>

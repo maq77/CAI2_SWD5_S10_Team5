@@ -1,4 +1,8 @@
-﻿<!-- HEADER -->
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<!-- HEADER -->
 <header>
 	<!-- TOP HEADER -->
 	<div id="top-header">
@@ -12,9 +16,25 @@
 					</ul>
 				</div>
 				<div class="col-md-6 text-right">
-					<ul class="header-links pull-right">
+					<ul class="header-links">
 						<li><a href="#"><i class="fa fa-dollar"></i> USD</a></li>
-						<li><a href="#"><i class="fa fa-user-o"></i> My Account</a></li>
+						@if (SignInManager.IsSignedIn(User))
+						{
+							if (User.IsInRole("Admin"))
+							{
+								<li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><i class="fa fa-user-o"></i> Admin Panel</a></li>
+							}
+							else if (User.IsInRole("Customer"))
+							{
+								<li><a asp-area="Customer" asp-controller="Profile" asp-action="Index"><i class="fa fa-user-o"></i> My Account</a></li>
+							}
+							<li><a href="javascript:void(0);" id="logoutBtn"><i class="fa fa-sign-out"></i> Logout</a></li>
+						}
+						else
+						{
+							<li><a asp-controller="Account" asp-action="Login"><i class="fa fa-user-o"></i> Login</a></li>
+							<li><a asp-controller="Account" asp-action="Register"><i class="fa fa-user-o"></i> Register</a></li>
+						}
 					</ul>
 				</div>
 			</div>
@@ -23,38 +43,36 @@
 	<!-- /TOP HEADER -->
 	<!-- MAIN HEADER -->
 	<div id="header">
-		<!-- container -->
 		<div class="container">
-			<!-- row -->
 			<div class="row">
 				<!-- LOGO -->
 				<div class="col-md-3">
 					<div class="header-logo">
-						<a href="#" class="logo">
-							<img src="~/images/logo.png" alt="">
+						<a asp-controller="Home" asp-action="Index" class="logo">
+							<img src="~/images/logo.png" alt="TechXpress Logo">
 						</a>
 					</div>
 				</div>
 				<!-- /LOGO -->
 				<!-- SEARCH BAR -->
-				<!-- Example for fixing search bar section -->
 				<div class="col-md-6">
 					<div class="header-search">
 						<form class="d-flex">
 							<div class="input-group">
 								<select id="categoryFilter" class="input-select">
 									<option value="0">All Categories</option>
+									@* Dynamically load categories if available *@
 									@* @if (ViewBag.Categories != null)
+										{
+											@foreach (var category in ViewBag.Categories)
 											{
-												@foreach (var category in Model.Categories)
-												{
-													<option value="@category.Id">@category.Name</option>
-												}
-											} *@
+												<option value="@category.Id">@category.Name</option>
+											}
+										} *@
 								</select>
 								<input type="text" id="searchBox" class="input form-control" placeholder="Search here">
 								<div class="input-group-append">
-									<button id="searchButton" class="search-btn btn">Search</button>
+									<button id="searchButton" class="search-btn btn"><i class="fa fa-search"></i> Search</button>
 								</div>
 							</div>
 						</form>
@@ -73,24 +91,23 @@
 							</a>
 						</div>
 						<!-- /Wishlist -->
-						@* @await Html.PartialAsync("_CartSummary", ViewBag.Cart ?? new TechXpress.Services.DTOs.ViewModels.CartViewModel()) *@
 
+						@* Uncomment when _CartSummary is implemented *@
+						@* @await Html.PartialAsync("_CartSummary", ViewBag.Cart ?? new CartViewModel()) *@
 
-						<!-- Menu Toogle -->
+						<!-- Menu Toggle -->
 						<div class="menu-toggle">
 							<a href="#">
 								<i class="fa fa-bars"></i>
 								<span>Menu</span>
 							</a>
 						</div>
-						<!-- /Menu Toogle -->
+						<!-- /Menu Toggle -->
 					</div>
 				</div>
 				<!-- /ACCOUNT -->
 			</div>
-			<!-- row -->
 		</div>
-		<!-- container -->
 	</div>
 	<!-- /MAIN HEADER -->
 </header>

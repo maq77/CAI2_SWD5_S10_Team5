@@ -78,7 +78,7 @@ namespace TechXpress.Services
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null) return (false, "");
 
-                string redirectUrl = await _userManager.IsInRoleAsync(user, "Admin") ? "/Admin/Index" : "/Home/Index";
+                string redirectUrl = await _userManager.IsInRoleAsync(user, "Admin") ? "/Admin/" : "/";
                 return (true, redirectUrl);
             }
             catch (Exception ex)
@@ -114,16 +114,31 @@ namespace TechXpress.Services
             await _userManager.AddToRoleAsync(user, role);
             return true;
         }
+        public async Task<bool> MakeUserAdmin(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return false;
+            await _userManager.AddToRoleAsync(user,"Admin");
+            return true;
+        }
         public async Task<List<UserDTO>> GetAllUsersAsync() //UserDTO
         {
-            return await _userManager.Users
-                .Select(u => new UserDTO
+            var users = await _userManager.Users.ToListAsync();
+            var userDTOs = new List<UserDTO>();
+            foreach(var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userDTOs.Add(new UserDTO
                 {
-                    Email = u.Email,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    Roles = _userManager.GetRolesAsync(u).Result.ToList()
-                }).ToListAsync();
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Roles = roles.ToList()
+                });
+
+            }
+
+            return userDTOs;
         }
         public async Task<bool> DeleteUserAsync(string email)
         {

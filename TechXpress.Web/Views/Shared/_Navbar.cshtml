@@ -1,4 +1,5 @@
-﻿<!-- NAVIGATION -->
+﻿
+<!-- NAVIGATION -->
 	<nav id="navigation" class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow">
 			<div class="container">
 				<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TechXpress</a>
@@ -12,16 +13,19 @@
 							<a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" asp-controller="Product" asp-action="Index">Products</a>
+							<a class="nav-link" asp-area="" asp-controller="Shop" asp-action="Index"> Shop </a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" asp-controller="Category" asp-action="Index">Category</a>
+							<a class="nav-link" asp-area="Admin"  asp-controller="Product" asp-action="Index"> Admin Products</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
+							<a class="nav-link" asp-area="Admin" asp-controller="Category" asp-action="Index">Admin Category</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+							<a class="nav-link" asp-area="Admin"  asp-controller="Order" asp-action="Index">Orders</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin Dashboard</a>
 						</li>
 					</ul>
 				</div>

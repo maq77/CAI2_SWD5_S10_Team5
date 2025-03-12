@@ -6,7 +6,7 @@
         let quantity = $(this).val();
 
         $.ajax({
-            url: "/Cart/UpdateCart",
+            url: "/Customer/Cart/UpdateCart",
             type: "POST",
             data: { productId: productId, quantity: quantity },
             headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
@@ -22,7 +22,7 @@
         let productId = row.data("product-id");
 
         $.ajax({
-            url: "/Cart/RemoveFromCart",
+            url: "/Customer/Cart/RemoveFromCart",
             type: "POST",
             data: { productId: productId },
             headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
@@ -43,7 +43,7 @@
         });
 
         $.ajax({
-            url: "/Cart/UpdateCart",
+            url: "/Customer/Cart/UpdateCart",
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(updatedCart),
@@ -53,5 +53,4 @@
             }
         });
     });
-});
 });

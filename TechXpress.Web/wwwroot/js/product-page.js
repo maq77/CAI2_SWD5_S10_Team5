@@ -101,7 +101,7 @@
         var categoryId = $("#categoryFilter").val() || 0;
 
         $.ajax({
-            url: "/Product/Search",
+            url: "/Admin/Product/Search",
             type: "GET",
             data: { pageNumber: pageNumber, pageSize: pageSize, searchTerm: searchTerm, categoryId: categoryId, sortOrder: sortOrder },
             beforeSend: function () {
@@ -132,7 +132,7 @@
         let sortOrder = $(".sort-button.active").data("sort") || "";
 
         $.ajax({
-            url: "/Product/LoadMoreProducts",
+            url: "/Admin/Product/LoadMoreProducts",
             type: "GET",
             data: { pageNumber: pageNumber, pageSize: pageSize, searchTerm: searchTerm, categoryId: categoryId, sortOrder: sortOrder },
             beforeSend: function () {
@@ -164,7 +164,7 @@
     }
     function updatePaginationControls() {
         $.ajax({
-            url: "/Product/GetPagination",
+            url: "/Admin/Product/GetPagination",
             type: "GET",
             data: { pageNumber: pageNumber, pageSize: pageSize },
             success: function (paginationHtml) {

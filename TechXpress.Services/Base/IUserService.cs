@@ -15,6 +15,7 @@ namespace TechXpress.Services.Base
         Task<(bool Success, string RedirectUrl)> LoginAsync(LoginDTO model);
         Task<bool> LogoutAsync();
         Task<bool> AssignRoleAsync(string email, string role);
+        Task<bool> MakeUserAdmin(string email);
         Task<List<UserDTO>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(string email);
     }

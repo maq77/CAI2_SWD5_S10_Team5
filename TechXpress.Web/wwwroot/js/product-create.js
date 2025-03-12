@@ -5,7 +5,7 @@
         let formData = new FormData(this); // Collect form data (including files)
 
         $.ajax({
-            url: "/Product/Create",
+            url: "/Admin/Product/Create",
             type: "POST",
             data: formData,
             contentType: false,

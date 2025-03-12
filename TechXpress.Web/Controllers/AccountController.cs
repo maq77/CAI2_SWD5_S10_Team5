@@ -47,7 +47,8 @@ namespace TechXpress.Web.Controllers
             var success = await _userService.LogoutAsync();
             if (success)
             {
-                return Json(new { success = true, redirectUrl = "/Account/Login" });
+                Console.WriteLine("logged out!");
+                return Json(new { success = true, redirectUrl = "/" });
             }
             return BadRequest(new { success = false, message = "Logout failed." });
         }
