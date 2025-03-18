@@ -1,0 +1,72 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.CartViewModel
+
+<!-- Cart -->
+<div class="dropdown">
+    <a class="dropdown-toggle" id="cartDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-shopping-cart"></i>
+        <span>Your Cart</span>
+        <div class="qty">@Model.TotalItems</div>
+    </a>
+    <div class="dropdown-menu cart-dropdown" aria-labelledby="cartDropdown">
+        <div class="cart-list">
+            @if (!Model.Items.Any())
+            {
+                <p class="text-center">Your cart is empty.</p>
+            }
+            else
+            {
+                @foreach (var item in Model.Items)
+                {
+                    <div class="product-widget">
+                        <div class="product-img">
+                            <img src="@(item.Product.Images?.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")"
+                                 width="100" height="100" class="img-thumbnail lazy-image" />
+                        </div>
+                        <div class="product-body">
+                            <h3 class="product-name"><a href="#">@item.Product.Name</a></h3>
+                            <h4 class="product-price">
+                                <span class="qty">@item.Quantity x</span> $@item.Price.ToString("0.00")
+                            </h4>
+                        </div>
+                        <button class="delete" onclick="removeFromCart(@item.ProductId)">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="cart-summary">
+            <small>@Model.TotalItems Item(s) selected</small>
+            <h5>SUBTOTAL: $@Model.TotalPrice.ToString("0.00")</h5>
+        </div>
+
+        <div class="cart-btns">
+            <a href="/Customer/Cart">View Cart</a>
+            <a href="/Customer/Checkout">Checkout <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+<!-- /Cart -->
+
+<script>
+    function removeFromCart(productId) {
+        $.ajax({
+            url: '/Customer/Cart/RemoveFromCart',
+            type: 'POST',
+            data: { productId: productId },
+            success: function (response) {
+                updateCartSummary();
+            },
+            error: function () {
+                alert("Error removing item from cart.");
+            }
+        });
+    }
+
+    function updateCartSummary() {
+        $.get('/Customer/Cart/GetCartSummary', function (data) {
+            $(".cart-dropdown").html(data);
+        });
+    }
+</script>

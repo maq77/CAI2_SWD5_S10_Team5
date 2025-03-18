@@ -10,8 +10,16 @@
     <script type="importmap"></script>
     <!-- Google font -->
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
-	<!-- Ensure CSS loading order is correct -->
-	<link rel="stylesheet" href="~/css/bootstrap.min.css" asp-append-version="true" />
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+	<!-- Popper.js -->
+	@* <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script> *@
+
+	<!-- Bootstrap JavaScript -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+	@* <link rel="stylesheet" href="~/css/bootstrap.min.css" asp-append-version="true" /> *@
 
 	<!-- Third-party plugins next -->
 	<link type="text/css" rel="stylesheet" href="~/css/slick.css" />
@@ -22,11 +30,11 @@
 	integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" 
 	crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<!-- Custom CSS last -->
-	<link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
-	@* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
-    <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/electro.css" asp-append-version="true" />
+	@* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> 
+     <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" /> 
 
-	@* <script src="~/js/jquery-3.7.1.min.js"></script>
+	<script src="~/js/jquery-3.7.1.min.js"></script>
 	<script src="~/js/electro.js"></script>
 	<script src="~/js/auth.js"></script>
 	<script src="~/js/cart.js"></script>
@@ -63,13 +71,15 @@
 	
 	</div>
 	<!-- Place at the end of your body -->
-	<script src="~/js/jquery-3.7.1.min.js"></script>
-	<script src="~/js/bootstrap.bundle.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	@* <script src="~/js/jquery-3.7.1.min.js"></script> *@
+	@* <script src="~/js/bootstrap.bundle.min.js"></script> *@
 	<script src="~/js/slick.min.js"></script>
 	<script src="~/js/nouislider.min.js"></script>
 	<script src="~/js/jquery.zoom.min.js"></script>
 	<!-- <script src="~/js/electro.js" asp-append-version="true"></script> -->
 	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/electro.js" asp-append-version="true"></script>
 	<script src="~/js/auth.js"></script>
 	<script src="~/js/cart.js"></script>
 	<script src="~/js/category.js"></script>

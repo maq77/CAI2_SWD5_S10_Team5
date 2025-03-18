@@ -67,5 +67,10 @@ namespace TechXpress.Services
         {
             _httpContextAccessor.HttpContext?.Session.SetString(CartSessionKey, JsonConvert.SerializeObject(cart));
         }
+
+        public int GetCartItemCount()
+        {
+            return GetCart().Sum(item => item.Quantity);
+        }
     }
 }

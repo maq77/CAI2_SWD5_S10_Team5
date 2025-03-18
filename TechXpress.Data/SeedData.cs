@@ -8,7 +8,7 @@ using TechXpress.Data.Model;
 namespace TechXpress.Data
 {
     public static class SeedData
-    {
+    {    // Seed Data in the Beginning of the Project // if not already seeded
         public static async Task Initialize(IServiceProvider services)
         {
             using var scope = services.CreateScope();

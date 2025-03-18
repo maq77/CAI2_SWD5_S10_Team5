@@ -1,20 +1,40 @@
-﻿@model IEnumerable<TechXpress.Services.DTOs.ProductDTO>
+﻿@model TechXpress.Services.DTOs.HomePageDTO
 
-<!-- 🔹 More Products -->
 
+<!-- Section -->
 <div class="section">
     <!-- container -->
     <div class="container">
         <!-- row -->
         <div class="row">
 
-             <div class="col-md-12">
+            <!-- 🔹 Shop by Category -->
+            <div class="col-md-12">
+                <div class="section-title">
+                    <h3 class="title">Best Seller</h3>
+                    <div class="section-nav">
+                        <ul class="section-tab-nav tab-nav">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <li>
+                                    <a asp-controller="Home" asp-action="Index" asp-route-categoryId="@category.Id">
+                                        @category.Name
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🔹 Best Seller Products -->
+            <div class="col-md-12">
                 <div class="row">
                     <div class="products-tabs">
                         <!-- Tab -->
                         <div id="tab2" class="tab-pane fade in active">
                             <div class="products-slick" data-nav="#slick-nav-2">
-                                @foreach (var product in Model)
+                                @foreach (var product in Model.FeaturedProducts)
                                 {
                                     <!-- Product -->
                                     <div class="product">
@@ -77,5 +97,8 @@
             </div>
 
         </div>
+        <!-- /row -->
     </div>
+    <!-- /container -->
 </div>
+<!-- /SECTION -->

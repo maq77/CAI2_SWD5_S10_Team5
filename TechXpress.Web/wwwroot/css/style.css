@@ -55,6 +55,8 @@ Table OF Contents
 	Typography
 \*----------------------------*/
 
+
+
 body {
     display: flex;
     flex-direction: column;
@@ -504,6 +506,30 @@ textarea.input {
 	Cart
 \*----------------------------*/
 
+.dropdown-menu {
+    display: none; /* Default hidden */
+    position: absolute;
+    background-color: white;
+    z-index: 1000;
+}
+.dropdown-menu.show {
+        display: block  !important; /* Show when toggled */
+}
+.cart-dropdown {
+    display: none !important; /* Remove !important */
+    position: absolute;
+    right: 0;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    width: 300px;
+}
+
+.cart-dropdown.show{
+    display: block !important;
+}
+
+
 .header-ctn {
   float: right;
   padding: 15px 0px;
@@ -864,12 +890,12 @@ textarea.input {
 \*----------------------------*/
 
 .product {
-  position: relative;
-  margin: 15px 0px;
-  -webkit-box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
-  box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
-  -webkit-transition: 0.2s all;
-  transition: 0.2s all;
+    position: relative;
+    margin: 15px 0px;
+    -webkit-box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
+    box-shadow: 0px 0px 0px 0px #E4E7ED, 0px 0px 0px 1px #E4E7ED;
+    -webkit-transition: 0.2s all;
+    transition: 0.2s all;
 }
 
 .product:hover {

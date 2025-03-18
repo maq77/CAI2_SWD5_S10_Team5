@@ -1,17 +1,17 @@
-﻿$(function () {  // ✅ Ensures jQuery is Ready
-    let pageNumber = 1; // ✅ Track current page
+﻿$(function () {  // Ensures jQuery is Ready
+    let pageNumber = 1; //  Track current page
     let pageSize = 100;
     let isLoading = false;
     let hasMoreProducts = true;
 
-    // ✅ Live Search (Separate AJAX for searching)
+    //  Live Search (Separate AJAX for searching)
     $("#searchBox").on("keyup", function () {
         clearTimeout($.data(this, 'timer'));
         let wait = setTimeout(resetProducts, 300); // ✅ Add delay to prevent excessive requests
         $(this).data('timer', wait);
     });
 
-    // ✅ Sorting
+    // Sorting
     $(".sort-button").on("click", function (e) {
         e.preventDefault();
         $(".sort-button").removeClass("active");
@@ -19,17 +19,17 @@
         searchProducts();
     });
 
-    // ✅ Category Filter
+    //  Category Filter
     $("#categoryFilter").on("change", function () {
         searchProducts();
     });
 
-    // ✅ Search on Button Click
+    //  Search on Button Click
     $("#searchButton").on("click", function () {
         searchProducts();
     });
 
-    // ✅ Auto Load More on Scroll
+    //  Auto Load More on Scroll
     /*$(window).scroll(function () {
         if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
             if (!isLoading) {
@@ -68,31 +68,31 @@
 
     $(document).on("click", ".pagination-link", function (e) {
         e.preventDefault();
-        pageNumber = $(this).data("pageNumber"); // ✅ Get page number from button
-        loadProducts(false); // ✅ Replace product list
+        pageNumber = $(this).data("pageNumber"); //  Get page number from button
+        loadProducts(false); //  Replace product list
     });
 
     $("#loadMoreButton").on("click", function () {
         pageNumber++;
-        loadProducts(true); // ✅ Append products instead of replacing
+        loadProducts(true); //  Append products instead of replacing
     });
 
     $("#loadMoreButtonv2").on("click", function () {
         pageNumber = $(this).data("page");
-        loadProducts(true); // ✅ Append products instead of replacing
+        loadProducts(true); //  Append products instead of replacing
     });
 
-    // ✅ Reset Products & Load New Data
+    //  Reset Products & Load New Data
     function resetProducts() {
-        pageNumber = 1; // ✅ Reset to first page
+        pageNumber = 1; //  Reset to first page
         hasMoreProducts = true;
-        $("#productList").html(""); // ✅ Clear previous products
-        $("#paginationControls").html(""); // ✅ Reset pagination
-        $("#loadMoreButton").show(); // ✅ Show Load More button
+        $("#productList").html(""); //  Clear previous products
+        $("#paginationControls").html(""); //  Reset pagination
+        $("#loadMoreButton").show(); //  Show Load More button
         loadProducts(false);
     }
 
-    // ✅ Search Products (Separate AJAX Call)
+    //  Search Products (Separate AJAX Call)
     function searchProducts() {
         if (!hasMoreProducts || isLoading) return;
         if (!pageNumber) pageNumber = 1;
@@ -123,7 +123,7 @@
         });
     }
 
-    // ✅ Load More Products (Separate AJAX Call)
+    //  Load More Products (Separate AJAX Call)
     function loadProducts(append = false) {
         if (!hasMoreProducts || isLoading) return;
 
@@ -145,13 +145,13 @@
                     $("#loadMoreButtonv2").hide();
                 } else {
                     if (append) {
-                        $("#productList").append(data); // ✅ Append products
+                        $("#productList").append(data); //  Append products
                     } else {
-                        $("#productList").html(data); // ✅ Replace products
+                        $("#productList").html(data); //  Replace products
                     }
                     $("#loadMoreButtonv2").remove();
                     if ($(data).find("#loadMoreButtonv2").length) {
-                        $("#paginationControls").append($(data).find("#loadMoreButtonv2")); // ✅ Add new Load More button if exists
+                        $("#paginationControls").append($(data).find("#loadMoreButtonv2")); //  Add new Load More button if exists
                     }
                 }
                 isLoading = false;
@@ -168,7 +168,7 @@
             type: "GET",
             data: { pageNumber: pageNumber, pageSize: pageSize },
             success: function (paginationHtml) {
-                $("#paginationControls").html(paginationHtml); // ✅ Update pagination UI
+                $("#paginationControls").html(paginationHtml); //  Update pagination UI
             }
         });
     }

@@ -10,6 +10,7 @@ using TechXpress.Services.DTOs;
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
     //[Authorize]
+    [Area("Customer")]
     public class OrderController : Controller
     {
 

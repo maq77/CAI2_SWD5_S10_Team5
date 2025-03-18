@@ -2,9 +2,8 @@
 
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
-    public class CheckoutController : Controller
+    public class ProductController : Controller
     {
-        [Area("Customer")]
         public IActionResult Index()
         {
             return View();

@@ -5,6 +5,7 @@ using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
+    [Area("Customer")]
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
@@ -37,6 +38,16 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             var cartItems = _cartService.GetCart();
             var cartViewModel = new CartViewModel { Items = cartItems };
             return PartialView("_CartSummary", cartViewModel);
+        }
+
+        public IActionResult GetCartSummary()
+        {
+            var cart = _cartService.GetCart();
+            var viewModel = new CartViewModel
+            {
+                Items = cart
+            };
+            return PartialView("_CartSummary", viewModel);
         }
 
 
