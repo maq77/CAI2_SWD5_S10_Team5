@@ -72,5 +72,35 @@
         }
     });
 
-    $(".cart-dropdown").addClass("show").css("display", "block");
+    function removeFromCart(productId) {
+        $.ajax({
+            url: '/Customer/Cart/RemoveFromCart',
+            type: 'POST',
+            data: { productId: productId },
+            success: function (response) {
+                // Call updateCartSummary and maintain visibility
+                updateCartSummary(true);
+            },
+            error: function () {
+                alert("Error removing item from cart.");
+            }
+        });
+    }
+
+    function updateCartSummary(keepOpen) {
+        $.get('/Customer/Cart/GetCartSummary', function (data) {
+            // Store the current state - if it's visible or not
+            var isVisible = $(".cart-dropdown").hasClass("show");
+
+            // Update the content
+            $(".cart-dropdown").html(data);
+
+            // If it was visible before or we want to keep it open, make it visible again
+            if (isVisible || keepOpen === true) {
+                $(".cart-dropdown").addClass("show").css("display", "block");
+            }
+        });
+    }
+
+    //$(".cart-dropdown").addClass("show").css("display", "block");
 });

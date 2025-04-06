@@ -10,6 +10,6 @@ namespace TechXpress.Data.Repositories.Base
 {
     public interface IOrderRepo : IRepository<Order>
     {
-        public Task<IEnumerable<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null);
+        Task<List<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null);
     }
 }

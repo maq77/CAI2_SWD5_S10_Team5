@@ -1,0 +1,49 @@
+﻿@model TechXpress.Services.DTOs.CustomerProfileDTO
+@{
+    ViewData["Title"] = "Customer Profile";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Customer Profile</h2>
+
+    <div class="card p-3 mb-3">
+        <h5>Personal Information</h5>
+        <p><strong>Name:</strong> @Model.User.FullName</p>
+        <p><strong>Email:</strong> @Model.User.Email</p>
+        <p><strong>Phone:</strong> @Model.User.PhoneNumber</p>
+        <p><strong>Address:</strong> @Model.User.Address</p>
+        <a asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+    </div>
+
+    <div class="card p-3">
+        <h5>Order History</h5>
+        @if (Model.OrderHistory.Any())
+        {
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.OrderHistory)
+                    {
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.OrderDate.ToShortDateString()</td>
+                            <td>@order.Status</td>
+                            <td>@order.TotalAmount.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No orders found.</p>
+        }
+    </div>
+</div>

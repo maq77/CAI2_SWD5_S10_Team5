@@ -36,6 +36,8 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IProductImageService, ProductImageService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IWishlistService, WishListItemService>();
+
 
             // Session Configuration
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

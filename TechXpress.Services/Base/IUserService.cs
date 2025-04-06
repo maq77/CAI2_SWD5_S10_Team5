@@ -18,5 +18,7 @@ namespace TechXpress.Services.Base
         Task<bool> MakeUserAdmin(string email);
         Task<List<UserDTO>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(string email);
+        Task<bool> UpdateUserProfileAsync(string userId, UserProfileDTO profile);
+        Task<UserProfileDTO> GetUserProfileAsync(string userId);
     }
 }

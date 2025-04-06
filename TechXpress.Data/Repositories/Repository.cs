@@ -22,7 +22,7 @@ namespace TechXpress.Data.Repositories
             _logger = logger;
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null)
+        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IQueryable<T>>? include = null) 
         {
             IQueryable<T> query = _Set;
 
@@ -31,9 +31,15 @@ namespace TechXpress.Data.Repositories
                 query = query.Where(filter);
             }
 
+            if (include != null)
+            {
+                query = include(query); // Apply includes dynamically
+            }
+
             _logger.LogInformation("Fetching all {EntityName} records from the database.", typeof(T).Name);
             return await query.ToListAsync();
         }
+
 
         public async Task<T?> GetById(int id)
         {
@@ -45,6 +51,11 @@ namespace TechXpress.Data.Repositories
         {
             _logger.LogInformation("Finding {EntityName} records with specified condition.", typeof(T).Name);
             return await _Set.Where(predicate).ToListAsync();
+        }
+        public async Task<T?> Find_First(Expression<Func<T, bool>> predicate)
+        {
+            _logger.LogInformation("Finding {EntityName} records with specified condition.", typeof(T).Name);
+            return await _Set.FirstOrDefaultAsync(predicate);
         }
 
         public async Task Add(T entity, Action<string>? logAction)

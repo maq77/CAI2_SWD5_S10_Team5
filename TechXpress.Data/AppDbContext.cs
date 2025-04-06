@@ -22,6 +22,7 @@ namespace TechXpress.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<WishListItem> WishlistItems { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -62,6 +63,33 @@ namespace TechXpress.Data
                 .WithMany(p => p.Images)
                 .HasForeignKey(p => p.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //builder.Entity<WishListItem>()
+            //    .HasOne(w => w.Product)
+            //    .WithMany() 
+            //    .HasForeignKey(w => w.ProductId)
+            //    .OnDelete(DeleteBehavior.Cascade); 
+
+            builder.Entity<WishListItem>(entity =>
+            {
+                
+                entity.HasKey(w => w.Id); 
+
+                entity.Property(w => w.UserId)
+                      .IsRequired()
+                      .HasMaxLength(450); // Same as Identity UserId
+
+                entity.Property(w => w.DateAdded)
+                      .IsRequired();
+
+                entity.HasOne(w => w.Product)
+                      .WithMany() // No navigation back to WishlistItem
+                      .HasForeignKey(w => w.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(w => new { w.ProductId, w.UserId })
+                      .IsUnique(); // Prevent duplicate Wishlist entries
+            });
 
         }
 

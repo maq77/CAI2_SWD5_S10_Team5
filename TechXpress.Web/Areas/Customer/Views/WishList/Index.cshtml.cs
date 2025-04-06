@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace TechXpress.Web.Views.Home
+namespace TechXpress.Web.Areas.Customer.Views.WishList
 {
-    public class _ProductListModel : PageModel
+    public class IndexModel : PageModel
     {
         public void OnGet()
         {

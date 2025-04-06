@@ -15,11 +15,13 @@ namespace TechXpress.Web.Areas.Customer.Controllers
     {
 
         private readonly IOrderService _orderService;
+        private readonly ICartService _cartService;
         private readonly UserManager<User> _userManager;
-        public OrderController(IOrderService orderService, UserManager<User> userManager)
+        public OrderController(IOrderService orderService, UserManager<User> userManager, ICartService cartService)
         {
             _orderService = orderService;
             _userManager = userManager;
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> Index()
@@ -108,19 +110,20 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            //var cartItems = _cartService.GetCart();
-            //if (!cartItems.Any()) return RedirectToAction("Index", "Cart");
+            var cartItems = _cartService.GetCart();
+            if (!cartItems.Any()) return RedirectToAction("Index", "Cart");
 
             var orderDto = new OrderDTO
             {
                 UserId = user.Id,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Pending,
-                // Items = cartItems
+                OrderDetails = cartItems
+                
             };
 
             await _orderService.CreateOrder(orderDto);
-            //_cartService.ClearCart(); // ✅ Empty cart after checkout
+            _cartService.ClearCart();
 
             return RedirectToAction("OrderSummary", new { id = orderDto.Id });
         }

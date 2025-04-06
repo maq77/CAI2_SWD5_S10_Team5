@@ -1,0 +1,41 @@
+﻿@model TechXpress.Services.DTOs.ShopPageDTO
+@using X.PagedList.Mvc.Core;
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sorting Options -->
+     
+        <!-- Sidebar Filters -->
+        <aside class="col-md-3">
+            <h4>Categories</h4>
+            <ul class="list-group">
+                @foreach (var category in Model.Categories)
+                {
+                    <li class="list-group-item">
+                        <a href="@Url.Action("Index", new { categoryId = category.Id })">@category.Name</a>
+                    </li>
+                }
+            </ul>
+        </aside>
+
+        <!-- Products Section -->
+        <section class="col-md-9">
+            <h2 class="mb-3">Shop</h2>
+
+            <!-- Search Bar -->
+            <form method="get" action="@Url.Action("Index")" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="searchQuery" class="form-control" placeholder="Search products..." value="@Model.SearchQuery">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+
+            @await Html.PartialAsync("_ProductList", Model.Products)
+
+            <!-- Pagination -->
+            <nav>
+                @Html.PagedListPager(Model.Products, page => Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, page }))
+            </nav>
+        </section>
+    </div>
+</div>

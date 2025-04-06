@@ -1,0 +1,40 @@
+﻿@model IEnumerable<TechXpress.Services.DTOs.WishListItemDTO>
+
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<h2 class="mb-4">My Wishlist</h2>
+
+<div id="wishlist-message" class="alert" style="display:none;"></div>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">Your wishlist is empty.</p>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Date Added</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="wishlist-items">
+            @foreach (var item in Model)
+            {
+                <tr id="wishlist-item-@item.ProductId">
+                    <td>@item.ProductName</td>
+                    <td>@item.AddedDate.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" id="remove-from-wishlist-@item.ProductId" data-product-id="@item.ProductId">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

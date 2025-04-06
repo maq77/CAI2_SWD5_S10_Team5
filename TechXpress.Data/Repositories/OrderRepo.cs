@@ -19,28 +19,34 @@ namespace TechXpress.Data.Repositories
         {
             _dp = dp;
         }
-        public async Task<IEnumerable<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null)
+        public async Task<List<Order>> GetAllOrders(Expression<Func<Order, bool>>? filter = null, string[]? includes = null)
         {
             IQueryable<Order> query = _dp.Orders
                 .Include(o => o.OrderDetails!)
-                .ThenInclude(d => d.Product!)
+                .ThenInclude(d => d.Product)
                 .AsNoTracking();
 
             if (filter != null)
             {
                 query = query.Where(filter);
             }
-            if(query is null){
-                throw new InvalidOperationException("There is no Orders!");
+
+            // Handle includes dynamically
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
             }
 
-            var orders = await query.ToListAsync();
+            var orders = await query.ToListAsync(); // Execute the query
 
-            /*if (orders.Count == 0) // Check if the result set is empty
+            if (!orders.Any()) // Check if the result set is empty
             {
-                throw new InvalidOperationException("There are no orders available!");
-            }*/
-            return orders ?? new List<Order>();
+                return new List<Order>();
+            }
+            return orders;
         }
     }
 }

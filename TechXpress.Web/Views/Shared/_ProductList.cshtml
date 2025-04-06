@@ -1,15 +1,84 @@
-﻿@model X.PagedList.IPagedList<TechXpress.Services.DTOs.ProductDTO>
+﻿@model IEnumerable<TechXpress.Services.DTOs.ProductDTO>
 
-@foreach (var product in Model)
-{
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <img src="@Url.Content(product.Images.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")" class="card-img-top" alt="@product.Name">
-            <div class="card-body">
-                <h5 class="card-title">@product.Name</h5>
-                <p class="card-text">@product.Price.ToString("C")</p>
-                <a asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@product.Id" class="btn btn-primary">Add to Cart</a>
+<!-- 🔹 More Products -->
+
+<div class="section">
+    <!-- container -->
+    <div class="container">
+        <!-- row -->
+        <div class="row">
+
+             <div class="col-md-12">
+                <div class="row">
+                    <div class="products-tabs">
+                        <!-- Tab -->
+                        <div id="tab2" class="tab-pane fade in active">
+                            <div class="products-slick" data-nav="#slick-nav-2">
+                                @foreach (var product in Model)
+                                {
+                                    <!-- Product -->
+                                    <div class="product">
+                                        <div class="product-img">
+                                            <img src="@Url.Content(product.Images.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")" alt="@product.Name">
+                                            <div class="product-label">
+                                                @* @if (product.Discount > 0) *@
+                                                @* { *@
+                                                @*     <span class="sale">-@product.Discount%</span> *@
+                                                @* } *@
+                                                <span class="new">NEW</span>
+                                            </div>
+                                        </div>
+                                        <div class="product-body">
+                                            <p class="product-category">@product.CategoryName</p>
+                                            <h3 class="product-name">
+                                                <a asp-area="Customer" asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+                                                    @product.Name
+                                                </a>
+                                            </h3>
+                                            <h4 class="product-price">
+                                                @product.Price.ToString("C")
+                                                @* @if (product.OldPrice > product.Price) *@
+                                                @* { *@
+                                                @*     <del class="product-old-price">@product.OldPrice.ToString("C")</del> *@
+                                                @* } *@
+                                            </h4>
+                                            <div class="product-rating">
+                                                @* @for (int i = 0; i < 5; i++) *@
+                                                @* { *@
+                                                @*     <i class="fa @(i < product.Rating ? "fa-star" : "fa-star-o")"></i> *@
+                                                @* } *@
+                                            </div>
+                                            <div class="product-btns">
+                                                <button type="button" class="wishlist-toggle" data-product-id="@product.Id">
+                                                    <i class="fa @(product.IsInWishlist ? "fa-heart text-danger" : "fa-heart-o")"></i>
+                                                    <span class="tooltipp">@(product.IsInWishlist ? "Remove from wishlist" : "Add to wishlist")</span>
+                                                </button>
+                                                <button class="add-to-compare">
+                                                    <i class="fa fa-exchange"></i>
+                                                    <span class="tooltipp">add to compare</span>
+                                                </button>
+                                                <button class="quick-view">
+                                                    <i class="fa fa-eye"></i>
+                                                    <span class="tooltipp">quick view</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="add-to-cart">
+                                            <a asp-area="Customer" asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@product.Id" class="add-to-cart-btn">
+                                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <!-- /Product -->
+                                }
+                            </div>
+                            <div id="slick-nav-2" class="products-slick-nav"></div>
+                        </div>
+                        <!-- /Tab -->
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
-}
+</div>

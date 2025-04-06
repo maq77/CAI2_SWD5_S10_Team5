@@ -14,6 +14,7 @@ namespace TechXpress.Data.Repositories.Base
         IRepository<ProductImage> ProductImages { get; }
         IRepository<Category> Categories { get; }
         IRepository<OrderDetail> OrderDetails { get; }
+        IRepository<WishListItem> WishListItems{ get; }
         Task<bool> SaveAsync();
 
     }

@@ -140,6 +140,41 @@ namespace TechXpress.Services
 
             return userDTOs;
         }
+        public async Task<UserProfileDTO> GetUserProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return null;
+
+            return new UserProfileDTO
+            {
+                Id = user.Id,
+                FirstName= user.FirstName,
+                LastName= user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address,
+                ProfilePictureUrl = user.ProfilePictureUrl,
+            };
+        }
+        public async Task<bool> UpdateUserProfileAsync(string userId, UserProfileDTO profile)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.FirstName = profile.FirstName;
+            user.LastName = profile.LastName;
+            user.PhoneNumber = profile.PhoneNumber;
+            user.Address = profile.Address;
+
+            // Only update profile picture if a new one is provided
+            if (!string.IsNullOrEmpty(profile.ProfilePictureUrl))
+            {
+                user.ProfilePictureUrl = profile.ProfilePictureUrl;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
+        }
         public async Task<bool> DeleteUserAsync(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);

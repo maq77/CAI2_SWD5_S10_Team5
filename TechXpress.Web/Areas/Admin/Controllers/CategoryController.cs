@@ -6,7 +6,7 @@ using TechXpress.Services.DTOs;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [Area("Admin")]
     public class CategoryController : Controller
     {

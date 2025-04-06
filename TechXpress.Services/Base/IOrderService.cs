@@ -14,5 +14,7 @@ namespace TechXpress.Services.Base
         Task<bool> CreateOrder(OrderDTO order);
         Task<bool> UpdateOrder(OrderDTO order);
         Task<bool> DeleteOrder(int id);
+
+        Task<List<OrderDTO>> GetOrdersByUserIdAsync(string userId);
     }
 }

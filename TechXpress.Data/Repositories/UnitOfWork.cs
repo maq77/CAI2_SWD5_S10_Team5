@@ -21,6 +21,7 @@ namespace TechXpress.Data.Repositories
             Categories = new Repository<Category>(dp, _loggerFactory.CreateLogger<Repository<Category>>());
             Orders = new OrderRepo(dp, _loggerFactory.CreateLogger<OrderRepo>());
             OrderDetails = new Repository<OrderDetail>(dp, _loggerFactory.CreateLogger<Repository<OrderDetail>>());
+            WishListItems = new Repository<WishListItem>(dp, _loggerFactory.CreateLogger<Repository<WishListItem>>());
             ProductImages = new Repository<ProductImage>(dp, _loggerFactory.CreateLogger<Repository<ProductImage>>());
 
             _logger.LogInformation("UnitOfWork initialized.");
@@ -33,6 +34,7 @@ namespace TechXpress.Data.Repositories
         public IOrderRepo Orders { get; private set; }
         public IRepository<ProductImage> ProductImages { get; private set; }
         public IRepository<OrderDetail> OrderDetails { get; private set; }
+        public IRepository<WishListItem> WishListItems { get; private set; }
 
         public void Dispose()
         {

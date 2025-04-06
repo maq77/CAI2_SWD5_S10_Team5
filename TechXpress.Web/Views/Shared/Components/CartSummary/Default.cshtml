@@ -48,25 +48,3 @@
     </div>
 </div>
 <!-- /Cart -->
-
-<script>
-    function removeFromCart(productId) {
-        $.ajax({
-            url: '/Customer/Cart/RemoveFromCart',
-            type: 'POST',
-            data: { productId: productId },
-            success: function (response) {
-                updateCartSummary();
-            },
-            error: function () {
-                alert("Error removing item from cart.");
-            }
-        });
-    }
-
-    function updateCartSummary() {
-        $.get('/Customer/Cart/GetCartSummary', function (data) {
-            $(".cart-dropdown").html(data);
-        });
-    }
-</script>

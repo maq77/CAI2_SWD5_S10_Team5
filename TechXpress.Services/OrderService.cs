@@ -1,4 +1,5 @@
-﻿using TechXpress.Data.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using TechXpress.Data.Enums;
 using TechXpress.Data.Model;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services.Base;
@@ -83,6 +84,42 @@ namespace TechXpress.Services
             order.Status = orderDto.Status;
             return await _unitOfWork.SaveAsync();
         }
+
+        public async Task<List<OrderDTO>> GetOrdersByUserIdAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ArgumentException("User ID cannot be null or empty", nameof(userId));
+            }
+
+            var orders = await _unitOfWork.Orders.GetAllOrders(
+                o => o.UserId == userId,
+                includes: new[] { "OrderDetails", "OrderDetails.Product" }
+            );
+
+            //  Ensure we always return a valid list, preventing NullReferenceExceptions
+            if (orders == null || !orders.Any())
+            {
+                return new List<OrderDTO>();
+            }
+
+            //  Use `.AsNoTracking()` in `GetAllOrders()` to improve performance if not modifying data
+            return orders.Select(o => new OrderDTO
+            {
+                Id = o.Id,
+                UserId = o.UserId,
+                TotalAmount = o.TotalAmount,
+                OrderDate = o.OrderDate,
+                Status = o.Status,
+                OrderDetails = o.OrderDetails?.Select(d => new OrderDetailDTO
+                {
+                    ProductId = d.ProductId,
+                    Quantity = d.Quantity,
+                    Price = d.Price
+                }).ToList() ?? new List<OrderDetailDTO>() // Ensure list is never null
+            }).ToList();
+        }
+
 
         public async Task<bool> DeleteOrder(int id)
         {

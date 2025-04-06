@@ -6,7 +6,7 @@ using TechXpress.ViewModels.Admin;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
-    
+    [Authorize(Roles = "Admin")]
     [Area("Admin")]
     public class DashboardController : Controller
     {

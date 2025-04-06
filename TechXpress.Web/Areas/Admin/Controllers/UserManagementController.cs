@@ -6,7 +6,7 @@ using TechXpress.Services.DTOs;
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    //[Authorize(Roles = "Admin")]  // Only admins can manage users
+    [Authorize(Roles = "Admin")]  // Only admins can manage users
     public class UserManagementController : Controller
     {
         private readonly IUserService _userService;

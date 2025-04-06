@@ -21,5 +21,7 @@ namespace TechXpress.Data.Model
         public string Country { get; set; } = string.Empty;
         public string? PostalCode { get; set; } = string.Empty;
         public ICollection<Order>? Orders { get; set; } //1-M Realation
+
+        public string ProfilePictureUrl { get; set; }
     }
 }

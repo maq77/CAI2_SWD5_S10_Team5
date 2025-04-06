@@ -73,7 +73,9 @@ a {
     -webkit-transition: 0.2s color;
     transition: 0.2s color;
 }
-
+a {
+    text-decoration: none !important;
+}
     a:hover, a:focus {
         color: #D10024;
         text-decoration: none;
@@ -493,6 +495,15 @@ textarea.input {
 	Cart
 \*----------------------------*/
 
+.dropdown-menu {
+    position: absolute;
+    background-color: white;
+    z-index: 1000;
+}
+
+    .dropdown-menu.show {
+        display: block !important; /* Show when toggled */
+    }
 .header-ctn {
     float: right;
     padding: 15px 0px;
@@ -553,9 +564,10 @@ textarea.input {
     opacity: 0;
     visibility: hidden;
 }
-.cart-dropdown.show {
+    .cart-dropdown.show {
         display: block !important;
-}
+    }
+
 .dropdown.open > .cart-dropdown {
     opacity: 1;
     visibility: visible;
