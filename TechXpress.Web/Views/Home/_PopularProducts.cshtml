@@ -8,7 +8,7 @@
         <!-- row -->
         <div class="row">
 
-            <!-- 🔹 Shop by Category -->
+            <!--  Shop by Category -->
             <div class="col-md-12">
                 <div class="section-title">
                     <h3 class="title">Best Seller</h3>
@@ -16,10 +16,8 @@
                         <ul class="section-tab-nav tab-nav">
                             @foreach (var category in Model.Categories)
                             {
-                                <li>
-                                    <a asp-controller="Home" asp-action="Index" asp-route-categoryId="@category.Id">
-                                        @category.Name
-                                    </a>
+                                <li class="list-group-item">
+                                    <a href="@Url.Action("Index", new { categoryId = category.Id })">@category.Name</a>
                                 </li>
                             }
                         </ul>
@@ -27,7 +25,7 @@
                 </div>
             </div>
 
-            <!-- 🔹 Best Seller Products -->
+            <!--  Best Seller Products -->
             <div class="col-md-12">
                 <div class="row">
                     <div class="products-tabs">
@@ -102,6 +100,7 @@
 
         </div>
         <!-- /row -->
+
     </div>
     <!-- /container -->
 </div>

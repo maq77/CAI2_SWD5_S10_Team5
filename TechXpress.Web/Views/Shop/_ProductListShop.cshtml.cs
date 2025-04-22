@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace TechXpress.Web.Views.Order
+namespace TechXpress.Web.Views.Shop
 {
-    public class EditModel : PageModel
+    public class _ProductListShopModel : PageModel
     {
         public void OnGet()
         {

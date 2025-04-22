@@ -7,7 +7,7 @@
     //  Live Search (Separate AJAX for searching)
     $("#searchBox").on("keyup", function () {
         clearTimeout($.data(this, 'timer'));
-        let wait = setTimeout(resetProducts, 300); // ✅ Add delay to prevent excessive requests
+        let wait = setTimeout(resetProducts, 300); //  Add delay to prevent excessive requests
         $(this).data('timer', wait);
     });
 
@@ -29,15 +29,6 @@
         searchProducts();
     });
 
-    //  Auto Load More on Scroll
-    /*$(window).scroll(function () {
-        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-            if (!isLoading) {
-                isLoading = true;
-                loadProducts();
-            }
-        }
-    });*/
     ////////////////////////////// lazy loading for image
     document.addEventListener("DOMContentLoaded", function () {
         let lazyImages = document.querySelectorAll(".lazy-image");
@@ -74,11 +65,6 @@
 
     $("#loadMoreButton").on("click", function () {
         pageNumber++;
-        loadProducts(true); //  Append products instead of replacing
-    });
-
-    $("#loadMoreButtonv2").on("click", function () {
-        pageNumber = $(this).data("page");
         loadProducts(true); //  Append products instead of replacing
     });
 

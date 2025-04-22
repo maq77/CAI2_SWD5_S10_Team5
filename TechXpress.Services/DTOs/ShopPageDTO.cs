@@ -11,7 +11,7 @@ namespace TechXpress.Services.DTOs
     {
         public IPagedList<ProductDTO> Products { get; set; }
         public IEnumerable<CategoryDTO> Categories { get; set; }
-        public string SearchQuery { get; set; }
+        public string? SearchQuery { get; set; }
         public int? SelectedCategoryId { get; set; }
     }
 }

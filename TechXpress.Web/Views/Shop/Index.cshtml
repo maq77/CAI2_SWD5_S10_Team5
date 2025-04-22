@@ -1,18 +1,26 @@
 ﻿@model TechXpress.Services.DTOs.ShopPageDTO
 @using X.PagedList.Mvc.Core;
+@using X.PagedList.Web.Common;
+@section Scripts {
+    <script src="~/js/jquery-3.7.1.min.js"></script>
+    <script src="~/js/shop-page.js"></script>
+    <script src="~/js/home.js"></script>
+}
 
 <div class="container mt-4">
     <div class="row">
-        <!-- Sorting Options -->
-     
-        <!-- Sidebar Filters -->
+        <!-- Sidebar - CategoryFilters -->
         <aside class="col-md-3">
             <h4>Categories</h4>
-            <ul class="list-group">
+            <ul class="list-group mb-4">
+                <li class="list-group-item @(Model.SelectedCategoryId == null || Model.SelectedCategoryId == 0 ? "active" : "")">
+                    <a href="@Url.Action("Index")" class="text-decoration-none @(Model.SelectedCategoryId == null || Model.SelectedCategoryId == 0 ? "text-white" : "")">All Categories</a>
+                </li>
                 @foreach (var category in Model.Categories)
                 {
-                    <li class="list-group-item">
-                        <a href="@Url.Action("Index", new { categoryId = category.Id })">@category.Name</a>
+                    <li class="list-group-item @(Model.SelectedCategoryId == category.Id ? "active" : "")">
+                        <a href="@Url.Action("Index", new { categoryId = category.Id, sortOrder = ViewBag.CurrentSort })" 
+                           class="text-decoration-none @(Model.SelectedCategoryId == category.Id ? "text-white" : "")">@category.Name</a>
                     </li>
                 }
             </ul>
@@ -21,21 +29,119 @@
         <!-- Products Section -->
         <section class="col-md-9">
             <h2 class="mb-3">Shop</h2>
-
-            <!-- Search Bar -->
-            <form method="get" action="@Url.Action("Index")" class="mb-3">
-                <div class="input-group">
-                    <input type="text" name="searchQuery" class="form-control" placeholder="Search products..." value="@Model.SearchQuery">
-                    <button type="submit" class="btn btn-primary">Search</button>
+            
+            <!-- Filters Row -->
+            <div class="row mb-4">
+                <!-- Search Bar -->
+                <div class="col-md-6">
+                    <form method="get" asp-action="Index" class="input-group">
+                        <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                        <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+                        <input type="text" name="searchQuery" class="form-control" placeholder="Search products..." value="@Model.SearchQuery" />
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
                 </div>
-            </form>
+                
+                <!-- Category Dropdown (Mobile Only) -->
+                <div class="col-md-3 d-md-none mb-3">
+                    <select id="mobileCategoryFilter" class="form-control" onchange="window.location = this.value">
+                        <option value="@Url.Action("Index", new { sortOrder = ViewBag.CurrentSort })">All Categories</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@Url.Action("Index", new { categoryId = category.Id, sortOrder = ViewBag.CurrentSort })"
+                                    selected="@(Model.SelectedCategoryId == category.Id)">@category.Name</option>
+                        }
+                    </select>
+                </div>
+                
+                <!-- Sorting Options -->
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-md-end">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Sort By: @(GetSortDisplayName(ViewBag.CurrentSort))
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == null || ViewBag.CurrentSort == "" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery })">Name A-Z</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "name_desc" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, sortOrder = "name_desc" })">Name Z-A</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "price_asc" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, sortOrder = "price_asc" })">Price Low-High</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "price_desc" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, sortOrder = "price_desc" })">Price High-Low</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "newest" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, sortOrder = "newest" })">Newest</a></li>
+                                <li><a class="dropdown-item @(ViewBag.CurrentSort == "oldest" ? "active" : "")" 
+                                       href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, sortOrder = "oldest" })">Oldest</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Filters Display -->
+            @if (!string.IsNullOrEmpty(Model.SearchQuery) || (Model.SelectedCategoryId.HasValue && Model.SelectedCategoryId.Value > 0))
+            {
+                <div class="mb-3">
+                    <h6>Active Filters:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                        {
+                            <span class="badge bg-primary">
+                                Search: @Model.SearchQuery
+                                <a href="@Url.Action("Index", new { categoryId = Model.SelectedCategoryId, sortOrder = ViewBag.CurrentSort })" class="text-white ms-1">×</a>
+                            </span>
+                        }
+                        @if (Model.SelectedCategoryId.HasValue && Model.SelectedCategoryId.Value > 0)
+                        {
+                            var categoryName = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name;
+                            if (!string.IsNullOrEmpty(categoryName))
+                            {
+                                <span class="badge bg-primary">
+                                    Category: @categoryName
+                                    <a href="@Url.Action("Index", new { searchQuery = Model.SearchQuery, sortOrder = ViewBag.CurrentSort })" class="text-white ms-1">×</a>
+                                </span>
+                            }
+                        }
+                    </div>
+                </div>
+            }
 
-            @await Html.PartialAsync("_ProductList", Model.Products)
+            <!-- Product List -->
+            <div id="productList">
+                @await Html.PartialAsync("_ProductList", Model.Products)
+            </div>
 
             <!-- Pagination -->
-            <nav>
-                @Html.PagedListPager(Model.Products, page => Url.Action("Index", new { categoryId = Model.SelectedCategoryId, searchQuery = Model.SearchQuery, page }))
+            <nav aria-label="Product pagination" class="mt-4">
+                @Html.PagedListPager(Model.Products, page => Url.Action("Index", new
+                    {
+                        categoryId = Model.SelectedCategoryId,
+                        searchQuery = Model.SearchQuery,
+                        sortOrder = ViewBag.CurrentSort,
+                        page
+                    }), new PagedListRenderOptions
+           {
+               LiElementClasses = new string[] { "page-item" },
+               PageClasses = new string[] { "page-link" }
+           })
             </nav>
         </section>
     </div>
 </div>
+
+@functions {
+    private string GetSortDisplayName(string sortOrder)
+    {
+        return sortOrder switch
+        {
+            "name_desc" => "Name Z-A",
+            "price_asc" => "Price Low-High",
+            "price_desc" => "Price High-Low",
+            "newest" => "Newest",
+            "oldest" => "Oldest",
+            _ => "Name A-Z", // Default sort
+        };
+    }
+}

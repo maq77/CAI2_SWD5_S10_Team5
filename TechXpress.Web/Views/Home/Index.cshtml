@@ -2,17 +2,17 @@
 
 <h2>Welcome to TechXpress</h2>
 
-<!-- 🔹 Best Seller Products -->
+<!--  Best Seller Products -->
 @await Html.PartialAsync("_PopularProducts", Model)
 
 
-<!-- 🔹 Load More Products -->
+<!--  Load More Products -->
 <h3>More Products</h3>
 @await Html.PartialAsync("_ProductList", Model.PaginatedProducts)
 
-<div class="text-center mt-4">
-    <button id="loadMoreBtn" class="btn btn-secondary">Load More</button>
-</div>
+@* <div class="text-center mt-4"> *@
+@*     <button id="loadMoreBtn" class="btn btn-secondary">Load More</button> *@
+@* </div> *@
 
 @section Scripts {
     <script src="~/js/home.js"></script>

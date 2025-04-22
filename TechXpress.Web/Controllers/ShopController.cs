@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
@@ -23,28 +25,47 @@ namespace TechXpress.Web.Controllers
         }
 
         //  Load Shop Page with Filtering & Pagination
-        public async Task<IActionResult> Index(int? categoryId, string searchQuery, int page = 1, int pageSize = 9)
+        public async Task<IActionResult> Index(int? categoryId, string? searchQuery, string? sortOrder, int page = 1, int pageSize = 9)
         {
             var shopData = new ShopPageDTO();
 
-            if (!_cache.TryGetValue(CategoryCacheKey, out IEnumerable<CategoryDTO>? categories))
-            {
-                categories = await _categoryService.GetAllCategories();
-                _cache.Set(CategoryCacheKey, categories, TimeSpan.FromMinutes(30));
-            }
-
-            var filteredProducts = await GetFilteredProducts(categoryId, searchQuery, page, pageSize);
+            var categories = await LoadCategories();
+            var filteredProducts = await GetFilteredProducts(categoryId, searchQuery, sortOrder, page, pageSize);
 
             shopData.Products = filteredProducts;
             shopData.Categories = categories;
             shopData.SearchQuery = searchQuery;
             shopData.SelectedCategoryId = categoryId;
 
+            SetViewBagParameters(categoryId, searchQuery, sortOrder);
+
+            // Check if this is an AJAX request
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_ProductList", filteredProducts);
+            }
+
             return View(shopData);
         }
 
+        // GET: Shop/Search (for AJAX requests)
+        public async Task<IActionResult> Search(string? searchQuery, int? categoryId, string? sortOrder, int page = 1, int pageSize = 9)
+        {
+            var filtered_products = await GetFilteredProducts(categoryId, searchQuery, sortOrder, page, pageSize);
+            return PartialView("_ProductList", filtered_products);
+        }
+
+        // GET: Shop/GetFilteredProducts (for AJAX requests)
+        public async Task<IActionResult> GetFilteredProducts(string? searchQuery, int? categoryId, string? sortOrder, int page = 1)
+        {
+            var pageSize = 9; // Consistent page size
+            var filtered_products = await GetFilteredProducts(categoryId, searchQuery, sortOrder, page, pageSize);
+            return PartialView("_ProductList", filtered_products);
+        }
+
+        #region Private Helper Methods
         //  Fetch Products with Filtering & Pagination
-        private async Task<IPagedList<ProductDTO>> GetFilteredProducts(int? categoryId, string searchQuery, int page, int pageSize)
+        private async Task<IPagedList<ProductDTO>> GetFilteredProducts(int? categoryId, string? searchQuery, string? sortOrder, int page, int pageSize)
         {
             if (!_cache.TryGetValue(ProductCacheKey, out IEnumerable<ProductDTO>? products))
             {
@@ -52,17 +73,50 @@ namespace TechXpress.Web.Controllers
                 _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(30));
             }
 
-            if (categoryId.HasValue)
+            if (categoryId.HasValue && categoryId.Value > 0)
             {
                 products = products.Where(p => p.CategoryId == categoryId.Value);
             }
 
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                products = products.Where(p => p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
+                searchQuery = searchQuery.ToLower();
+                products = products.Where(p => p.Name.ToLower().Contains(searchQuery) ||
+                                              (p.Description != null && p.Description.ToLower().Contains(searchQuery)));
             }
 
-            return products.OrderByDescending(p => p.Id).ToPagedList(page, pageSize);
+            return ApplySorting(products, sortOrder).ToPagedList(page, pageSize);
         }
+
+        private async Task<IEnumerable<CategoryDTO>> LoadCategories()
+        {
+            if (!_cache.TryGetValue(CategoryCacheKey, out IEnumerable<CategoryDTO>? categories))
+            {
+                categories = await _categoryService.GetAllCategories();
+                _cache.Set(CategoryCacheKey, categories, TimeSpan.FromMinutes(30));
+            }
+            return categories;
+        }
+
+        private IEnumerable<ProductDTO> ApplySorting(IEnumerable<ProductDTO> products, string? sortOrder)
+        {
+            return sortOrder switch
+            {
+                "name_desc" => products.OrderByDescending(p => p.Name),
+                "price_asc" => products.OrderBy(p => p.Price),
+                "price_desc" => products.OrderByDescending(p => p.Price),
+                "newest" => products.OrderByDescending(p => p.Id),
+                "oldest" => products.OrderBy(p => p.Id),
+                _ => products.OrderBy(p => p.Name) // Default sort by name ascending
+            };
+        }
+
+        private void SetViewBagParameters(int? categoryId, string? searchTerm, string? sortOrder)
+        {
+            ViewBag.CurrentCategory = categoryId;
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.CurrentSearch = searchTerm;
+        }
+        #endregion
     }
 }

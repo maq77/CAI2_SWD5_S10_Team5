@@ -54,13 +54,16 @@ namespace TechXpress.Services
 
             if (images != null && images.Count > 0)
             {
+                var allowed_ext = new[] { ".jpg", ".jepg", ".png", ".webp" };
                 var productImages = new List<ProductImage>();
 
                 foreach (var image in images)
                 {
                     if (image.Length > 0)
                     {
-                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        var ext = Path.GetExtension(image.FileName).ToLowerInvariant();
+                        if (!allowed_ext.Contains(ext)) { continue; }
+                        var fileName = Guid.NewGuid().ToString() + ext;
                         var filePath = Path.Combine("wwwroot/images", fileName);
 
                         using (var stream = new FileStream(filePath, FileMode.Create))

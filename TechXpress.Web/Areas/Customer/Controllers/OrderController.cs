@@ -9,7 +9,7 @@ using TechXpress.Services.DTOs;
 
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Area("Customer")]
     public class OrderController : Controller
     {
@@ -37,61 +37,6 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return View(order);
         }
 
-        // Display Checkout Form
-        public IActionResult Create()
-        {
-            return View(new OrderDTO()); //  Pass empty order DTO to the form
-        }
-        [HttpPost]
-        public async Task<IActionResult> Create(OrderDTO orderDto)
-        {
-            if (!ModelState.IsValid) return View(orderDto);
-
-            var user = await _userManager.GetUserAsync(User); //  Get logged-in user
-            if (user == null) return Unauthorized();
-
-            orderDto.UserId = user.Id; // Assign order to the logged-in user
-            orderDto.OrderDate = DateTime.UtcNow;
-            orderDto.Status = OrderStatus.Pending;
-
-            var result = await _orderService.CreateOrder(orderDto);
-
-            if (!result)
-            {
-                ModelState.AddModelError("", "Error processing order. Try again.");
-                return View(orderDto);
-            }
-
-            return RedirectToAction("OrderSummary", new { id = orderDto.Id });
-        }
-
-        public async Task<IActionResult> Edit(int id)
-        {
-            var order = await _orderService.GetOrderById(id);
-            if (order == null) return NotFound();
-
-            ViewBag.StatusList = new SelectList(Enum.GetValues(typeof(OrderStatus)));
-            return View(order);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(OrderDTO orderDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.StatusList = new SelectList(Enum.GetValues(typeof(OrderStatus)));
-                return View(orderDto);
-            }
-
-            var result = await _orderService.UpdateOrder(orderDto);
-            if (!result)
-            {
-                ModelState.AddModelError("", "Failed to update order.");
-                return View(orderDto);
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
 
         public async Task<IActionResult> Delete(int id)
         {

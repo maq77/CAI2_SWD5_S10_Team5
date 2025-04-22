@@ -28,16 +28,16 @@
             <th>Unit Price</th>
         </tr>
     </thead> 
-    <tbody>
-        @foreach (var item in Model.OrderDetails)
-        {
-            <tr>
-                <td>@item.ProductId</td>
-                <td>@item.Quantity</td>
-                <td>@item.Price.ToString("C")</td>
-            </tr>
-        }
-    </tbody>
+    <tbody> 
+        @foreach (var item in Model.OrderDetails) 
+        { 
+            <tr> 
+                 <td>@item.ProductId</td> 
+                 <td>@item.Quantity</td> 
+                 <td>@item.Price.ToString("C")</td>
+             </tr>
+         }
+     </tbody>
 </table>
 
 <a asp-action="Index" class="btn btn-primary">Back to Orders</a>

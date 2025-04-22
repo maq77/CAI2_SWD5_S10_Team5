@@ -12,6 +12,20 @@
         });
     });
 
+    //document.getElementById('cartDropdown').addEventListener('click', function (e) {
+    //    e.preventDefault();
+    //    const dropdown = this.nextElementSibling;
+    //    dropdown.classList.toggle('show');
+    //});
+
+    window.addEventListener('click', function (e) {
+        const dropdown = document.querySelector('.cart-dropdown');
+        const toggle = document.getElementById('cartDropdown');
+
+        if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
     function updateWishlistCount() {
         $.ajax({
             url: "/Customer/Wishlist/GetWishlistCount",

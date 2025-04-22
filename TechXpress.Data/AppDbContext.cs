@@ -46,6 +46,9 @@ namespace TechXpress.Data
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Order>()
+                .Navigation(p => p.OrderDetails).AutoInclude();
+
             builder.Entity<OrderDetail>()
                 .HasOne(od => od.Order)
                 .WithMany(o => o.OrderDetails)

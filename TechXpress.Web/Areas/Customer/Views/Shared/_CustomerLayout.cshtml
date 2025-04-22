@@ -8,6 +8,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 
+    @* <script src="~/js/cart.js"></script> *@
+
     <!-- Third-party plugins next -->
     <link type="text/css" rel="stylesheet" href="~/css/slick.css" />
     <link type="text/css" rel="stylesheet" href="~/css/slick-theme.css" />
@@ -17,11 +19,9 @@
           integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- Custom CSS last -->
-    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/electro.css" asp-append-version="true" />
     @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="~/TechXpress.Web.styles.css" asp-append-version="true" />
-
-    @RenderSection("Styles", required: false) <!-- Optional styles section -->
 </head>
 <body>
     <!-- Header Partial -->
@@ -43,17 +43,16 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Place at the end of your body -->
+    <script src="~/js/cart.js"></script>
     <script src="~/js/jquery-3.7.1.min.js"></script>
+    <script src="~/js/home.js"></script>
     <!--<script src="~/js/bootstrap.bundle.min.js"></script>-->
     <script src="~/js/slick.min.js"></script>
     <script src="~/js/nouislider.min.js"></script>
     <script src="~/js/jquery.zoom.min.js"></script>
-    <script src="~/js/home.js"></script> 
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/auth.js"></script>
-    <script src="~/js/cart.js"></script>
     <script src="~/js/category.js"></script>
-    <script src="~/js/product-page.js"></script>
-    @RenderSection("Scripts", required: false) <!-- Optional scripts section -->
+    <script src="~/js/shop-page.js"></script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace TechXpress.Web.Views.Order
+namespace TechXpress.Web.Areas.Customer.Views.Order
 {
-    public class CreateModel : PageModel
+    public class DetailsModel : PageModel
     {
         public void OnGet()
         {
