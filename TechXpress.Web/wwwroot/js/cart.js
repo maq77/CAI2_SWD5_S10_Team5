@@ -1,13 +1,4 @@
 ﻿$(function () {
-    //Cart toggle
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".cart-toggle").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                const target = document.querySelector(this.dataset.target);
-                if (target) target.classList.toggle("show");
-            });
-        });
-    });
 
     //Update Cart
     $(".cart-quantity").on("change", function () {
@@ -63,6 +54,16 @@
             }
         });
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".cart-toggle").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const target = document.querySelector(this.dataset.target);
+            if (target) target.classList.toggle("show");
+        });
+    });
+});
     function removeFromCart(productId) {
         $.ajax({
             url: '/Customer/Cart/RemoveFromCart',
@@ -93,4 +94,3 @@
         });
     }
 
-});

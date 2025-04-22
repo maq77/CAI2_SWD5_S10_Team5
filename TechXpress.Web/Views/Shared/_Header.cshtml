@@ -93,7 +93,8 @@
 						<!-- /Wishlist -->
 
 						<!-- Cart -->
-						@await Component.InvokeAsync("CartSummary")
+						 @await Component.InvokeAsync("CartSummary") 
+						@* @await Html.PartialAsync("_CartSummary") *@
 						<!-- /Cart -->
 
 						<!-- Menu Toggle -->
