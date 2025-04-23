@@ -7,6 +7,7 @@ namespace TechXpress.Services.Base
         List<OrderDetailDTO> GetCart();
         void AddToCart(OrderDetailDTO item);
         void UpdateCart(List<OrderDetailDTO> updatedCart);
+        void UpdateQuantity(int productId, int quantity);
         void RemoveFromCart(int productId);
         void ClearCart();
     }

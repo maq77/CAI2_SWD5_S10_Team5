@@ -50,6 +50,11 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return PartialView("_CartSummary", viewModel);
         }
 
+        public IActionResult UpdateQuantity(int productId, int quantity = 1)
+        {
+            _cartService.UpdateQuantity(productId, quantity);
+            return RedirectToAction("Index");
+        }
 
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
@@ -74,6 +79,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             _cartService.UpdateCart(updatedCart);
             return RedirectToAction("Index");
         }
+
 
         public IActionResult RemoveFromCart(int productId)
         {

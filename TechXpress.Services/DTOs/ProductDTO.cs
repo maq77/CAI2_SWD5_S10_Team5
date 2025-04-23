@@ -17,6 +17,7 @@ namespace TechXpress.Services.DTOs
         public string? Description { get; set; } = string.Empty;
         [Required]
         public double Price { get; set; } = double.MaxValue;
+        public int StockQunatity { get; set; } = 0;
         //[Required]
         public int CategoryId { get; set; } = int.MaxValue;
         public string? CategoryName { get; set; } = "UnCategorized";

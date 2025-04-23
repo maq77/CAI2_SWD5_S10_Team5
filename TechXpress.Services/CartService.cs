@@ -50,6 +50,23 @@ namespace TechXpress.Services
         {
             SaveCart(updatedCart);
         }
+        public void UpdateQuantity(int productId, int quantity)
+        {
+            if (quantity <= 0)
+            {
+                RemoveFromCart(productId);
+                return;
+            }
+
+            var cart = GetCart();
+            var item = cart.FirstOrDefault(i => i.ProductId == productId);
+
+            if (item != null)
+            {
+                item.Quantity = quantity;
+                SaveCart(cart);
+            }
+        }
 
         public void RemoveFromCart(int productId)
         {

@@ -14,12 +14,13 @@ namespace TechXpress.Data.Model
         public int Id { get; set; }  //PK
         public string Name { get; set; } = string.Empty;
         public double Price { get; set; }
+        public int StockQuantity { get; set; } = 0;
         public string? Description { get; set; } = string.Empty;
         [Required]
         public int CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]
-        public Category? Category { get; set; } // ✅ Navigation Property
+        public Category? Category { get; set; } // Navigation Property
         public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
     }
 }

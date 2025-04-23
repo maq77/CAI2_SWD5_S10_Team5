@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechXpress.Data.Enums;
 using TechXpress.Services.DTOs;
 
 namespace TechXpress.Services.Base
@@ -11,8 +12,10 @@ namespace TechXpress.Services.Base
     {
         Task<IEnumerable<OrderDTO>> GetAllOrders();
         Task<OrderDTO?> GetOrderById(int id);
-        Task<bool> CreateOrder(OrderDTO order);
+        Task<int> CreateOrder(OrderDTO order);
         Task<bool> UpdateOrder(OrderDTO order);
+        Task<bool> UpdateOrderStatus(int id, OrderStatus status);
+        Task<bool> UpdateOrderQuantity(OrderDTO order);
         Task<bool> DeleteOrder(int id);
 
         Task<List<OrderDTO>> GetOrdersByUserIdAsync(string userId);

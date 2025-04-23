@@ -56,25 +56,94 @@ namespace TechXpress.Services
             };
         }
 
-        public async Task<bool> CreateOrder(OrderDTO orderDto)
+        public async Task<int> CreateOrder(OrderDTO orderDto)
         {
-            var order = new Order
-            {
-                UserId = orderDto.UserId,
-                TotalAmount = orderDto.OrderDetails.Sum(i => i.Quantity * i.Price),
-                OrderDate = DateTime.UtcNow,
-                Status = OrderStatus.Pending,
-                OrderDetails = orderDto.OrderDetails.Select(i => new OrderDetail
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    Price = i.Price
-                }).ToList()
-            };
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            bool transactionCompleted = false;
 
-            await _unitOfWork.Orders.Add(order,log=>Console.WriteLine(log));
-            return await _unitOfWork.SaveAsync();
+            try
+            {
+                if (orderDto.OrderDetails.Any())
+                {
+                    var order_details = orderDto.OrderDetails.Select(i => new OrderDetail
+                    {
+                        ProductId = i.ProductId,
+                        Quantity = i.Quantity,
+                        Price = i.Price
+                    }).ToList();
+
+                    var order = new Order
+                    {
+                        UserId = orderDto.UserId,
+                        TotalAmount = orderDto.OrderDetails.Sum(i => i.Quantity * i.Price),
+                        OrderDate = DateTime.UtcNow,
+                        Status = OrderStatus.Pending,
+                        OrderDetails = order_details
+                    };
+
+                    foreach (var order_item in order_details)
+                    {
+                        var prod = await _unitOfWork.Products.GetById(order_item.ProductId);
+                        if (prod != null)
+                        {
+                            if (prod.StockQuantity < order_item.Quantity)
+                            {
+                                throw new Exception($"Not enough stock for product {prod.Name}. Available: {prod.StockQuantity}");
+                            }
+
+                            prod.StockQuantity -= order_item.Quantity;
+                            await _unitOfWork.Products.Update(prod, log => Console.WriteLine(log));
+                        }
+                    }
+
+                    await _unitOfWork.Orders.Add(order, log => Console.WriteLine(log));
+
+                    Console.WriteLine($"Order Total: {order.TotalAmount}");
+                    Console.WriteLine($"Order Items Count: {order.OrderDetails.Count}");
+                    foreach (var item in order.OrderDetails)
+                    {
+                        Console.WriteLine($"Item: ProductId={item.ProductId}, Qty={item.Quantity}, Price={item.Price}");
+                    }
+
+
+                    bool result = await _unitOfWork.SaveAsync();
+                    /////////////////////// Error Creating
+                    //if (!result)
+                    //{
+                    //    throw new Exception("Error saving order");
+                    //}
+
+                    await transaction.CommitAsync();
+                    transactionCompleted = true;
+
+                    return order.Id;
+                }
+                else
+                {
+                    throw new Exception("No Order Details");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating order: {ex.Message}");
+                throw; // Rethrow the original exception
+            }
+            finally
+            {
+                if (!transactionCompleted)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
+                    }
+                }
+            }
         }
+
 
         public async Task<bool> UpdateOrder(OrderDTO orderDto)
         {
@@ -82,6 +151,22 @@ namespace TechXpress.Services
             if (order == null) return false;
 
             order.Status = orderDto.Status;
+            return await _unitOfWork.SaveAsync();
+        }
+        public async Task<bool> UpdateOrderStatus(int id , OrderStatus status)
+        {
+            var order = await _unitOfWork.Orders.GetById(id);
+            if (order == null) return false;
+
+            order.Status = status;
+            return await _unitOfWork.SaveAsync();
+        }
+        public async Task<bool> UpdateOrderQuantity(OrderDTO orderDto)
+        {
+            var order = await _unitOfWork.Orders.GetById(orderDto.Id);
+            if (order == null) return false;
+
+            //order.OrderDetails = orderDto.Status;
             return await _unitOfWork.SaveAsync();
         }
 
@@ -123,8 +208,61 @@ namespace TechXpress.Services
 
         public async Task<bool> DeleteOrder(int id)
         {
-            await _unitOfWork.Orders.Delete(id, log => Console.WriteLine(log));
-            return await _unitOfWork.SaveAsync();
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            bool transactionCompleted = false;
+
+            try
+            {
+                var order = await _unitOfWork.Orders.GetById(id);
+                if (order == null)
+                {
+                    return false;
+                }
+                if (order.OrderDetails != null)
+                {
+                    foreach (var detail in order.OrderDetails)
+                    {
+                        var product = await _unitOfWork.Products.GetById(detail.ProductId);
+                        if (product != null)
+                        {
+                            product.StockQuantity += detail.Quantity;
+                            await _unitOfWork.Products.Update(product, log => Console.WriteLine(log));
+                        }
+                    }
+                }
+
+                await _unitOfWork.Orders.Delete(id, log => Console.WriteLine(log));
+                bool result = await _unitOfWork.SaveAsync();
+                  ////////////////////////////////Error saving
+                //if (!result)
+                //{
+                //    throw new Exception("Error deleting order.");
+                //}
+
+                await transaction.CommitAsync();
+                transactionCompleted = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting order: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                if (!transactionCompleted)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
+                    }
+                }
+            }
         }
+
     }
 }

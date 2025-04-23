@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Stripe.Climate;
 using TechXpress.Data.Enums;
 using TechXpress.Data.Model;
 using TechXpress.Services.Base;
@@ -23,13 +24,14 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             _userManager = userManager;
             _cartService = cartService;
         }
-
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var orders = await _orderService.GetAllOrders();
+            var user = await _userManager.GetUserAsync(User);
+            var orders = await _orderService.GetOrdersByUserIdAsync(user.Id);
             return View(orders);
         }
-
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             var order = await _orderService.GetOrderById(id);
@@ -44,12 +46,15 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public async Task<IActionResult> OrderSummary(int id)
         {
             var order = await _orderService.GetOrderById(id);
             if (order == null) return NotFound();
             return View(order);
         }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateFromCart()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -67,10 +72,16 @@ namespace TechXpress.Web.Areas.Customer.Controllers
                 
             };
 
-            await _orderService.CreateOrder(orderDto);
+            int order_id = await _orderService.CreateOrder(orderDto);
+
+            if (order_id == 0)
+            {
+                ModelState.AddModelError("", "Failed to create order.");
+                return RedirectToAction("Index", "Cart");
+            }
             _cartService.ClearCart();
 
-            return RedirectToAction("OrderSummary", new { id = orderDto.Id });
+            return RedirectToAction("OrderSummary", new { id = order_id });
         }
 
     }

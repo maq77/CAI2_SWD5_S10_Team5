@@ -10,10 +10,10 @@ namespace TechXpress.Data.Model
     {
         public int Id { get; set; }  // PK
         public int OrderId { get; set; }  // FK
-        public Order? Order { get; set; }  // Navigation Property
+        public Order Order { get; set; }  // Navigation Property
 
         public int ProductId { get; set; }  // FK
-        public Product? Product { get; set; }  // Navigation Property
+        public Product Product { get; set; }  // Navigation Property
 
         public int Quantity { get; set; }
         public double Price { get; set; }  ///UnitPrice

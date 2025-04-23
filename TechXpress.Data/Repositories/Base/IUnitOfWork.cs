@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,8 @@ namespace TechXpress.Data.Repositories.Base
         IRepository<Category> Categories { get; }
         IRepository<OrderDetail> OrderDetails { get; }
         IRepository<WishListItem> WishListItems{ get; }
+
+        Task<IDbContextTransaction> BeginTransactionAsync();
         Task<bool> SaveAsync();
 
     }
