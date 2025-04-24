@@ -1,0 +1,7 @@
+﻿@model IEnumerable<TechXpress.Services.DTOs.OrderDTO>
+
+<h2>Orders</h2>
+
+<div id="orderList">
+    @await Html.PartialAsync("_OrderList", Model) <!-- Loads initial products -->
+</div>

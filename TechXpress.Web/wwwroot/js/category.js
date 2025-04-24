@@ -15,7 +15,7 @@
             success: function (response) {
                 if (response.success) {
                     alert("Category created successfully!");
-                    window.location.href = "/Category/Index";
+                    window.location.href = "/Admin/Category/Index";
                 } else {
                     alert(response.message);
                 }

@@ -63,10 +63,13 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <div class="add-to-cart">
-                                            <a asp-area="Customer" asp-controller="Cart" asp-action="AddToCart" asp-route-productId="@product.Id" class="add-to-cart-btn">
+                                        <div class="add-to-cart-1">
+                                            <div class="input-group mb-2">
+                                                <input type="number" class="form-control product-quantity" value="1" style="width: 60px;" />
+                                            </div>
+                                            <button class="add-to-cart-1-btn" data-product-id="@product.Id">
                                                 <i class="fa fa-shopping-cart"></i> Add to Cart
-                                            </a>
+                                            </button>
                                         </div>
                                     </div>
                                     <!-- /Product -->

@@ -14,6 +14,8 @@
                 $("#successMessage").removeClass("d-none").text("Product added successfully!");
                 $("#errorMessage").addClass("d-none");
                 $("#productForm")[0].reset(); // Clear form after success
+                alert(response.message);
+                window.location.href = "/Admin/Category/Index";
             },
             error: function (xhr) {
                 let errorText = "Error adding product.";

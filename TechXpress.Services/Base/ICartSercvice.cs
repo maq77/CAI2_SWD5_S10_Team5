@@ -5,10 +5,13 @@ namespace TechXpress.Services.Base
     public interface ICartService
     {
         List<OrderDetailDTO> GetCart();
-        void AddToCart(OrderDetailDTO item);
-        void UpdateCart(List<OrderDetailDTO> updatedCart);
-        void UpdateQuantity(int productId, int quantity);
-        void RemoveFromCart(int productId);
-        void ClearCart();
+        bool ClearCart();
+        int GetCartItemCount();
+        double GetCartTotal();
+        Task<bool> AddToCart(OrderDetailDTO item);
+        bool UpdateCart(List<OrderDetailDTO> updatedCart);
+        bool UpdateQuantity(int productId, int quantity);
+        bool RemoveFromCart(int productId);
+        OrderDetailDTO? GetCartItem(int productId);
     }
 }

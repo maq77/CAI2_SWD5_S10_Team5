@@ -1,4 +1,50 @@
 ﻿$(function () {
+    //const token = $('input[name="__RequestVerificationToken"]').val();
+
+    $(document).off("click", ".add-to-cart-1-btn").on("click", ".add-to-cart-1-btn", function () {
+        var button = $(this);
+        var productId = button.data("product-id");
+        var quantityInput = button.closest('.add-to-cart-1').find('.product-quantity');
+        var quantity = parseInt(quantityInput.val());
+        //alert("Function hit!");
+
+
+        if (!productId) {
+            alert("Invalid product ID.");
+            return;
+        }
+        if (quantity < 1) {
+            alert("Quantity must be at least 1.");
+            quantityInput.val(1);
+            return;
+        }
+        //// Optional: check max if it's set
+        var max = parseInt(quantityInput.attr("max"));
+        if (max && quantity > max) {
+            alert("Only " + max + " items in stock.");
+            quantityInput.val(max);
+            return;
+        }
+
+        button.prop("disabled", true); // Prevent multiple clicks
+
+        $.ajax({
+            url: "/Customer/Cart/AddToCart",
+            type: "POST",
+            data: { productId: productId, quantity: quantity },
+            success: function (response) {
+                alert(response.message);
+                updateCartSummary(true);
+            },
+            error: function () {
+                alert("An error occurred. Please try again.");
+            },
+            complete: function () {
+                button.prop("disabled", false); // Re-enable button
+            }
+        });
+    });
+    
 
     //Update Cart
     $(".cart-quantity").on("change", function () {
@@ -7,12 +53,18 @@
         let quantity = $(this).val();
 
         $.ajax({
-            url: "/Customer/Cart/UpdateCart",
+            url: "/Customer/Cart/UpdateQuantity",
             type: "POST",
             data: { productId: productId, quantity: quantity },
-            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
             success: function (response) {
-                location.reload();
+                if (response.success) {
+                    alert(`Updated Quantity: ${quantity}`);
+                    row.find(".cart-item-total").text(response.itemTotal);
+                    $("#cart-total").text(response.cartTotal); 
+                }
+            },
+            error: function () {
+                alert("Failed to update quantity.");
             }
         });
     });
@@ -26,7 +78,6 @@
             url: "/Customer/Cart/RemoveFromCart",
             type: "POST",
             data: { productId: productId },
-            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
             success: function () {
                 location.reload();
             }
@@ -48,7 +99,6 @@
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(updatedCart),
-            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() },
             success: function () {
                 location.reload();
             }
@@ -64,7 +114,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
-    function removeFromCart(productId) {
+
+
+////////////////////
+function removeFromCart(productId) {
         $.ajax({
             url: '/Customer/Cart/RemoveFromCart',
             type: 'POST',
@@ -79,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function updateCartSummary(keepOpen) {
+function updateCartSummary(keepOpen) {
         $.get('/Customer/Cart/GetCartSummary', function (data) {
             // Store the current state - if it's visible or not
             var isVisible = $(".cart-dropdown").hasClass("show");
@@ -92,5 +145,4 @@ document.addEventListener("DOMContentLoaded", function () {
                 $(".cart-dropdown").addClass("show").css("display", "block");
             }
         });
-    }
-
+}

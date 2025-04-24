@@ -25,7 +25,7 @@ else
                     <td>@(item.Product?.Name ?? "Unknown Product")</td> <!-- Prevent null reference -->
                     <td>
                         <input type="number" class="cart-quantity form-control"
-                               value="@item.Quantity" min="1" />
+                               value="@item.Quantity"/>
                     </td>
                     <td>@item.Price.ToString("C")</td>
                     <td class="cart-item-total">

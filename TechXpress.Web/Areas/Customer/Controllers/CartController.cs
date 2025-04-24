@@ -39,6 +39,13 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             var cartViewModel = new CartViewModel { Items = cartItems };
             return PartialView("_CartSummary", cartViewModel);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetCartCount()
+        {
+            
+            int count = _cartService.GetCartItemCount();
+            return Json(new { count });
+        }
 
         public IActionResult GetCartSummary()
         {
@@ -50,17 +57,37 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return PartialView("_CartSummary", viewModel);
         }
 
+        [HttpPost]
         public IActionResult UpdateQuantity(int productId, int quantity = 1)
         {
             _cartService.UpdateQuantity(productId, quantity);
-            return RedirectToAction("Index");
+            var item = _cartService.GetCartItem(productId);
+            if (item == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    itemTotal = 0.ToString("C"),
+                    cartTotal = 0.ToString("C")
+                });
+            }
+            double itemTotal = ( item.Quantity * item.Price );
+            double cartTotal = _cartService.GetCartTotal();
+            return Json(new
+            {
+                success = true,
+                itemTotal = itemTotal.ToString("C"),
+                cartTotal = cartTotal.ToString("C")
+            });
         }
 
-        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToCart(int productId, int quantity=1)
         {
             var product = await _productService.GetProductById(productId);
-            if (product == null) return NotFound();
-
+            if (product == null) { return Json(new { success = false, message = "Product Not Found" }); }
             var item = new OrderDetailDTO
             {
                 ProductId = product.Id,
@@ -69,22 +96,37 @@ namespace TechXpress.Web.Areas.Customer.Controllers
                 Product = product
             };
 
-            _cartService.AddToCart(item);
-            return RedirectToAction("Index");
+            var res = await _cartService.AddToCart(item);
+            if (res)
+            {
+                return Json(new { success = true, message = "Added to cart!" });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Error While Adding To cart" });
+            }
+
         }
 
-        [HttpPost]
-        public IActionResult UpdateCart(List<OrderDetailDTO> updatedCart)
-        {
-            _cartService.UpdateCart(updatedCart);
-            return RedirectToAction("Index");
-        }
+        //[HttpPost]
+        //public IActionResult UpdateCart(List<OrderDetailDTO> updatedCart)
+        //{
+        //    _cartService.UpdateCart(updatedCart);
+        //    return Json(new { success = true, message = "Quantity updated" });
+        //}
 
 
         public IActionResult RemoveFromCart(int productId)
         {
-            _cartService.RemoveFromCart(productId);
-            return RedirectToAction("Index");
+            var res = _cartService.RemoveFromCart(productId);
+            if (res)
+            {
+                return Json(new { success = true, message = "Product removed from cart." });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Failed to remove product from cart." });
+            }
         }
 
         public IActionResult ClearCart()
