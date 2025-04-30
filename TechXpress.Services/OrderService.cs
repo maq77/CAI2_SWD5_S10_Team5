@@ -26,6 +26,7 @@ namespace TechXpress.Services
                 TotalAmount = o.TotalAmount,
                 OrderDate = o.OrderDate,
                 Status = o.Status,
+                shipping_address = o.ShippingAddress,
                 OrderDetails = o.OrderDetails.Select(d => new OrderDetailDTO
                 {
                     ProductId = d.ProductId,
@@ -47,6 +48,7 @@ namespace TechXpress.Services
                 TotalAmount = order.TotalAmount,
                 OrderDate = order.OrderDate,
                 Status = order.Status,
+                shipping_address =  order.ShippingAddress,
                 OrderDetails = order.OrderDetails.Select(d => new OrderDetailDTO
                 {
                     ProductId = d.ProductId,
@@ -78,6 +80,7 @@ namespace TechXpress.Services
                         TotalAmount = orderDto.OrderDetails.Sum(i => i.Quantity * i.Price),
                         OrderDate = DateTime.UtcNow,
                         Status = OrderStatus.Pending,
+                        ShippingAddress = orderDto.shipping_address,
                         OrderDetails = order_details
                     };
 
@@ -144,23 +147,47 @@ namespace TechXpress.Services
             }
         }
 
-
-        public async Task<bool> UpdateOrder(OrderDTO orderDto)
+        public async Task<bool> UpdateOrderStatus(int id, string status)
         {
-            var order = await _unitOfWork.Orders.GetById(orderDto.Id);
-            if (order == null) return false;
-
-            order.Status = orderDto.Status;
-            return await _unitOfWork.SaveAsync();
-        }
-        public async Task<bool> UpdateOrderStatus(int id , OrderStatus status)
-        {
+            /*
+             * Satus should be at sequence like :  
+             * Pending -> Procc -> Shipping -> Delivered  
+             */
             var order = await _unitOfWork.Orders.GetById(id);
             if (order == null) return false;
 
-            order.Status = status;
+            // Validation
+            if (!Enum.TryParse<OrderStatus>(status, out OrderStatus orderStatus))
+            {
+                return false; // Invalid status string
+            }
+
+            // Add status transition validation
+            if (!IsValidStatusTransition(order.Status, orderStatus))
+            {
+                return false; // Invalid transition
+            }
+
+            order.Status = orderStatus;
             return await _unitOfWork.SaveAsync();
         }
+        //Helper method
+        private bool IsValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus)
+        {
+            // Example rules (adjust as needed for your business logic):
+
+            // Can't change status of delivered or canceled orders
+            if (currentStatus == OrderStatus.Delivered || currentStatus == OrderStatus.Canceled)
+                return false;
+
+            // Can't skip steps (e.g., Pending → Shipped without Processing)
+            if (currentStatus == OrderStatus.Pending && newStatus == OrderStatus.Shipped)
+                return false;
+
+            return true;
+        }
+
+        ///Fix Func
         public async Task<bool> UpdateOrderQuantity(OrderDTO orderDto)
         {
             var order = await _unitOfWork.Orders.GetById(orderDto.Id);

@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TechXpress.Data.Enums;
 using TechXpress.Data.Model;
 using TechXpress.Services.Base;
+using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
@@ -23,7 +26,32 @@ namespace TechXpress.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var orders = await _orderService.GetAllOrders();
-            return View(orders);
+            var model = new List<OrderViewModel>();
+
+            foreach (var order in orders)
+            {
+                // Retrieve the user details using UserManager
+                var user = await _userManager.FindByIdAsync(order.UserId);
+
+                model.Add(new OrderViewModel
+                {
+                    Id = order.Id,
+                    UserId = order.UserId,
+                    TotalAmount = order.TotalAmount,
+                    OrderDate = order.OrderDate,
+                    SelectedStatus = order.Status,
+                    CustomerName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown",
+                    CustomerEmail = user?.Email ?? "Unknown",
+                    Items = order.OrderDetails.Select(item => new OrderDetailViewModel
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        Price = item.Price,
+                        ProductName = item.Product.Name ?? "Unknown"
+                    }).ToList()
+                });
+            }
+            return View(model);
         }
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -44,5 +72,29 @@ namespace TechXpress.Web.Areas.Admin.Controllers
             if (order == null) return NotFound();
             return View(order);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus([FromBody] OrderStatusUpdateViewModel model)
+        {
+            if (model == null || !ModelState.IsValid)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            try
+            {
+                var result = await _orderService.UpdateOrderStatus(model.OrderId, model.Status);
+                if (!result)
+                {
+                    return NotFound("Order not found or status could not be updated.");
+                }
+                return Ok(new { success = true, message = "Order status updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the order status." });
+            }
+        }
+
     }
 }

@@ -15,10 +15,15 @@ namespace TechXpress.Services.DTOs.ViewModels
 
         [Required(ErrorMessage = "Product Name is required.")]
         public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Price is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero.")]
         public double Price { get; set; }
+
+        [Required]
+        [Range(1, 100, ErrorMessage = "Quantity must be between 0 and 100")]
+        public int StockQuantity { get; set; }
 
         public int? CategoryId { get; set; }  // Optional category update
         public List<SelectListItem>? Categories { get; set; } // Dropdown list

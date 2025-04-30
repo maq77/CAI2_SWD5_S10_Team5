@@ -42,7 +42,7 @@
             success: function (response) {
                 if (response.success) {
                     alert("Category updated successfully!");
-                    window.location.href = "/Category/Index";
+                    window.location.href = "/Admin/Category/";
                 } else {
                     alert(response.message);
                 }

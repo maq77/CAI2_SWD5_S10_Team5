@@ -13,8 +13,7 @@ namespace TechXpress.Services.Base
         Task<IEnumerable<OrderDTO>> GetAllOrders();
         Task<OrderDTO?> GetOrderById(int id);
         Task<int> CreateOrder(OrderDTO order);
-        Task<bool> UpdateOrder(OrderDTO order);
-        Task<bool> UpdateOrderStatus(int id, OrderStatus status);
+        Task<bool> UpdateOrderStatus(int id, string status);
         Task<bool> UpdateOrderQuantity(OrderDTO order);
         Task<bool> DeleteOrder(int id);
 

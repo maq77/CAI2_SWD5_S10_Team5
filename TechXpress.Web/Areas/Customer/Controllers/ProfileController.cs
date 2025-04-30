@@ -29,6 +29,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            SetPageMeta();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
                 return RedirectToAction(nameof(Login), "Account", new { area = "" });
@@ -70,6 +71,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserProfileDTO model)
         {
+            SetPageMeta();
             if (!ModelState.IsValid)
             {
                 // Log errors for debugging
@@ -117,5 +119,24 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         {
             return RedirectToAction("Login", "Account", new { area = "" });
         }
+        #region Private Helper Methods
+
+        //
+        protected void SetPageMeta()
+        {
+            var controller = ControllerContext.ActionDescriptor.ControllerName;
+            var action = ControllerContext.ActionDescriptor.ActionName;
+
+            ViewData["PageTitle"] = FormatTitle(action);
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+        {
+            ("/", "Home"),
+            ($"/{controller}", FormatTitle(controller))
+        };
+        }
+
+        private string FormatTitle(string text) =>
+            System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.Replace("_", " ").ToLower());
+        #endregion
     }
 }

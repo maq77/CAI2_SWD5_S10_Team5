@@ -105,7 +105,7 @@ namespace TechXpress.Services
                     AddedDate = w.DateAdded
                 }).ToList();
 
-                _cache.Set(string.Format(WishListCacheKey, userId), wishlist, TimeSpan.FromMinutes(10));
+                _cache.Set(string.Format(WishListCacheKey, userId), wishlist, TimeSpan.FromMinutes(1));
                 _logger.LogInformation($"Cached wishlist for user {userId}.");
             }
 

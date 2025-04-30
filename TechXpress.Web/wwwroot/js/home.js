@@ -69,7 +69,8 @@
                 updateWishlistCount();
             },
             error: function () {
-                alert("An error occurred. Please try again.");
+                alert("An error occurred User Not Authorized. Please try again.");
+                alert(response.message);
             },
             complete: function () {
                 button.prop("disabled", false); // Re-enable button

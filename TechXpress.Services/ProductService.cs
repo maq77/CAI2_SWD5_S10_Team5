@@ -10,6 +10,7 @@ using TechXpress.Data.Model;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
+using TechXpress.Services.DTOs.ViewModels;
 using X.PagedList;
 using X.PagedList.Extensions;
 using X.PagedList.Mvc.Core;
@@ -45,8 +46,10 @@ namespace TechXpress.Services
             var product = new Product
             {
                 Name = model.Name,
+                Description = model.Description,
                 Price = model.Price,
-                CategoryId = model.CategoryId
+                CategoryId = model.CategoryId,
+                StockQuantity = model.StockQunatity
             };
 
             await _unitOfWork.Products.Add(product, log => _logger.LogInformation(log));
@@ -104,6 +107,7 @@ namespace TechXpress.Services
                     Name = p.Name,
                     Price = p.Price,
                     CategoryId = p.CategoryId,
+                    StockQunatity = p.StockQuantity,
                     CategoryName = p.Category?.Name ?? "Uncategorized",
                     Images = p.Images.Select(img => new ProductImageDTO
                     {
@@ -113,8 +117,8 @@ namespace TechXpress.Services
                 });
 
                 // Cache for 10 minutes
-                _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(10));
-                _logger.LogInformation("Cached all products for 10 minutes.");
+                _cache.Set(ProductCacheKey, products, TimeSpan.FromSeconds(30));
+                _logger.LogInformation("Cached all products for less than 1 minutes.");
             }
             else
             {
@@ -137,6 +141,7 @@ namespace TechXpress.Services
                     Name = p.Name,
                     Price = p.Price,
                     CategoryId = p.CategoryId,
+                    StockQunatity = p.StockQuantity,
                     CategoryName = p.Category != null ? p.Category.Name : "Uncategorized",
                     Images = p.Images.Select(img => new ProductImageDTO
                     {
@@ -165,6 +170,7 @@ namespace TechXpress.Services
                 Name = p.Name,
                 Price = p.Price,
                 CategoryId = p.CategoryId,
+                StockQunatity = p.StockQuantity,
                 CategoryName = p.Category?.Name ?? "Uncategorized",
                 Images = p.Images.Select(img => new ProductImageDTO
                 {
@@ -199,6 +205,7 @@ namespace TechXpress.Services
                 Name = p.Name,
                 Price = p.Price,
                 CategoryId = p.CategoryId,
+                StockQunatity = p.StockQuantity,
                 CategoryName = p.Category != null ? p.Category.Name : "Uncategorized",
                 Images = p.Images.Select(img => new ProductImageDTO
                 {
@@ -234,6 +241,7 @@ namespace TechXpress.Services
                         Price = p.Price,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category?.Name ?? "Uncategorized",
+                        StockQunatity = p.StockQuantity,
                         SalesCount = salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0,
                         Images = p.Images.Select(img => new ProductImageDTO
                         {
@@ -243,8 +251,8 @@ namespace TechXpress.Services
                     });
 
                 //  Cache for 30 minutes
-                _cache.Set(PopularProductCacheKey, popularProducts, TimeSpan.FromMinutes(30));
-                _logger.LogInformation("Cached popular products for 30 minutes.");
+                _cache.Set(PopularProductCacheKey, popularProducts, TimeSpan.FromSeconds(30));
+                _logger.LogInformation("Cached popular products for less than 1 minute.");
             }
             else
             {
@@ -253,6 +261,31 @@ namespace TechXpress.Services
 
             return popularProducts;
         }
+        public async Task<ProductDetailsViewModel> GetProductDetailsAsync(int productId)
+        {
+            var product = await _unitOfWork.Products.Find_First(p => p.Id == productId);
+            if (product == null)
+                return null;
+
+            var model = new ProductDetailsViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description ?? "No Description For this Product!",
+                Price = product.Price,
+                Images = product.Images.Select(img => new ProductImageDTO
+                {
+                    Id = img.Id,
+                    ImagePath = img.ImagePath ?? "/images/default-product.png"
+                }).ToList(),
+                CategoryName = product.Category?.Name,
+                StockQuantity = product.StockQuantity
+                //IsInWishlist = 
+                //Rating = product.Rating
+            };
+            return model;
+        }
+
         public async Task<ProductDTO?> GetProductById(int id)
         {
             _logger.LogInformation($"Fetching product with ID: {id}");
@@ -267,8 +300,10 @@ namespace TechXpress.Services
             {
                 Id = product.Id,
                 Name = product.Name,
+                Description = product.Description,
                 Price = product.Price,
                 CategoryId = product.CategoryId,
+                StockQunatity = product.StockQuantity,
                 CategoryName = product.Category != null ? product.Category.Name : "Uncategorized",///Projection
                 Images = product.Images.Select(img => new ProductImageDTO
                 {
@@ -292,6 +327,7 @@ namespace TechXpress.Services
             product.Description = model.Description;
             product.Price = model.Price;
             product.CategoryId = model.CategoryId;
+            product.StockQuantity = model.StockQunatity;
             
 
             await _unitOfWork.Products.Update(product, log=> _logger.LogInformation(log));

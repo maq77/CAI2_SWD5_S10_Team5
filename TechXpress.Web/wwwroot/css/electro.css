@@ -481,8 +481,8 @@ textarea.input {
         }
 
         .header-search form .search-btn {
-            height: 40px;
-            width: 100px;
+            height: 100%;
+            width: 100%;
             background: #D10024;
             color: #FFF;
             font-weight: 700;
@@ -879,10 +879,16 @@ textarea.input {
 
     .product .product-img {
         position: relative;
+        width: 100%; /* or a specific width like 300px */
+        aspect-ratio: 1 / 1; /* Makes height equal to width */
+        overflow: hidden;
     }
 
         .product .product-img > img {
             width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image covers the square area */
+            display: block;
         }
 
         .product .product-img .product-label {
@@ -1161,9 +1167,8 @@ textarea.input {
         border: none;
         color: #FFF;
     }
-
 /*----------------------------*\
-	Products slick
+    Products Slick
 \*----------------------------*/
 
 .products-slick .slick-list {
@@ -1184,35 +1189,41 @@ textarea.input {
     overflow-y: hidden;
     padding-bottom: 60px;
     margin-bottom: -60px;
+    transition: opacity 0.3s ease;
 }
 
     .products-tabs > .tab-pane.active {
         opacity: 1;
         visibility: visible;
         height: auto;
+        overflow-y: visible;
     }
 
 .products-slick-nav {
     position: absolute;
     right: 15px;
+    top: -40px;
     z-index: 10;
 }
 
-    .products-slick-nav .slick-prev, .products-slick-nav .slick-next {
+    .products-slick-nav .slick-prev,
+    .products-slick-nav .slick-next {
         position: static;
-        -webkit-transform: none;
-        -ms-transform: none;
         transform: none;
         width: 20px;
         height: 20px;
         display: inline-block !important;
-        margin: 0px 2px;
+        margin: 0 2px;
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 
-        .products-slick-nav .slick-prev:before, .products-slick-nav .slick-next:before {
+        .products-slick-nav .slick-prev:before,
+        .products-slick-nav .slick-next:before {
             font-size: 14px;
+            color: #333;
         }
-
 /*=========================================================
 	07 -> PRODUCTS PAGE
 ===========================================================*/

@@ -27,6 +27,7 @@ namespace TechXpress.Web.Controllers
         //  Load Shop Page with Filtering & Pagination
         public async Task<IActionResult> Index(int? categoryId, string? searchQuery, string? sortOrder, int page = 1, int pageSize = 9)
         {
+            SetPageMeta();
             var shopData = new ShopPageDTO();
 
             var categories = await LoadCategories();
@@ -64,13 +65,33 @@ namespace TechXpress.Web.Controllers
         }
 
         #region Private Helper Methods
+
+        //
+        protected void SetPageMeta()
+        {
+            var controller = ControllerContext.ActionDescriptor.ControllerName;
+            var action = ControllerContext.ActionDescriptor.ActionName;
+
+            ViewData["PageTitle"] = FormatTitle(action);
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+        {
+            ("/", "Home"),
+            ($"/{controller}", FormatTitle(controller))
+        };
+        }
+
+        private string FormatTitle(string text) =>
+            System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.Replace("_", " ").ToLower());
+      
+        //
+
         //  Fetch Products with Filtering & Pagination
         private async Task<IPagedList<ProductDTO>> GetFilteredProducts(int? categoryId, string? searchQuery, string? sortOrder, int page, int pageSize)
         {
             if (!_cache.TryGetValue(ProductCacheKey, out IEnumerable<ProductDTO>? products))
             {
                 products = await _productService.GetAllProducts();
-                _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(30));
+                _cache.Set(ProductCacheKey, products, TimeSpan.FromMinutes(1));
             }
 
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -93,7 +114,7 @@ namespace TechXpress.Web.Controllers
             if (!_cache.TryGetValue(CategoryCacheKey, out IEnumerable<CategoryDTO>? categories))
             {
                 categories = await _categoryService.GetAllCategories();
-                _cache.Set(CategoryCacheKey, categories, TimeSpan.FromMinutes(30));
+                _cache.Set(CategoryCacheKey, categories, TimeSpan.FromMinutes(1));
             }
             return categories;
         }

@@ -30,8 +30,8 @@ public class CategoryService : ICategoryService
 
             var cacheOptions = new MemoryCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
-                SlidingExpiration = TimeSpan.FromMinutes(2)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10),
+                SlidingExpiration = TimeSpan.FromMinutes(10)
             };
 
             _cache.Set(CacheKey, categories, cacheOptions);

@@ -15,6 +15,14 @@
     <input asp-for="Price" class="form-control" />
     <span asp-validation-for="Price" class="text-danger"></span>
 
+    <label>Description</label>
+    <input asp-for="Description" class="form-control" />
+    <span asp-validation-for="Description" class="text-danger"></span>
+
+    <label>Stock</label>
+    <input asp-for="StockQuantity" class="form-control" />
+    <span asp-validation-for="StockQuantity" class="text-danger"></span>
+
     <label>Category</label>
     <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
         <option value="">-- Select Category --</option>

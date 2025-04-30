@@ -1,0 +1,161 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.ProductDetailsViewModel
+
+<!-- SECTION -->
+<div class="section">
+    <div class="container">
+        <div class="row">
+            <!-- Product main img -->
+            <div class="col-md-5 col-md-push-2">
+                <div id="product-main-img">
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        foreach (var image in Model.Images)
+                        {
+                            <div class="product-preview">
+                                <img src="@image.ImagePath" alt="@Model.Name" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="product-preview">
+                            <img src="~/images/default-product.png" alt="Default Image" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Product thumbnails -->
+            <div class="col-md-2 col-md-pull-5">
+                <div id="product-imgs">
+                    @if (Model.Images != null && Model.Images.Any())
+                    {
+                        foreach (var image in Model.Images)
+                        {
+                            <div class="product-preview">
+                                <img src="@image.ImagePath" alt="@Model.Name" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="product-preview">
+                            <img src="~/images/default-product.png" alt="Default Thumbnail" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Product details -->
+            <div class="col-md-5">
+                <div class="product-details">
+                    <h2 class="product-name">@Model.Name</h2>
+                    <div>
+                        <div class="product-rating">
+                            @{
+                                int fullStars = (int)Math.Floor(Model.Rating);
+                                int emptyStars = 5 - fullStars;
+                                for (int i = 0; i < fullStars; i++)
+                                {
+                                    <i class="fa fa-star"></i>
+                                    ;
+                                }
+                                for (int i = 0; i < emptyStars; i++)
+                                {
+                                    <i class="fa fa-star-o"></i>
+                                    ;
+                                }
+                            }
+                        </div>
+                        <a class="review-link" href="#">@Model.Rating Review(s)</a>
+                    </div>
+                    <div>
+                        <h3 class="product-price">@Model.Price.ToString("C")</h3>
+                        <span class="product-available">
+                            @(Model.StockQuantity > 0 ? "In Stock" : "Out of Stock")
+                        </span>
+                    </div>
+                    <p>@Model.Description</p>
+
+                    <div class="add-to-cart-1">
+                        <div class="input-group mb-2">
+                            <input type="number" class="form-control product-quantity" value="1" min="1" max="@Model.StockQuantity" style="width: 60px;" />
+                        </div>
+                        <button class="add-to-cart-1-btn btn btn-primary" data-product-id="@Model.Id">
+                            <i class="fa fa-shopping-cart"></i> Add to Cart
+                        </button>
+                    </div>
+
+                    @*<div class="add-to-cart"> ///Uses Form 
+                        <form method="post" asp-area="Customer" asp-controller="Cart" asp-action="AddToCart">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <div class="qty-label">
+                                Qty
+                                <div class="input-number">
+                                    <input type="number" name="quantity" value="1" min="1" />
+                                    <span class="qty-up">+</span>
+                                    <span class="qty-down">-</span>
+                                </div>
+                            </div>
+                            <button type="submit" class="add-to-cart-1-btn">
+                                <i class="fa fa-shopping-cart"></i> Add to cart
+                            </button>
+                        </form>
+                    </div>*@
+
+                    <ul class="product-btns">
+                        <button type="button" class="wishlist-toggle" data-product-id="@Model.Id">
+                            <i class="fa @(Model.IsInWishlist ? "fa-heart text-danger" : "fa-heart-o")"></i>
+                            <span class="tooltipp">@(Model.IsInWishlist ? "Remove from wishlist" : "Add to wishlist")</span>
+                        </button>
+                        <li><a href="#"><i class="fa fa-exchange"></i> add to compare</a></li>
+                    </ul>
+
+                    <ul class="product-links">
+                        <li>Category:</li>
+                        <li><a href="#">@Model.CategoryName</a></li>
+                    </ul>
+
+                    <ul class="product-links">
+                        <li>Share:</li>
+                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
+                        <li><a href="#"><i class="fa fa-envelope"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="col-md-12 mt-4">
+                <ul class="nav nav-tabs" id="productTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="description-tab" data-bs-toggle="tab" href="#description" role="tab">Description</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="details-tab" data-bs-toggle="tab" href="#details" role="tab">Details</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab">Reviews</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content p-3 border border-top-0" id="productTabContent">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+                        <p>@Model.Description</p>
+                    </div>
+                    <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
+                        <p>Stock: @Model.StockQuantity</p>
+                        <p>Category: @Model.CategoryName</p>
+                        <p>Rating: @Model.Rating</p>
+                    </div>
+                    <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                        <p>No reviews available.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- /Tabs -->
+
+        </div>
+    </div>
+</div>

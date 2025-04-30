@@ -1,4 +1,10 @@
-﻿@model IEnumerable<TechXpress.Services.DTOs.OrderDTO>
+﻿
+@model IEnumerable<TechXpress.Services.DTOs.ViewModels.OrderViewModel>
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
 <div class="card p-3">
 @if (Model != null && Model.Any())
 {
@@ -6,9 +12,12 @@
         <thead class="table-dark">
             <tr>
                 <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Customer Email</th>
+                <td>Shipping Address</td>
                 <th>Date</th>
                 <th>Total Price</th>
-                 <th>Status</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -17,11 +26,22 @@
             {
                 <tr>
                     <td>@order.Id</td>
-                    <td>@order.OrderDate</td>
+                    <td>@order.CustomerName</td>
+                    <td>@order.CustomerEmail</td>
+                    <td>@order.shipping_address</td>
+                    <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
                     <td>@order.TotalAmount.ToString("C")</td>
-                    <td>@order.Status</td>
                     <td>
-                        <a asp-area="Admin" asp-controller="Order"  asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">Details</a>
+                        <select class="form-control" onchange="updateStatus(@order.Id, this.value)">
+                                @foreach (var status in order.Status)
+                                {
+                                     string selected = status.Value == order.SelectedStatus.ToString() ? "selected" : "";
+                                     @:<option value="@status.Value" @selected>@status.Text</option>
+                                 }
+                        </select>
+                    </td>
+                    <td>
+                        <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">Details</a>
                         <a asp-area="Admin" asp-controller="Order" asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Delete</a>
                     </td>
                 </tr>
@@ -34,3 +54,33 @@ else
     <p class="text-center text-muted">No Orders found.</p>
 }
 </div>
+
+
+<script>
+    function updateStatus(orderId, status) {
+    console.log('Updating order:', orderId, 'to status:', status);
+    
+    // Make an AJAX call to update the order status
+    fetch(`/Admin/Order/UpdateStatus`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ OrderId: orderId, Status: status })
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then(data => {
+        alert('Order status updated successfully.');
+    })
+    .catch(error => {
+        console.error('Error updating order status:', error);
+        alert('Failed to update order status.');
+    });
+}
+</script>

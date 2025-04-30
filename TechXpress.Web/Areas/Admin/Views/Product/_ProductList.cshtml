@@ -8,6 +8,7 @@
                 <th>Image</th>
                 <th>Name</th>
                 <th>Price</th>
+                <th>Stock</th>
                 <th>Category</th>
                 <th>Actions</th>
             </tr>
@@ -28,6 +29,7 @@
                     </td>
                     <td>@product.Name</td>
                     <td>@product.Price.ToString("C")</td>
+                    <td>@product.StockQunatity</td>
                     <td>@(string.IsNullOrEmpty(product.CategoryName) ? "Uncategorized" : product.CategoryName)</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@product.Id" class="btn btn-warning">Edit</a>

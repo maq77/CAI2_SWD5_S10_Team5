@@ -27,6 +27,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            SetPageMeta();
             var user = await _userManager.GetUserAsync(User);
             var orders = await _orderService.GetOrdersByUserIdAsync(user.Id);
             return View(orders);
@@ -34,6 +35,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
+            SetPageMeta();
             var order = await _orderService.GetOrderById(id);
             if (order == null) return NotFound();
             return View(order);
@@ -49,6 +51,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [HttpGet]
         public async Task<IActionResult> OrderSummary(int id)
         {
+            SetPageMeta();
             var order = await _orderService.GetOrderById(id);
             if (order == null) return NotFound();
             return View(order);
@@ -68,6 +71,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
                 UserId = user.Id,
                 OrderDate = DateTime.UtcNow,
                 Status = OrderStatus.Pending,
+                shipping_address = "DUMP Data", 
                 OrderDetails = cartItems
                 
             };
@@ -82,7 +86,27 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             _cartService.ClearCart();
 
             return RedirectToAction("OrderSummary", new { id = order_id });
+
         }
+        #region Private Helper Methods
+
+        //
+        protected void SetPageMeta()
+        {
+            var controller = ControllerContext.ActionDescriptor.ControllerName;
+            var action = ControllerContext.ActionDescriptor.ActionName;
+
+            ViewData["PageTitle"] = FormatTitle(action);
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+        {
+            ("/", "Home"),
+            ($"/{controller}", FormatTitle(controller))
+        };
+        }
+
+        private string FormatTitle(string text) =>
+            System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.Replace("_", " ").ToLower());
+        #endregion
 
     }
 }

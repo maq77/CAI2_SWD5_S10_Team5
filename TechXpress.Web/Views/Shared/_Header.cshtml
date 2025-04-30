@@ -1,7 +1,12 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using TechXpress.Services.Base
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
+@inject ICategoryService _categoryService
 
+@{
+	var categories = await _categoryService.GetAllCategories();
+}
 <!-- HEADER -->
 <header>
 	<!-- TOP HEADER -->
@@ -57,22 +62,20 @@
 				<!-- SEARCH BAR -->
 				<div class="col-md-6">
 					<div class="header-search">
-						<form class="d-flex">
+						<form id="searchForm" class="d-flex" method="get" action="/Shop/Index">
 							<div class="input-group">
-								<select id="categoryFilter" class="input-select">
+								<select id="categoryFilter" name="categoryId" class="input-select">
 									<option value="0">All Categories</option>
-									@* Dynamically load categories if available *@
-									@* @if (ViewBag.Categories != null)
-										{
-											@foreach (var category in ViewBag.Categories)
-											{
-												<option value="@category.Id">@category.Name</option>
-											}
-										} *@
+									@foreach (var category in categories)
+									{
+										<option value="@category.Id">@category.Name</option>
+									}
 								</select>
-								<input type="text" id="searchBox" class="input form-control" placeholder="Search here">
+								<input type="text" id="searchBox" name="searchQuery" class="input form-control" placeholder="Search here">
 								<div class="input-group-append">
-									<button id="searchButton" class="search-btn btn"><i class="fa fa-search"></i> Search</button>
+									<button type="submit" id="searchButton" class="search-btn btn">
+										<i class="fa fa-search"></i> Search
+									</button>
 								</div>
 							</div>
 						</form>

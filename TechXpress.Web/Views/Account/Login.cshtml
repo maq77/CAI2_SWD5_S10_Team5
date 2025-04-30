@@ -2,6 +2,11 @@
 
 @{
     ViewData["Title"] = "Login";
+    ViewData["BreadcrumbPath"] = new List<(string, string)>
+            {
+                ("/", "Home"),
+                ("/Login", "Login")
+            };
 }
 
 <h2 class="text-center">Login</h2>

@@ -25,14 +25,15 @@ namespace TechXpress.Web.Controllers
             _cache = cache;
         }
 
-        // ✅ Load Home Page with Popular Products & Categories
+        //  Load Home Page with Popular Products & Categories
         public async Task<IActionResult> Index(int? categoryId, int page = 1, int pageSize = 6)
         {
+            SetPageMeta();
             var homePageData = new HomePageDTO();
 
             if (!_cache.TryGetValue(FeaturedProductCacheKey, out IEnumerable<ProductDTO>? featuredProducts))
             {
-                featuredProducts = await _productService.GetPopularProducts(); // ✅ Fetch Bestselling Products
+                featuredProducts = await _productService.GetPopularProducts(); //  Fetch Bestselling Products
                 _cache.Set(FeaturedProductCacheKey, featuredProducts, TimeSpan.FromMinutes(30));
             }
 
@@ -81,6 +82,24 @@ namespace TechXpress.Web.Controllers
         }
 
         //  Fetch Products with Filtering & Pagination
+        #region Private Helper Methods
+
+        //
+        protected void SetPageMeta()
+        {
+            var controller = ControllerContext.ActionDescriptor.ControllerName;
+            var action = ControllerContext.ActionDescriptor.ActionName;
+
+            ViewData["PageTitle"] = FormatTitle(action);
+            ViewData["BreadcrumbPath"] = new List<(string, string)>
+        {
+            ("/", "Home"),
+            ($"/{controller}", FormatTitle(controller))
+        };
+        }
+
+        private string FormatTitle(string text) =>
+            System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.Replace("_", " ").ToLower());
         private async Task<IPagedList<ProductDTO>> GetFilteredProducts(int? categoryId, int page, int pageSize)
         {
             var products = await GetCachedProducts();
@@ -92,5 +111,6 @@ namespace TechXpress.Web.Controllers
 
             return products.OrderByDescending(p => p.Id).ToPagedList(page, pageSize);
         }
+        #endregion
     }
 }

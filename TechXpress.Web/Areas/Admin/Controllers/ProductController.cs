@@ -87,7 +87,9 @@ namespace TechXpress.Web.Areas.Admin.Controllers
                 Name = model.Name,
                 Description = model.Description,
                 Price = model.Price,
-                CategoryId = model.CategoryId
+                CategoryId = model.CategoryId,
+                StockQunatity = model.StockQuantity
+
             };
 
             await _productService.AddProduct(productDTO, model.Images);
@@ -128,8 +130,10 @@ namespace TechXpress.Web.Areas.Admin.Controllers
             {
                 Id = product.Id,
                 Name = product.Name,
+                Description = product.Description,
                 Price = product.Price,
                 CategoryId = product.CategoryId,
+                StockQuantity = product.StockQunatity,
                 ExistingImages = await _productImageService.GetImagesByProductId(product.Id) ?? new List<ProductImageDTO>(),
                 Categories = await GetCategorySelectList()
             };
@@ -156,7 +160,9 @@ namespace TechXpress.Web.Areas.Admin.Controllers
 
             // Update product properties
             product.Name = model.Name;
+            product.Description = model.Description;
             product.Price = model.Price;
+            product.StockQunatity = model.StockQuantity;
             if (model.CategoryId.HasValue)
             {
                 product.CategoryId = model.CategoryId.Value;
