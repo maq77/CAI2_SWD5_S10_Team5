@@ -14,6 +14,7 @@ namespace TechXpress.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<WishListItem> WishlistItems { get; set; }
+        public DbSet<TokenInfo> TokenInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -24,8 +25,28 @@ namespace TechXpress.Data
             ConfigureOrderDetail(builder);
             ConfigureProductImage(builder);
             ConfigureWishlistItem(builder);
+            ConfigureToken(builder);
         }
+        private void ConfigureToken(ModelBuilder builder)
+        {
+            builder.Entity<TokenInfo>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.UserId)
+                      .IsRequired()
+                      .HasMaxLength(450);
+                entity.Property(t => t.RefreshToken)
+                      .IsRequired()
+                      .HasMaxLength(256);
+                entity.Property(t => t.ExpiryDate)
+                      .IsRequired();
+                entity.HasOne(t => t.User)
+                      .WithMany()
+                      .HasForeignKey(t => t.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
 
+            });
+        }
         private void ConfigureProduct(ModelBuilder builder)
         {
             builder.Entity<Product>()

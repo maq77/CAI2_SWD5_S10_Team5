@@ -12,6 +12,7 @@ namespace TechXpress.Data.Repositories.Base
     {
         IProductRepo Products { get; }
         IOrderRepo Orders { get; }
+        ITokenRepo Tokens { get; }
         IRepository<ProductImage> ProductImages { get; }
         IRepository<Category> Categories { get; }
         IRepository<OrderDetail> OrderDetails { get; }

@@ -23,6 +23,7 @@ namespace TechXpress.Data.Repositories
             Products = new ProductRepo(dp, _loggerFactory.CreateLogger<ProductRepo>());
             Categories = new Repository<Category>(dp, _loggerFactory.CreateLogger<Repository<Category>>());
             Orders = new OrderRepo(dp, _loggerFactory.CreateLogger<OrderRepo>());
+            Tokens = new TokenRepo(dp, _loggerFactory.CreateLogger<TokenRepo>());
             OrderDetails = new Repository<OrderDetail>(dp, _loggerFactory.CreateLogger<Repository<OrderDetail>>());
             WishListItems = new Repository<WishListItem>(dp, _loggerFactory.CreateLogger<Repository<WishListItem>>());
             ProductImages = new Repository<ProductImage>(dp, _loggerFactory.CreateLogger<Repository<ProductImage>>());
@@ -37,6 +38,7 @@ namespace TechXpress.Data.Repositories
         public IProductRepo Products { get; private set; }
         public IRepository<Category> Categories { get; private set; }
         public IOrderRepo Orders { get; private set; }
+        public ITokenRepo Tokens { get; private set; }
         public IRepository<ProductImage> ProductImages { get; private set; }
         public IRepository<OrderDetail> OrderDetails { get; private set; }
         public IRepository<WishListItem> WishListItems { get; private set; }

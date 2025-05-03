@@ -1,16 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
 
 namespace TechXpress.Web.Controllers
 {
+    //[Route("api/[controller]")]
+    ///[ApiController]
     public class AccountController : Controller
     {
-        private readonly IUserService _userService;
 
-        public AccountController(IUserService userService)
+        private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
+
+        public AccountController(IUserService userService, ITokenService tokenService)
         {
             _userService = userService;
+            _tokenService = tokenService;
+        }
+        [HttpGet]
+        public async Task<IActionResult> WhoAmI()
+        {
+            var claims = User.Claims.Select(c => new { c.Type, c.Value });
+            return Json(claims);
         }
 
         public IActionResult Register() => View();
@@ -18,29 +31,62 @@ namespace TechXpress.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDTO model)
         {
-            var (success, message, redirectUrl) = await _userService.RegisterAsync(model);
-            if (success)
+            if (!ModelState.IsValid)
             {
-                return Json(new { success, message, redirectUrl });
+                return BadRequest(new { success = false, message = "Invalid input data", errors = ModelState });
             }
-            return BadRequest(new { success, message });
+            var (authResponse, redirectUrl) = await _userService.RegisterAsync(model);
+            if (authResponse.IsSuccess)
+            {
+                return Json(new { authResponse.IsSuccess, authResponse.Message, authResponse.Token, authResponse.RefreshToken, redirectUrl });
+            }
+            return BadRequest(new { authResponse.IsSuccess, authResponse.Message});
         }
 
 
         public IActionResult Login() => View();
 
+        //[HttpPost("login")]
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] LoginDTO model)
         {
-            var (success, redirectUrl) = await _userService.LoginAsync(model);
-            if (success)
+            if (!ModelState.IsValid)
             {
-                return Json(new { success, redirectUrl });
+                return BadRequest(new { success = false, message = "Invalid input data", errors = ModelState });
             }
-            return BadRequest(new { success, message = "Invalid credentials." });
+            var stopwatch = Stopwatch.StartNew();
+
+            var (authResponse, redirectUrl) = await _userService.LoginAsync(model);
+
+            stopwatch.Stop();
+            Console.WriteLine($"Login took: {stopwatch.ElapsedMilliseconds} ms");
+            if (authResponse.IsSuccess)
+            {
+                // Set access token in cookie (short-lived)
+                Response.Cookies.Append("AccessToken", authResponse.Token, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddMinutes(3) // Short-lived token
+                });
+
+                // Set refresh token in cookie (longer-lived)
+                Response.Cookies.Append("RefreshToken", authResponse.RefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddDays(7) // 1-week refresh token
+                });
+                return Ok(new { authResponse.IsSuccess, authResponse.Message, authResponse.Token, authResponse.RefreshToken, redirectUrl });
+            }
+            return BadRequest(new { authResponse.IsSuccess, authResponse.Message });
         }
 
 
+        //[HttpPost("logout")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -52,24 +98,21 @@ namespace TechXpress.Web.Controllers
             }
             return BadRequest(new { success = false, message = "Logout failed." });
         }
-        #region Private Helper Methods
 
-        //
-        protected void SetPageMeta()
+        [HttpPost]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDTO model)
         {
-            var controller = ControllerContext.ActionDescriptor.ControllerName;
-            var action = ControllerContext.ActionDescriptor.ActionName;
-
-            ViewData["PageTitle"] = FormatTitle(action);
-            ViewData["BreadcrumbPath"] = new List<(string, string)>
-        {
-            ("/", "Home"),
-            ($"/{controller}", FormatTitle(controller))
-        };
+            if (string.IsNullOrEmpty(model.RefreshToken))
+            {
+                return BadRequest(new { success = false, message = "Invalid refresh token. Require Token" });
+            }
+            var authResponse = await _userService.RefreshTokenAsync(model.RefreshToken);
+            if (authResponse.IsSuccess)
+            {
+                return Json(new { authResponse.IsSuccess, authResponse.Message, authResponse.Token, authResponse.RefreshToken });
+            }
+            return BadRequest(new { authResponse.IsSuccess, authResponse.Message });
         }
-
-        private string FormatTitle(string text) =>
-            System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text.Replace("_", " ").ToLower());
-        #endregion
+        
     }
 }

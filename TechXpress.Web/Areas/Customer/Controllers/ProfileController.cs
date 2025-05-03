@@ -23,9 +23,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
         }
 
-        /// <summary>
-        /// Displays the customer's profile with order history.
-        /// </summary>
+        
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -48,9 +46,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return View(model);
         }
 
-        /// <summary>
-        /// Displays the edit profile form.
-        /// </summary>
+        
         [HttpGet("Edit")]
         public async Task<IActionResult> Edit()
         {
@@ -64,9 +60,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return View(userProfile);
         }
 
-        /// <summary>
-        /// Handles profile update requests.
-        /// </summary>
+        
         [HttpPost("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserProfileDTO model)
@@ -96,9 +90,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         }
 
 
-        /// <summary>
-        /// Fetches order history for a specific user.
-        /// </summary>
+        
         [HttpGet("Orders/{userId}")]
         public async Task<IActionResult> GetOrdersByUser(string userId)
         {
@@ -112,9 +104,7 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return Ok(orders);
         }
 
-        /// <summary>
-        /// Redirects to login if user is not authenticated.
-        /// </summary>
+        
         private IActionResult Login()
         {
             return RedirectToAction("Login", "Account", new { area = "" });

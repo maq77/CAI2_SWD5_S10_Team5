@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using TechXpress.Data.Model;
@@ -11,8 +12,10 @@ namespace TechXpress.Services.Base
 {
     public interface IUserService
     {
-        Task<(bool Success, string Message, string RedirectUrl)> RegisterAsync(RegisterDTO model);
-        Task<(bool Success, string RedirectUrl)> LoginAsync(LoginDTO model);
+        Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model);
+        Task<(AuthResponse authResponse, string RedirectUrl)> LoginAsync(LoginDTO model);
+        Task<List<Claim>> GenerateClaims(User user);
+        Task<AuthResponse> RefreshTokenAsync(string refreshToken);
         Task<bool> LogoutAsync();
         Task<bool> AssignRoleAsync(string email, string role);
         Task<bool> MakeUserAdmin(string email);

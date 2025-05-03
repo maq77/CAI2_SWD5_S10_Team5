@@ -12,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add Application Services
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 
 // Add MVC Controllers and Views
 builder.Services.AddControllersWithViews();
@@ -20,12 +22,15 @@ builder.Services.AddControllersWithViews();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-
+builder.Logging.AddFilter("Microsoft", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Routing", LogLevel.Error);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Authentication", LogLevel.Error);
+builder.Logging.AddFilter("Default", LogLevel.Warning);
 
 var app = builder.Build();
 
-//Seed Data
-//await SeedData.Initialize(app.Services);
+//V2 of Seed Data ,, remove it when initilazing proj for 1st time
+//await DbSeeder.SeedData(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -40,6 +45,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthorization();
 
 // Configure Routing with Areas

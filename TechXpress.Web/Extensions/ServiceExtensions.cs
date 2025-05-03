@@ -37,7 +37,9 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IWishlistService, WishListItemService>();
-
+            services.AddScoped<ITokenRepo, TokenRepo>();
+            services.AddScoped<ITokenService, TokenService>();
+            //services.AddScoped<ITokenService, TokenService>();
 
             // Session Configuration
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -55,6 +57,7 @@ namespace TechXpress.Web.Extensions
                 options.LoginPath = "/Account/Login";
                 options.AccessDeniedPath = "/Account/AccessDenied";
             });
+
 
             return services;
         }

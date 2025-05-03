@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using TechXpress.Data.Constants;
 using TechXpress.Data.Model;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
@@ -14,25 +18,26 @@ namespace TechXpress.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ITokenService _tokenService;
         private readonly ILogger<UserService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _tokenService = tokenService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
         }
-
-        public async Task<(bool Success, string Message, string RedirectUrl)> RegisterAsync(RegisterDTO model)
+        public async Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
             try
             {
                 if (await _userManager.Users.AnyAsync(u => u.Email == model.Email))
                 {
-                    return (false, "This email is already registered.", "");
+                    return (new AuthResponse {IsSuccess=false,Message= "This email is already registered." }, "");
                 }
 
                 var user = new User
@@ -49,50 +54,63 @@ namespace TechXpress.Services
                 if (!result.Succeeded)
                 {
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    return (false, errors, "");
+                    return (new AuthResponse { IsSuccess=false,Message=errors}, "");
                 }
 
                 await AssignRoleAsync(user.Email, "Customer");
                 await _signInManager.SignInAsync(user, isPersistent: false);
 
-                return (true, "Registration successful.", "/Home/Index"); // Ensure the redirect URL is returned
+                // Generate tokens
+                var claims = await GenerateClaims(user);
+                var accessToken = await _tokenService.GenerateAccessToken(claims);
+                var tokenInfo = await _tokenService.CreateToken(user.Id);
+                return (new AuthResponse {IsSuccess= true, Token=accessToken, RefreshToken=tokenInfo.RefreshToken, Message="Registration successful." }, "/Home/Index"); // Ensure the redirect URL is returned
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception in RegisterAsync for {Email}", model.Email);
-                return (false, "An error occurred while registering.", "");
+                return (new AuthResponse {IsSuccess= false,Message= "An error occurred while registering." }, "");
             }
         }
-
-
-        public async Task<(bool Success, string RedirectUrl)> LoginAsync(LoginDTO model)
+        public async Task<(AuthResponse authResponse, string RedirectUrl)> LoginAsync(LoginDTO model)
         {
             try
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
                 if (!result.Succeeded)
                 {
-                    return (false, "");
+                    _logger.LogWarning($"Login failed for {model.Email}");
+                    
+                    return (new AuthResponse { IsSuccess =false , Message="Invalid Credintials!"}, "");
                 }
 
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null) return (false, "");
+                if (user == null) return (new AuthResponse { IsSuccess = false , Message="Cannot find user with this email" }, "");
 
-                string redirectUrl = await _userManager.IsInRoleAsync(user, "Admin") ? "/Admin/" : "/";
-                return (true, redirectUrl);
+                // Generate tokens
+                var claims = await GenerateClaims(user);
+                var accessToken = await _tokenService.GenerateAccessToken(claims);
+                var tokenInfo = await _tokenService.CreateToken(user.Id);
+                string redirectUrl = (await IsAdmin(user)) ? "/Admin/" : "/";
+                return (new AuthResponse { IsSuccess=true, Token = accessToken, RefreshToken = tokenInfo.RefreshToken, Message = "Login Successfully!",}, redirectUrl);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception in LoginAsync for {Email}", model.Email);
-                return (false, "");
+                return (new AuthResponse { IsSuccess = false, Message="Exception in Login could be server error, Try Again! " }, "");
             }
         }
-
-
+        private async Task<bool> IsAdmin(User user) => await _userManager.IsInRoleAsync(user, "Admin");
         public async Task<bool> LogoutAsync()
         {
             try
             {
+                var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                // Revoke all user tokens
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    await _tokenService.RevokeAllUserTokens(userId);
+                }
                 await _signInManager.SignOutAsync();
                 return true;
             }
@@ -102,7 +120,6 @@ namespace TechXpress.Services
                 return false;
             }
         }
-
         public async Task<bool> AssignRoleAsync(string email, string role)
         {
             var user = await _userManager.FindByEmailAsync(email);
@@ -183,5 +200,88 @@ namespace TechXpress.Services
             await _userManager.DeleteAsync(user);
             return true;
         }
+        public async Task<List<Claim>> GenerateClaims(User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email),
+                new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+            return claims;
+        }
+        public async Task<AuthResponse> RefreshTokenAsync(string refreshToken)
+        {
+            try
+            {
+                // Validate refresh token
+                if (!await _tokenService.ValidateRefreshToken(refreshToken))
+                {
+                    return new AuthResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid token"
+                    };
+                }
+
+                // Get token from database
+                var tokenInfo = await _tokenService.GetTokenByRefreshToken(refreshToken);
+                if (tokenInfo == null)
+                {
+                    return new AuthResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Cannot retrieve token from Refresh Token"
+                    };
+                }
+
+                // Get user
+                var user = await _userManager.FindByIdAsync(tokenInfo.UserId);
+                if (user == null)
+                {
+                    return new AuthResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Cannot Find User Token"
+                    };
+                }
+
+                // Revoke current token
+                await _tokenService.RevokeToken(refreshToken);
+
+                // Generate new tokens
+                var claims = await GenerateClaims(user);
+                var accessToken = await _tokenService.GenerateAccessToken(claims);
+                var newTokenInfo = await _tokenService.CreateToken(user.Id);
+                var roles = await _userManager.GetRolesAsync(user);
+
+                return new AuthResponse
+                {
+                    IsSuccess = true,
+                    Message = "Renewed Token Successfully!",
+                    Token = accessToken,
+                    RefreshToken = newTokenInfo.RefreshToken,
+                    Email = user.Email,
+                    Expiration = newTokenInfo.ExpiryDate,
+                    UserId = user.Id,
+                    Roles = roles.ToList()
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception in RefreshTokenAsync");
+                return new AuthResponse
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+                //return (false, null, null);
+            }
+        } // For Testing
     }
 }

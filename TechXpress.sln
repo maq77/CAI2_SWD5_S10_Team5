@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Data", "TechXpre
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Services", "TechXpress.Services\TechXpress.Services.csproj", "{21E017D5-154D-42F9-881F-45341BFF3F32}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{129EEB0E-6AFC-4B1F-B88C-11C5A0204243}"
+	ProjectSection(SolutionItems) = preProject
+		setup-dev.ps1 = setup-dev.ps1
+		setup.sh = setup.sh
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
