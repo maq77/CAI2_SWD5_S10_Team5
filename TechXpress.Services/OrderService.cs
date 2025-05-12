@@ -27,6 +27,8 @@ namespace TechXpress.Services
                 OrderDate = o.OrderDate,
                 Status = o.Status,
                 shipping_address = o.ShippingAddress,
+                paymentMethod = o.PaymentMethod,
+                TransactionId = o.TransactionId,
                 OrderDetails = o.OrderDetails.Select(d => new OrderDetailDTO
                 {
                     ProductId = d.ProductId,
@@ -49,6 +51,8 @@ namespace TechXpress.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status,
                 shipping_address =  order.ShippingAddress,
+                paymentMethod = order.PaymentMethod,
+                TransactionId = order.TransactionId,
                 OrderDetails = order.OrderDetails.Select(d => new OrderDetailDTO
                 {
                     ProductId = d.ProductId,
@@ -81,6 +85,8 @@ namespace TechXpress.Services
                         OrderDate = DateTime.UtcNow,
                         Status = OrderStatus.Pending,
                         ShippingAddress = orderDto.shipping_address,
+                        PaymentMethod = orderDto.paymentMethod,
+                        TransactionId = orderDto.TransactionId,
                         OrderDetails = order_details
                     };
 
@@ -223,6 +229,9 @@ namespace TechXpress.Services
                 TotalAmount = o.TotalAmount,
                 OrderDate = o.OrderDate,
                 Status = o.Status,
+                shipping_address = o.ShippingAddress,
+                paymentMethod = o.PaymentMethod,
+                TransactionId = o.TransactionId,
                 OrderDetails = o.OrderDetails?.Select(d => new OrderDetailDTO
                 {
                     ProductId = d.ProductId,
