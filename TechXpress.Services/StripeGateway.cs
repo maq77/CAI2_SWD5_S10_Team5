@@ -4,8 +4,6 @@ using Stripe.Checkout;
 using Stripe;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
@@ -15,96 +13,94 @@ namespace TechXpress.Services
     public class StripeGateway : IPaymentGateway
     {
         private readonly IStripeClient _stripeClient;
-        private readonly string _webhookSecret;
 
         public string Name => "Stripe";
 
         public StripeGateway(IStripeClient stripeClient, IOptions<StripeSettings> stripeSettings)
         {
-            _stripeClient = stripeClient;
-            _webhookSecret = stripeSettings.Value.WebhookSecret;
+            _stripeClient = stripeClient ?? throw new ArgumentNullException(nameof(stripeClient));
         }
 
         public async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
         {
-            var options = new SessionCreateOptions
+            try
             {
-                PaymentMethodTypes = new List<string> { "card" },
-                LineItems = new List<SessionLineItemOptions>
-            {
-                new SessionLineItemOptions
+                var options = new SessionCreateOptions
                 {
-                    PriceData = new SessionLineItemPriceDataOptions
+                    PaymentMethodTypes = new List<string> { "card" },
+                    LineItems = new List<SessionLineItemOptions>
                     {
-                        UnitAmount = (long)((request.Amount) * 100), // Convert to cents
-                        Currency = request.Currency.ToLower(),
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        new SessionLineItemOptions
                         {
-                            Name = request.Description
+                            PriceData = new SessionLineItemPriceDataOptions
+                            {
+                                UnitAmount = (long)(request.Amount * 100), // amount in cents
+                                Currency = request.Currency?.ToLower() ?? "usd",
+                                ProductData = new SessionLineItemPriceDataProductDataOptions
+                                {
+                                    Name = request.Description ?? "TechXpress Order"
+                                }
+                            },
+                            Quantity = 1
                         }
                     },
-                    Quantity = 1
-                }
-            },
-                Mode = "payment",
-                SuccessUrl = request.ReturnUrl,
-                CancelUrl = request.CancelUrl,
-                Metadata = new Dictionary<string, string>
-            {
-                { "OrderId", $"{request.OrderId}" }
+                    Mode = "payment",
+                    SuccessUrl = request.ReturnUrl, // Stripe will append ?session_id={CHECKOUT_SESSION_ID}
+                    CancelUrl = request.CancelUrl,
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "OrderId", request.OrderId.ToString() ?? "N/A" }
+                    }
+                };
+
+                var service = new SessionService(_stripeClient);
+                var session = await service.CreateAsync(options);
+
+                return new PaymentResponse
+                {
+                    Success = true,
+                    TransactionId = session.Id,
+                    RedirectUrl = session.Url
+                };
             }
-            };
-
-            var service = new SessionService(_stripeClient);
-            Session session = await service.CreateAsync(options);
-
-            return new PaymentResponse
+            catch (StripeException ex)
             {
-                Success = true,
-                TransactionId = session.Id,
-                RedirectUrl = session.Url
-            };
+                return new PaymentResponse
+                {
+                    Success = false,
+                    ErrorMessage = $"Stripe error: {ex.Message}"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new PaymentResponse
+                {
+                    Success = false,
+                    ErrorMessage = $"Unexpected error: {ex.Message}"
+                };
+            }
         }
 
         public async Task<PaymentResponse> VerifyPaymentAsync(HttpRequest request)
         {
-            // Handle webhook verification
             try
             {
-                // Read the request body directly as a stream
-                string json;
-                request.EnableBuffering();
-                using (var reader = new StreamReader(request.Body, leaveOpen: true))
-                {
-                    json = await reader.ReadToEndAsync();
-                    // Reset the position for potential future reads
-                    request.Body.Position = 0;
-                }
+                var sessionId = request.Query["session_id"].ToString();
 
-                // Get the Stripe signature from headers
-                // Extract the raw signature header value - this is critical
-                string signatureHeader = request.Headers["Stripe-Signature"];
-
-                if (string.IsNullOrEmpty(signatureHeader))
+                if (string.IsNullOrWhiteSpace(sessionId))
                 {
                     return new PaymentResponse
                     {
                         Success = false,
-                        ErrorMessage = "Stripe-Signature header is missing"
+                        ErrorMessage = "Session ID not found in callback."
                     };
                 }
 
-                // Verify the event
-                var stripeEvent = EventUtility.ConstructEvent(
-                    json,
-                    signatureHeader,
-                    _webhookSecret
-                );
+                var service = new SessionService(_stripeClient);
+                var session = await service.GetAsync(sessionId);
 
-                if (stripeEvent.Type == "checkout.session.completed")
+                if (session.PaymentStatus == "paid")
                 {
-                    var session = stripeEvent.Data.Object as Session;
-
                     return new PaymentResponse
                     {
                         Success = true,
@@ -115,29 +111,25 @@ namespace TechXpress.Services
                 return new PaymentResponse
                 {
                     Success = false,
-                    ErrorMessage = $"Event type '{stripeEvent.Type}' not supported"
+                    ErrorMessage = "Payment was not successful."
                 };
             }
             catch (StripeException ex)
             {
-                // Log the specific Stripe exception
-                Console.WriteLine($"Stripe Error: {ex.StripeError?.Message ?? ex.Message}");
                 return new PaymentResponse
                 {
                     Success = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = $"Stripe error: {ex.Message}"
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error processing webhook: {ex.Message}");
                 return new PaymentResponse
                 {
                     Success = false,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = $"Unexpected error: {ex.Message}"
                 };
             }
         }
     }
-
 }

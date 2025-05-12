@@ -14,7 +14,7 @@ namespace YourNamespace.Controllers
 {
     [Authorize]
     [Area("Customer")]
-    [Route("[area]/[controller]/[action]")]
+    //[Route("[area]/[controller]/[action]")]
     public class CheckoutController : Controller
     {
         private readonly IPaymentService _paymentService;
@@ -66,7 +66,7 @@ namespace YourNamespace.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProcessPayment(string gatewayName, string shippingAddress)
+        public async Task<IActionResult> ProcessPayment(string gatewayName)
         {
             try{
                 // Create a new order in pending state

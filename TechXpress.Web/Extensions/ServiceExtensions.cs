@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Stripe;
 using TechXpress.Data;
 using TechXpress.Data.Model;
@@ -7,6 +8,7 @@ using TechXpress.Data.Repositories;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services;
 using TechXpress.Services.Base;
+using TechXpress.Services.DTOs;
 using ProductService = TechXpress.Services.ProductService;
 using TokenService = TechXpress.Services.TokenService;
 
@@ -54,11 +56,12 @@ namespace TechXpress.Web.Extensions
                 options.Cookie.IsEssential = true;
             });
 
-            services.AddSingleton<IStripeClient>(sp =>
+            services.AddSingleton<IStripeClient>(provider =>
             {
-                var config = sp.GetRequiredService<IConfiguration>();
-                return new StripeClient(config["StripeSettings:SecretKey"]);
+                var stripeSettings = provider.GetRequiredService<IOptions<StripeSettings>>().Value;
+                return new StripeClient(stripeSettings.SecretKey); // secret key
             });
+
 
 
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -138,13 +139,24 @@ namespace TechXpress.Services
 
                 // Get access token
                 var accessToken = await GetAccessTokenAsync();
+                _logger.LogInformation("Sending PayPal capture request for access token: {accessToken}", accessToken);
 
                 // Capture payment
                 var captureRequest = new HttpRequestMessage(HttpMethod.Post, $"v2/checkout/orders/{orderId}/capture");
                 captureRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
                 captureRequest.Content = new StringContent("{}", Encoding.UTF8, "application/json");
 
+                _logger.LogInformation("Sending PayPal capture request for Order ID: {OrderId}", orderId);
+
+                if (captureRequest.Content != null)
+                {
+                    var content = await captureRequest.Content.ReadAsStringAsync();
+                    _logger.LogInformation("PayPal Capture Request Body: {Content}", content);
+                }
                 var captureResponse = await _httpClient.SendAsync(captureRequest);
+                var responseContent = await captureResponse.Content.ReadAsStringAsync();
+
+                _logger.LogInformation("PayPal Capture Response: {StatusCode} - {Content}", captureResponse.StatusCode, responseContent);
 
                 if (!captureResponse.IsSuccessStatusCode)
                 {

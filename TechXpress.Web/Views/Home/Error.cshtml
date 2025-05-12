@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Error";
+    var message = Context.Request.Query["message"].ToString();
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-4 text-danger">Oops!</h1>
+    <p class="lead">Something went wrong.</p>
+    <hr />
+    <p>
+        <strong>Error Details:</strong><br />
+        <span class="text-warning">@message</span>
+    </p>
+    <a href="@Url.Action("Index", "Home", new { area = "Customer" })" class="btn btn-primary mt-3">
+        Go Back Home
+    </a>
+</div>
