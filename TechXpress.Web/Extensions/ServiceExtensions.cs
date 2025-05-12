@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using TechXpress.Data;
 using TechXpress.Data.Model;
 using TechXpress.Data.Repositories;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services;
 using TechXpress.Services.Base;
+using ProductService = TechXpress.Services.ProductService;
+using TokenService = TechXpress.Services.TokenService;
 
 namespace TechXpress.Web.Extensions
 {
@@ -50,6 +53,20 @@ namespace TechXpress.Web.Extensions
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            services.AddSingleton<IStripeClient>(sp =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                return new StripeClient(config["StripeSettings:SecretKey"]);
+            });
+
+
+
+            // Gatway Configuration
+            services.AddHttpClient(); // <--- This is required for IHttpClientFactory
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IPaymentGateway, PayPalGateway>();
+            services.AddScoped<IPaymentGateway, StripeGateway>();
 
             // Cookie Authentication Configuration
             services.ConfigureApplicationCookie(options =>

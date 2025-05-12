@@ -12,6 +12,7 @@ namespace TechXpress.Data.Enums
         Processing = 1,   // Order is being processed
         Shipped = 2,      // Order has been shipped
         Delivered = 3,    // Order has been delivered
-        Canceled = 4      // Order was canceled
+        Canceled = 4,      // Order was canceled
+        Paid = 5,        // Order has been paid
     }
 }

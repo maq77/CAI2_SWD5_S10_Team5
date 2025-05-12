@@ -1,0 +1,31 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Processing Payment";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="spinner-border text-primary mb-4" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h2 class="mb-3">Processing Your Payment</h2>
+                    <p class="lead mb-4">Please wait while we process your payment. Do not close this window.</p>
+                    <div class="progress mb-4">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                    </div>
+                    <p class="text-muted">You will be redirected to the payment gateway shortly.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // This would display while redirecting to payment gateway
+        // In a real implementation, the form would auto-submit or redirect would happen
+    </script>
+}

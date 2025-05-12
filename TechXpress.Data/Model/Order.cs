@@ -22,5 +22,8 @@ namespace TechXpress.Data.Model
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();  // 1-M Relation
+        public string PaymentMethod { get; set; } = "Cash on Delivery"; // "Stripe" or "PayPal"
+        public string? TransactionId { get; set; } // For Stripe or PayPal transactions
+
     }
 }

@@ -41,6 +41,6 @@ else
 
     <p><strong>Total Price:</strong> <span id="cart-total">@Model.TotalPrice.ToString("C")</span></p>
 
-    <a asp-controller="Cart" asp-action="UpdateCart" class="btn btn-primary">Update Cart</a>
-    <a asp-controller="Order" asp-action="CreateFromCart" class="btn btn-success">Proceed to Checkout</a>
+    <a asp-area="Customer" asp-controller="Cart" asp-action="UpdateCart" class="btn btn-primary">Update Cart</a>
+    <a asp-area="Customer" asp-controller="Checkout" asp-action="Index" class="btn btn-success">Proceed to Checkout</a>
 }

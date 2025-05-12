@@ -11,6 +11,11 @@ namespace TechXpress.Services.DTOs.ViewModels
         public List<OrderDetailDTO> CartItems { get; set; }
         public double TotalAmount => CartItems?.Sum(i => i.Price * i.Quantity) ?? 0;
         public IEnumerable<string> AvailablePaymentGateways { get; set; }
+        public string SelectedPaymentGateway { get; set; }
+
+        /// 
+        ///
+        /// 
         public string StripePublishableKey { get; set; }
         public string PayPalClientId { get; set; }
         public bool PayPalSandbox { get; set; }

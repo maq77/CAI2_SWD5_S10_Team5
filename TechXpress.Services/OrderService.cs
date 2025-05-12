@@ -291,5 +291,178 @@ namespace TechXpress.Services
             }
         }
 
+        public async Task UpdateTransactionIdAsync(int orderId, string paymentMethod, string transactionId)
+        {
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            bool transactionCompleted = false;
+
+            try
+            {
+                var order = await _unitOfWork.Orders.GetById(orderId);
+                if (order == null) return;
+
+                // Validate the transition
+                if (!IsValidStatusTransition(order.Status, OrderStatus.Delivered))
+                {
+                    throw new Exception(" error "); // Cannot complete order from current status
+                }
+
+                // Set order to delivered
+                order.PaymentMethod = paymentMethod;
+                order.TransactionId = transactionId;
+
+                // Save changes
+                await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
+                bool result = await _unitOfWork.SaveAsync();
+                // Log warning but don't throw exception
+                if (!result)
+                {
+                    Console.WriteLine("Warning: SaveAsync returned false when completing order, but continuing with transaction");
+                }
+
+                await transaction.CommitAsync();
+                transactionCompleted = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error completing order: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                if (!transactionCompleted)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
+                    }
+                }
+            }
+        }
+
+        public async Task<bool> CompleteOrder(int id)
+        {
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            bool transactionCompleted = false;
+
+            try
+            {
+                var order = await _unitOfWork.Orders.GetById(id);
+                if (order == null) return false;
+
+                // Validate the transition
+                if (!IsValidStatusTransition(order.Status, OrderStatus.Delivered))
+                {
+                    return false; // Cannot complete order from current status
+                }
+
+                // Set order to delivered
+                order.Status = OrderStatus.Delivered;
+
+                // Save changes
+                await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
+                bool result = await _unitOfWork.SaveAsync();
+                // Log warning but don't throw exception
+                if (!result)
+                {
+                    Console.WriteLine("Warning: SaveAsync returned false when completing order, but continuing with transaction");
+                }
+
+                await transaction.CommitAsync();
+                transactionCompleted = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error completing order: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                if (!transactionCompleted)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
+                    }
+                }
+            }
+        }
+
+        public async Task<bool> CancelOrder(int id)
+        {
+            var transaction = await _unitOfWork.BeginTransactionAsync();
+            bool transactionCompleted = false;
+
+            try
+            {
+                var order = await _unitOfWork.Orders.GetById(id);
+                if (order == null) return false;
+
+                // Validate the transition
+                if (!IsValidStatusTransition(order.Status, OrderStatus.Canceled))
+                {
+                    return false; // Cannot cancel order from current status
+                }
+
+                // Return items to inventory only if the order was not already canceled
+                if (order.Status != OrderStatus.Canceled && order.OrderDetails != null)
+                {
+                    foreach (var detail in order.OrderDetails)
+                    {
+                        var product = await _unitOfWork.Products.GetById(detail.ProductId);
+                        if (product != null)
+                        {
+                            // Return the quantity back to stock
+                            product.StockQuantity += detail.Quantity;
+                            await _unitOfWork.Products.Update(product, log => Console.WriteLine(log));
+                        }
+                    }
+                }
+
+                // Set order to canceled
+                order.Status = OrderStatus.Canceled;
+
+                // Save changes
+                await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
+                bool result = await _unitOfWork.SaveAsync();
+                // Log warning but don't throw exception
+                if (!result)
+                {
+                    Console.WriteLine("Warning: SaveAsync returned false when canceling order, but continuing with transaction");
+                }
+
+                await transaction.CommitAsync();
+                transactionCompleted = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error canceling order: {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                if (!transactionCompleted)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
+                    }
+                }
+            }
+        }
     }
 }

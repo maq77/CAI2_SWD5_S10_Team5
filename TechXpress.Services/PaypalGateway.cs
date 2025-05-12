@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Web;
 using TechXpress.Services.Base;
@@ -20,15 +21,20 @@ namespace TechXpress.Services
         private readonly string _clientId;
         private readonly string _secret;
         private readonly bool _isSandbox;
+        private readonly ILogger<PayPalGateway> _logger;
 
         public string Name => "PayPal";
 
-        public PayPalGateway(IOptions<PayPalSettings> paypalSettings, IHttpClientFactory httpClientFactory)
+        public PayPalGateway(
+            IOptions<PayPalSettings> paypalSettings,
+            IHttpClientFactory httpClientFactory,
+            ILogger<PayPalGateway> logger)
         {
             _httpClient = httpClientFactory.CreateClient("PayPal");
             _clientId = paypalSettings.Value.ClientId;
             _secret = paypalSettings.Value.Secret;
             _isSandbox = paypalSettings.Value.UseSandbox;
+            _logger = logger;
 
             // Configure the base address based on environment
             _httpClient.BaseAddress = new Uri(_isSandbox
@@ -38,89 +44,143 @@ namespace TechXpress.Services
 
         public async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
         {
-            // Get access token
-            var tokenRequest = new HttpRequestMessage(HttpMethod.Post, "v1/oauth2/token");
-            tokenRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
-                "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_secret}")));
-            tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string> { { "grant_type", "client_credentials" } });
-
-            var tokenResponse = await _httpClient.SendAsync(tokenRequest);
-            tokenResponse.EnsureSuccessStatusCode();
-            var tokenResult = await tokenResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-            var accessToken = tokenResult["access_token"].ToString();
-
-            // Create order
-            var paymentRequest = new HttpRequestMessage(HttpMethod.Post, "v2/checkout/orders");
-            paymentRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-
-            var orderRequest = new
+            try
             {
-                intent = "CAPTURE",
-                purchase_units = new[]
+                // Get access token
+                var accessToken = await GetAccessTokenAsync();
+
+                // Create order
+                var paymentRequest = new HttpRequestMessage(HttpMethod.Post, "v2/checkout/orders");
+                paymentRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                var orderRequest = new
                 {
-                new {
-                    reference_id = request.OrderId,
-                    amount = new {
-                        currency_code = request.Currency,
-                        value = request.Amount
+                    intent = "CAPTURE",
+                    purchase_units = new[]
+                    {
+                        new {
+                            reference_id = request.OrderId,
+                            amount = new {
+                                currency_code = request.Currency,
+                                value = request.Amount
+                            },
+                            description = request.Description
+                        }
                     },
-                    description = request.Description
-                }
-            },
-                application_context = new
+                    application_context = new
+                    {
+                        return_url = request.ReturnUrl,
+                        cancel_url = request.CancelUrl
+                    }
+                };
+
+                paymentRequest.Content = new StringContent(
+                    JsonSerializer.Serialize(orderRequest),
+                    Encoding.UTF8,
+                    "application/json");
+
+                var paymentResponse = await _httpClient.SendAsync(paymentRequest);
+
+                if (!paymentResponse.IsSuccessStatusCode)
                 {
-                    return_url = request.ReturnUrl,
-                    cancel_url = request.CancelUrl
+                    return await HandleErrorResponseAsync(paymentResponse, "ProcessPayment");
                 }
-            };
 
-            paymentRequest.Content = new StringContent(
-                JsonSerializer.Serialize(orderRequest),
-                Encoding.UTF8,
-                "application/json");
+                var result = await paymentResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                var links = ((JsonElement)result["links"]).EnumerateArray().ToList();
+                var approvalUrl = links.FirstOrDefault(x => x.GetProperty("rel").GetString() == "approve").GetProperty("href").GetString();
 
-            var paymentResponse = await _httpClient.SendAsync(paymentRequest);
-            if (!paymentResponse.IsSuccessStatusCode)
-            {
-                var errorJson = await paymentResponse.Content.ReadAsStringAsync();
-                Console.WriteLine("PayPal Error Response: " + errorJson);
-                throw new Exception($"PayPal payment failed: {paymentResponse.StatusCode} - {errorJson}");
+                if (string.IsNullOrEmpty(approvalUrl))
+                {
+                    _logger.LogError("PayPal didn't return an approval URL");
+                    return new PaymentResponse
+                    {
+                        Success = false,
+                        ErrorMessage = "Payment gateway didn't return a redirect URL"
+                    };
+                }
+
+                return new PaymentResponse
+                {
+                    Success = true,
+                    TransactionId = result["id"].ToString(),
+                    RedirectUrl = approvalUrl
+                };
             }
-
-            paymentResponse.EnsureSuccessStatusCode();
-            var result = await paymentResponse.Content.ReadFromJsonAsync<Dictionary<string,object>>();
-            var links = ((JsonElement)result["links"]).EnumerateArray().ToList();
-            var approvalUrl = links.FirstOrDefault(x => x.GetProperty("rel").GetString() == "approve").GetProperty("href").GetString();
-
-            return new PaymentResponse
+            catch (Exception ex)
             {
-                Success = true,
-                TransactionId = result["id"].ToString(),
-                RedirectUrl = approvalUrl
-            };
+                _logger.LogError(ex, "Unexpected error in PayPal payment processing");
+                return new PaymentResponse
+                {
+                    Success = false,
+                    ErrorMessage = "An unexpected error occurred while processing your payment"
+                };
+            }
         }
 
         public async Task<PaymentResponse> VerifyPaymentAsync(HttpRequest request)
         {
-            if (request.HasFormContentType)
+            try
             {
-                var form = await request.ReadFormAsync();
-            }
-            var queryString = request.QueryString.Value;
-            // Handle PayPal IPN or return URL validation
-            var query = HttpUtility.ParseQueryString(queryString);
-            var orderId = query["token"];
+                var queryString = request.QueryString.Value;
+                var query = HttpUtility.ParseQueryString(queryString);
+                var orderId = query["token"];
 
-            if (string.IsNullOrEmpty(orderId))
+                if (string.IsNullOrEmpty(orderId))
+                {
+                    _logger.LogWarning("PayPal verification called without order ID");
+                    return new PaymentResponse
+                    {
+                        Success = false,
+                        ErrorMessage = "Order ID not found in the return URL"
+                    };
+                }
+
+                // Get access token
+                var accessToken = await GetAccessTokenAsync();
+
+                // Capture payment
+                var captureRequest = new HttpRequestMessage(HttpMethod.Post, $"v2/checkout/orders/{orderId}/capture");
+                captureRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                captureRequest.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
+                var captureResponse = await _httpClient.SendAsync(captureRequest);
+
+                if (!captureResponse.IsSuccessStatusCode)
+                {
+                    return await HandleErrorResponseAsync(captureResponse, "CapturePayment");
+                }
+
+                var result = await captureResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
+                bool isCompleted = result["status"].ToString() == "COMPLETED";
+
+                if (!isCompleted)
+                {
+                    _logger.LogWarning($"PayPal payment not completed. Status: {result["status"]}");
+                }
+
+                return new PaymentResponse
+                {
+                    Success = isCompleted,
+                    TransactionId = result["id"].ToString(),
+                    Status = result["status"].ToString()
+                };
+            }
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error verifying PayPal payment");
                 return new PaymentResponse
                 {
                     Success = false,
-                    ErrorMessage = "Order ID not found"
+                    ErrorMessage = "An error occurred while verifying your payment"
                 };
             }
+        }
 
-            // Get access token
+        #region Helper Methods
+
+        private async Task<string> GetAccessTokenAsync()
+        {
             var tokenRequest = new HttpRequestMessage(HttpMethod.Post, "v1/oauth2/token");
             tokenRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
                 "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{_clientId}:{_secret}")));
@@ -128,35 +188,114 @@ namespace TechXpress.Services
 
             var tokenResponse = await _httpClient.SendAsync(tokenRequest);
 
-            tokenResponse.EnsureSuccessStatusCode();
-            var tokenResult = await tokenResponse.Content.ReadFromJsonAsync<PayPalTokenResponse>();
-            var accessToken = tokenResult.access_token;
-
-            // Capture payment
-            var captureRequest = new HttpRequestMessage(HttpMethod.Post, $"v2/checkout/orders/{orderId}/capture");
-            captureRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
-            captureRequest.Content = new StringContent("{}", Encoding.UTF8, "application/json");
-
-            var captureResponse = await _httpClient.SendAsync(captureRequest);
-            if (!captureResponse.IsSuccessStatusCode)
+            if (!tokenResponse.IsSuccessStatusCode)
             {
-                var errorContent = await captureResponse.Content.ReadAsStringAsync();
-                Console.WriteLine("PayPal Error Response: " + errorContent);
+                var errorContent = await tokenResponse.Content.ReadAsStringAsync();
+                _logger.LogError($"Failed to obtain PayPal access token: {errorContent}");
+                throw new Exception("Failed to authenticate with payment provider");
+            }
+
+            var tokenResult = await tokenResponse.Content.ReadFromJsonAsync<PayPalTokenResponse>();
+            return tokenResult.access_token;
+        }
+
+        private async Task<PaymentResponse> HandleErrorResponseAsync(HttpResponseMessage response, string operation)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            _logger.LogError($"PayPal {operation} Error: {response.StatusCode} - {errorContent}");
+
+            try
+            {
+                // Try to parse the error response
+                var errorJson = JsonSerializer.Deserialize<PayPalErrorResponse>(errorContent);
+
+                // Handle specific error types
+                if (errorJson?.Details?.Count > 0)
+                {
+                    foreach (var detail in errorJson.Details)
+                    {
+                        // Special handling for compliance violations
+                        if (detail.Issue == "COMPLIANCE_VIOLATION")
+                        {
+                            return new PaymentResponse
+                            {
+                                Success = false,
+                                ErrorCode = detail.Issue,
+                                ErrorMessage = "This transaction cannot be processed due to security restrictions. Please try a different payment method.",
+                                DebugId = errorJson.DebugId
+                            };
+                        }
+
+                        // Handle insufficient funds
+                        if (detail.Issue == "INSUFFICIENT_FUNDS")
+                        {
+                            return new PaymentResponse
+                            {
+                                Success = false,
+                                ErrorCode = detail.Issue,
+                                ErrorMessage = "Your account has insufficient funds. Please use a different payment method.",
+                                DebugId = errorJson.DebugId
+                            };
+                        }
+                    }
+                }
+
+                // Generic error with parsed information
                 return new PaymentResponse
                 {
                     Success = false,
-                    ErrorMessage = $"Failed to capture payment: {errorContent}"
+                    ErrorCode = errorJson?.Name,
+                    ErrorMessage = errorJson?.Message ?? "Payment processing failed",
+                    DebugId = errorJson?.DebugId
                 };
             }
-
-
-            var result = await captureResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
-
-            return new PaymentResponse
+            catch
             {
-                Success = result["status"].ToString() == "COMPLETED",
-                TransactionId = result["id"].ToString()
-            };
+                // If error parsing fails, return a generic error
+                return new PaymentResponse
+                {
+                    Success = false,
+                    ErrorMessage = $"Payment gateway error: {response.StatusCode}"
+                };
+            }
         }
+
+        #endregion
     }
+
+    #region PayPal Response Models
+
+    public class PayPalTokenResponse
+    {
+        public string scope { get; set; }
+        public string access_token { get; set; }
+        public string token_type { get; set; }
+        public string app_id { get; set; }
+        public int expires_in { get; set; }
+        public string nonce { get; set; }
+    }
+
+    public class PayPalErrorResponse
+    {
+        public string Name { get; set; }
+        public string Message { get; set; }
+        public string DebugId { get; set; }
+        public List<PayPalErrorDetail> Details { get; set; } = new List<PayPalErrorDetail>();
+        public List<PayPalLink> Links { get; set; } = new List<PayPalLink>();
+    }
+
+    public class PayPalErrorDetail
+    {
+        public string Issue { get; set; }
+        public string Description { get; set; }
+    }
+
+    public class PayPalLink
+    {
+        public string Href { get; set; }
+        public string Rel { get; set; }
+        public string Method { get; set; }
+    }
+
+    #endregion
 }

@@ -1,18 +1,31 @@
-﻿@model TechXpress.Services.DTOs.OrderDTO
+﻿@model dynamic
 @{
-    ViewData["Title"] = "Order Success !";
+    ViewData["Title"] = "Payment Cancelled";
 }
-<div class="container my-5 text-center">
-    <div class="card p-5">
-        <div class="mb-4">
-            <i class="fas fa-times-circle text-danger" style="font-size: 64px;"></i>
-        </div>
-        <h1 class="mb-4">Order Cancelled</h1>
-        <p class="mb-4">Your order has been cancelled. No payment has been processed.</p>
-        
-        <div class="mt-4">
-            <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-primary me-3">Return to Cart</a>
-            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">Continue Shopping</a>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto text-center">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <div class="d-inline-block p-3 bg-warning bg-opacity-25 rounded-circle mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-x-circle text-warning" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <h1 class="display-5 mb-3">Payment Cancelled</h1>
+                    <p class="lead mb-4">Your payment has been cancelled. No charges have been made to your account.</p>
+
+                    <div class="d-grid gap-3">
+                        <a asp-controller="Checkout" asp-action="Index" asp-area="Customer" class="btn btn-primary">Try Again</a>
+                        <a asp-controller="Cart" asp-action="Index" asp-area="Customer" class="btn btn-outline-secondary">Return to Cart</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
