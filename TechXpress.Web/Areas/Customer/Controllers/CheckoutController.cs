@@ -201,7 +201,7 @@ namespace YourNamespace.Controllers
                         _cartService.ClearCart();
 
                         // Redirect to order confirmation
-                        return RedirectToAction("OrderConfirmation", new { id = orderId });
+                        return RedirectToAction("OrderConfirmation", new { id = orderId, verificationResult.TransactionId });
                     }
                     catch (Exception ex)
                     {
@@ -249,9 +249,11 @@ namespace YourNamespace.Controllers
             return View();
         }
         [HttpGet]
-        public async Task<IActionResult> OrderConfirmation(int id)
+        public async Task<IActionResult> OrderConfirmation(int id, string TransactionId)
         {
             var order = await _orderService.GetOrderById(id);
+            ViewBag.TransactionId = TransactionId;
+            ViewBag.OrderId = id;
             if (order == null)
             {
                 return RedirectToAction("Error", "Home", new
