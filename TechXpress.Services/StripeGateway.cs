@@ -45,7 +45,7 @@ namespace TechXpress.Services
                         }
                     },
                     Mode = "payment",
-                    SuccessUrl = request.ReturnUrl, // Stripe will append ?session_id={CHECKOUT_SESSION_ID}
+                    SuccessUrl = $"{request.ReturnUrl}?session_id={{CHECKOUT_SESSION_ID}}", // Stripe will append ?session_id={CHECKOUT_SESSION_ID}
                     CancelUrl = request.CancelUrl,
                     Metadata = new Dictionary<string, string>
                     {

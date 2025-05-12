@@ -89,7 +89,8 @@ namespace YourNamespace.Controllers
                     TotalAmount = totalAmount,
                     Status = OrderStatus.Pending,
                     shipping_address = "DUMP Data", // Replace with actual shipping address
-                    OrderDate = DateTime.UtcNow
+                    OrderDate = DateTime.UtcNow,
+                    paymentMethod = gatewayName
                 };
                 /*var order_id = await _orderService.CreateOrder(orderDto);
 
@@ -163,6 +164,14 @@ namespace YourNamespace.Controllers
                         message = "Payment session expired or invalid."
                     });
                 }
+                if (gatewayName == "Stripe" && string.IsNullOrEmpty(Request.Query["session_id"]))
+                {
+                    return RedirectToAction("Error", "Home", new
+                    {
+                        area = "Customer",
+                        message = "Stripe session ID not found in the callback URL."
+                    });
+                }
 
                 // Verify payment was successful
                 var verificationResult = await _paymentService.VerifyPaymentAsync(gatewayName, HttpContext.Request);
@@ -187,7 +196,7 @@ namespace YourNamespace.Controllers
                     {
                         // Create the order in database now that payment is confirmed
                         var orderId = await _orderService.CreateOrder(orderDto);
-
+                        await _orderService.UpdateTransactionIdAsync(orderId, gatewayName, verificationResult.TransactionId);
                         // Clear the shopping cart
                         _cartService.ClearCart();
 

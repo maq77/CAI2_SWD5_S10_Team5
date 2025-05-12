@@ -16,6 +16,8 @@ namespace TechXpress.Services.DTOs
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public string shipping_address { get; set; } = string.Empty;
+        public string paymentMethod { get; set; } = "Cash on delivery";
+        public string? TransactionId { get; set; }
         public List<OrderDetailDTO> OrderDetails { get; set; } = new();
     }
 }

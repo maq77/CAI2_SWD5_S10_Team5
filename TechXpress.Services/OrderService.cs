@@ -310,9 +310,9 @@ namespace TechXpress.Services
                 // Set order to delivered
                 order.PaymentMethod = paymentMethod;
                 order.TransactionId = transactionId;
+                order.Status = OrderStatus.Paid;
 
                 // Save changes
-                await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
                 bool result = await _unitOfWork.SaveAsync();
                 // Log warning but don't throw exception
                 if (!result)

@@ -8,7 +8,10 @@
                 <th>Order ID</th>
                 <th>Date</th>
                 <th>Total Price</th>
-                 <th>Status</th>
+                <th>Status</th>
+                <th>Shipping Adress</th>
+                <th>Payment Method</th>
+                <th>Transaction ID</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -20,6 +23,9 @@
                     <td>@order.OrderDate</td>
                     <td>@order.TotalAmount.ToString("C")</td>
                     <td>@order.Status</td>
+                    <td>@order.shipping_address</td>
+                    <td>@order.paymentMethod</td>
+                    <td>@order.TransactionId</td>
                     <td>
                         <a asp-area="Customer" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">Details</a>
                         <a asp-area="Customer" asp-controller="Order" asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Cancel</a>
