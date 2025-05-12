@@ -6,6 +6,7 @@ using TechXpress.Data.Repositories;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services;
 using TechXpress.Services.Base;
+using TechXpress.Services.DTOs;
 using TechXpress.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Application Services
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
+// Initialize Stripe Client & Paypal Client
+builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPalSettings"));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+
 
 
 // Add MVC Controllers and Views

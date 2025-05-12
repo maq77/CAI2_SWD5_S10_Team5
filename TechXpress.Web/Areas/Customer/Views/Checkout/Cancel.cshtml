@@ -1,0 +1,18 @@
+﻿@model TechXpress.Services.DTOs.OrderDTO
+@{
+    ViewData["Title"] = "Order Success !";
+}
+<div class="container my-5 text-center">
+    <div class="card p-5">
+        <div class="mb-4">
+            <i class="fas fa-times-circle text-danger" style="font-size: 64px;"></i>
+        </div>
+        <h1 class="mb-4">Order Cancelled</h1>
+        <p class="mb-4">Your order has been cancelled. No payment has been processed.</p>
+        
+        <div class="mt-4">
+            <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="btn btn-primary me-3">Return to Cart</a>
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">Continue Shopping</a>
+        </div>
+    </div>
+</div>
