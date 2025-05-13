@@ -92,14 +92,7 @@ namespace YourNamespace.Controllers
                     OrderDate = DateTime.UtcNow,
                     paymentMethod = gatewayName
                 };
-                /*var order_id = await _orderService.CreateOrder(orderDto);
-
-                if (order_id == null || order_id == 0)
-                {
-                    return RedirectToAction("Error", "Home", new { message = "Failed to create order" });
-                }
-                var order = await _orderService.GetOrderById(order_id);
-                */
+                
                 var returnUrl = Url.Action("PaymentCallback", "Checkout",
                         new { area = "Customer" }, Request.Scheme);
                 var cancelUrl = Url.Action("PaymentCancelled", "Checkout",
@@ -108,7 +101,7 @@ namespace YourNamespace.Controllers
                 var paymentRequest = new PaymentRequest
                 {
                     //OrderId = order.Id,
-                    Amount = (decimal)totalAmount,
+                    Amount = Math.Round((decimal)totalAmount, 2, MidpointRounding.AwayFromZero),
                     Currency = "USD",
                     Description = $"TechXpress Order - {DateTime.Now:yyyy-MM-dd}",
                     ReturnUrl = returnUrl,
@@ -116,7 +109,9 @@ namespace YourNamespace.Controllers
                 };
 
                 // Process payment through selected gateway
+                
                 var paymentResult = await _paymentService.ProcessPaymentAsync(gatewayName, paymentRequest);
+                
 
                 if (paymentResult.Success && !string.IsNullOrEmpty(paymentResult.RedirectUrl))
                 {
@@ -134,7 +129,7 @@ namespace YourNamespace.Controllers
 
                     return RedirectToAction("Error", "Home", new
                     {
-                        area = "Customer",
+                        area = "",
                         message = $"Failed to initialize payment: {paymentResult.ErrorMessage}"
                     });
                 }
@@ -144,7 +139,7 @@ namespace YourNamespace.Controllers
                 _logger.LogError(ex, "Error in ProcessPayment");
                 return RedirectToAction("Error", "Home", new
                 {
-                    area = "Customer",
+                    area = "",
                     message = "An unexpected error occurred while processing your payment."
                 });
             }
@@ -160,7 +155,7 @@ namespace YourNamespace.Controllers
                 {
                     return RedirectToAction("Error", "Home", new
                     {
-                        area = "Customer",
+                        area = "",
                         message = "Payment session expired or invalid."
                     });
                 }
@@ -168,7 +163,7 @@ namespace YourNamespace.Controllers
                 {
                     return RedirectToAction("Error", "Home", new
                     {
-                        area = "Customer",
+                        area = "",
                         message = "Stripe session ID not found in the callback URL."
                     });
                 }
@@ -176,7 +171,7 @@ namespace YourNamespace.Controllers
                 // Verify payment was successful
                 var verificationResult = await _paymentService.VerifyPaymentAsync(gatewayName, HttpContext.Request);
 
-                if (verificationResult.Success)
+                if (verificationResult.Success || gatewayName =="Cash on Delivery")
                 {
                     // Get pending order from TempData
                     var orderJson = TempData["PendingOrder"]?.ToString();
@@ -184,7 +179,7 @@ namespace YourNamespace.Controllers
                     {
                         return RedirectToAction("Error", "Home", new
                         {
-                            area = "Customer",
+                            area = "",
                             message = "Order information not found. Please contact customer support."
                         });
                     }
@@ -196,7 +191,10 @@ namespace YourNamespace.Controllers
                     {
                         // Create the order in database now that payment is confirmed
                         var orderId = await _orderService.CreateOrder(orderDto);
-                        await _orderService.UpdateTransactionIdAsync(orderId, gatewayName, verificationResult.TransactionId);
+                        if (gatewayName != "Cash")
+                        {
+                            await _orderService.UpdateTransactionIdAsync(orderId, gatewayName, verificationResult.TransactionId);
+                        }
                         // Clear the shopping cart
                         _cartService.ClearCart();
 
@@ -208,7 +206,7 @@ namespace YourNamespace.Controllers
                         _logger.LogError(ex, "Error creating order after successful payment");
                         return RedirectToAction("Error", "Home", new
                         {
-                            area = "Customer",
+                            area = "",
                             message = "Payment successful but we couldn't create your order. Please contact customer support with your payment ID: " + verificationResult.TransactionId
                         });
                     }
@@ -221,14 +219,14 @@ namespace YourNamespace.Controllers
                     {
                         return RedirectToAction("Error", "Home", new
                         {
-                            area = "Customer",
+                            area = "",
                             message = "Your payment could not be processed due to security restrictions. Please try a different payment method."
                         });
                     }
 
                     return RedirectToAction("Error", "Home", new
                     {
-                        area = "Customer",
+                        area = "",
                         message = $"Failed to verify payment: {verificationResult.ErrorMessage}"
                     });
                 }
@@ -238,7 +236,7 @@ namespace YourNamespace.Controllers
                 _logger.LogError(ex, "Error in PaymentCallback");
                 return RedirectToAction("Error", "Home", new
                 {
-                    area = "Customer",
+                    area = "",
                     message = "An unexpected error occurred while processing your payment callback."
                 });
             }
@@ -258,7 +256,7 @@ namespace YourNamespace.Controllers
             {
                 return RedirectToAction("Error", "Home", new
                 {
-                    area = "Customer",
+                    area = "",
                     message = "Order not found."
                 });
             }

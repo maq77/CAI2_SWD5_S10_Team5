@@ -49,7 +49,7 @@ namespace TechXpress.Services
                     CancelUrl = request.CancelUrl,
                     Metadata = new Dictionary<string, string>
                     {
-                        { "OrderId", request.OrderId.ToString() ?? "N/A" }
+                        { "OrderId", (request.OrderId.ToString()=="0") ? Guid.NewGuid().ToString() : request.OrderId.ToString()}
                     }
                 };
 

@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using Stripe;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -49,6 +52,10 @@ namespace TechXpress.Services
             {
                 // Get access token
                 var accessToken = await GetAccessTokenAsync();
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    throw new Exception("Failed to obtain PayPal access token.");
+                }
 
                 // Create order
                 var paymentRequest = new HttpRequestMessage(HttpMethod.Post, "v2/checkout/orders");
@@ -57,21 +64,27 @@ namespace TechXpress.Services
                 var orderRequest = new
                 {
                     intent = "CAPTURE",
+                    payment_source = new
+                    {
+                        paypal = new
+                        {
+                            experience_context = new
+                            {
+                                return_url = request.ReturnUrl,
+                                cancel_url = request.CancelUrl
+                            }
+                        }
+                    },
                     purchase_units = new[]
                     {
                         new {
-                            reference_id = request.OrderId,
+                            invoice_id = (request.OrderId.ToString()=="0") ? Guid.NewGuid().ToString() : request.OrderId.ToString(),
                             amount = new {
                                 currency_code = request.Currency,
-                                value = request.Amount
+                                value = request.Amount.ToString("F2", CultureInfo.InvariantCulture)
                             },
-                            description = request.Description
+                            //description = request.Description
                         }
-                    },
-                    application_context = new
-                    {
-                        return_url = request.ReturnUrl,
-                        cancel_url = request.CancelUrl
                     }
                 };
 
@@ -79,6 +92,8 @@ namespace TechXpress.Services
                     JsonSerializer.Serialize(orderRequest),
                     Encoding.UTF8,
                     "application/json");
+
+                paymentRequest.Headers.Add("PayPal-Request-Id", Guid.NewGuid().ToString());
 
                 var paymentResponse = await _httpClient.SendAsync(paymentRequest);
 
@@ -89,7 +104,7 @@ namespace TechXpress.Services
 
                 var result = await paymentResponse.Content.ReadFromJsonAsync<Dictionary<string, object>>();
                 var links = ((JsonElement)result["links"]).EnumerateArray().ToList();
-                var approvalUrl = links.FirstOrDefault(x => x.GetProperty("rel").GetString() == "approve").GetProperty("href").GetString();
+                var approvalUrl = links.FirstOrDefault(x => x.GetProperty("rel").GetString() == "payer-action").GetProperty("href").GetString();
 
                 if (string.IsNullOrEmpty(approvalUrl))
                 {

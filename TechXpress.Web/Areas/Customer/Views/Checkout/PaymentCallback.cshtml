@@ -1,6 +1,7 @@
 ﻿@{
     Layout = "_Layout";
     ViewData["Title"] = "Processing Payment";
+    var message = Context.Request.Query["message"].ToString();
 }
 
 <div class="container py-5">
@@ -17,6 +18,8 @@
                         <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
                     </div>
                     <p class="text-muted">You will be redirected to the payment gateway shortly.</p>
+                    <strong>Error Details:</strong><br />
+                    <span class="text-warning">@message</span>
                 </div>
             </div>
         </div>

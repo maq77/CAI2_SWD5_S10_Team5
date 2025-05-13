@@ -80,6 +80,10 @@ namespace TechXpress.Web.Controllers
             var products = await GetFilteredProducts(categoryId, page, pageSize);
             return PartialView("_ProductList", products);
         }
+        public  IActionResult Error(string error="", string message="")
+        {
+            return View();
+        }
 
         //  Fetch Products with Filtering & Pagination
         #region Private Helper Methods

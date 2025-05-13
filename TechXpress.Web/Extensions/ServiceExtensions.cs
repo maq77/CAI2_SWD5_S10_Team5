@@ -70,6 +70,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IPaymentGateway, PayPalGateway>();
             services.AddScoped<IPaymentGateway, StripeGateway>();
+            services.AddScoped<IPaymentGateway, CashGateway>();
 
             // Cookie Authentication Configuration
             services.ConfigureApplicationCookie(options =>
