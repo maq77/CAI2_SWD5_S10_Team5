@@ -319,7 +319,7 @@ namespace TechXpress.Services
                 // Set order to delivered
                 order.PaymentMethod = paymentMethod;
                 order.TransactionId = transactionId;
-                order.Status = OrderStatus.Paid;
+
 
                 // Save changes
                 bool result = await _unitOfWork.SaveAsync();

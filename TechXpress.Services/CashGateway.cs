@@ -20,7 +20,7 @@ namespace TechXpress.Services
             return new PaymentResponse
             {
                 Success = true,
-                TransactionId = Guid.NewGuid().ToString(),
+                //TransactionId = Guid.NewGuid().ToString(),
                 RedirectUrl = request.ReturnUrl
             };
         }
@@ -28,8 +28,8 @@ namespace TechXpress.Services
         public async Task<PaymentResponse> VerifyPaymentAsync(HttpRequest request)
         {
             return new PaymentResponse { 
-              Success = true,
-              TransactionId = Guid.NewGuid().ToString()
+              Success = true
+              //TransactionId = Guid.NewGuid().ToString()
             };
         }
     }

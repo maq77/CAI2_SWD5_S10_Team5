@@ -171,7 +171,7 @@ namespace YourNamespace.Controllers
                 // Verify payment was successful
                 var verificationResult = await _paymentService.VerifyPaymentAsync(gatewayName, HttpContext.Request);
 
-                if (verificationResult.Success || gatewayName =="Cash on Delivery")
+                if (verificationResult.Success || gatewayName =="cash")
                 {
                     // Get pending order from TempData
                     var orderJson = TempData["PendingOrder"]?.ToString();
@@ -191,9 +191,11 @@ namespace YourNamespace.Controllers
                     {
                         // Create the order in database now that payment is confirmed
                         var orderId = await _orderService.CreateOrder(orderDto);
-                        if (gatewayName != "Cash")
+                        await _orderService.UpdateTransactionIdAsync(orderId, gatewayName, verificationResult.TransactionId);
+                        if (gatewayName != "cash")
                         {
-                            await _orderService.UpdateTransactionIdAsync(orderId, gatewayName, verificationResult.TransactionId);
+                            await _orderService.UpdateOrderStatus(orderId, "Paid");
+
                         }
                         // Clear the shopping cart
                         _cartService.ClearCart();
