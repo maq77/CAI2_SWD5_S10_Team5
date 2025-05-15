@@ -9,7 +9,7 @@ using TechXpress.Services.Base;
 
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "Auth")]
     [Area("Customer")]
     //[Route("[area]/[controller]")]
     public class ProfileController : Controller

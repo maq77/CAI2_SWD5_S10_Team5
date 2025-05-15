@@ -1175,6 +1175,7 @@ textarea.input {
     padding-bottom: 60px;
     margin-bottom: -60px;
     z-index: 2;
+    height: 650px;;
 }
 
 .products-slick .product.slick-slide {

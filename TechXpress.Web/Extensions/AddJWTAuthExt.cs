@@ -22,6 +22,8 @@ namespace TechXpress.Web.Extensions
             {
                 options.AddPolicy("AdminOnly", policy =>
                     policy.RequireRole("Admin"));
+                options.AddPolicy("Auth", policy =>
+                    policy.RequireRole("Admin","Customer"));
             });
 
             services.AddAuthentication(options =>
@@ -57,6 +59,28 @@ namespace TechXpress.Web.Extensions
                     OnMessageReceived = context =>
                     {
                         context.Token = context.Request.Cookies["AccessToken"];
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse(); // Suppress the default 401 response
+                        var request = context.Request;
+                        var returnUrl = request.Path + request.QueryString;
+
+                        var loginUrl = $"/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+                        context.Response.StatusCode = 302;
+                        context.Response.Headers["Location"] = loginUrl; // Or wherever you want to redirect
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.StatusCode = 302;
+                        var request = context.Request;
+                        var returnUrl = request.Path + request.QueryString;
+
+                        var accessDeniedUrl = $"/Account/AccessDenied?returnUrl={Uri.EscapeDataString(returnUrl)}";
+                        context.Response.Headers["Location"] = accessDeniedUrl;
                         return Task.CompletedTask;
                     }
                 };

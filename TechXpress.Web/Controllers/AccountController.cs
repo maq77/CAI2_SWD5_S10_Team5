@@ -27,6 +27,7 @@ namespace TechXpress.Web.Controllers
         }
 
         public IActionResult Register() => View();
+        public IActionResult AccessDenied() => View();
 
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDTO model)
@@ -44,7 +45,11 @@ namespace TechXpress.Web.Controllers
         }
 
 
-        public IActionResult Login() => View();
+        public IActionResult Login(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
 
         //[HttpPost("login")]
         [HttpPost]
@@ -54,11 +59,11 @@ namespace TechXpress.Web.Controllers
             {
                 return BadRequest(new { success = false, message = "Invalid input data", errors = ModelState });
             }
-            var stopwatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew(); ///for testing performance
 
             var (authResponse, redirectUrl) = await _userService.LoginAsync(model);
 
-            stopwatch.Stop();
+            stopwatch.Stop(); ///
             Console.WriteLine($"Login took: {stopwatch.ElapsedMilliseconds} ms");
             if (authResponse.IsSuccess)
             {
@@ -79,6 +84,10 @@ namespace TechXpress.Web.Controllers
                     SameSite = SameSiteMode.Strict,
                     Expires = DateTime.UtcNow.AddDays(7) // 1-week refresh token
                 });
+                if (!string.IsNullOrEmpty(model.returnUrl) && Url.IsLocalUrl(model.returnUrl))
+                {
+                    redirectUrl = model.returnUrl;
+                }
                 return Ok(new { authResponse.IsSuccess, authResponse.Message, authResponse.Token, authResponse.RefreshToken, redirectUrl });
             }
             return BadRequest(new { authResponse.IsSuccess, authResponse.Message });

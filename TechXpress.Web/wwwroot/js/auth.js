@@ -33,12 +33,14 @@
     });
 
     $("#loginBtn").on("click", function () {
+        //alert("Clicked!");
         $("#loginBtn").prop("disabled", true).text("Logging in...");
 
         var loginData = {
             Email: $("#Email").val(),
             Password: $("#Password").val(),
-            RememberMe: $("#RememberMe").is(":checked")
+            RememberMe: $("#RememberMe").is(":checked"),
+            returnUrl: $("#returnUrl").val()
         };
 
         $.ajax({

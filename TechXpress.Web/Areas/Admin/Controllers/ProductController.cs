@@ -8,7 +8,7 @@ using X.PagedList.Extensions;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = "AdminOnly")]
     [Area("Admin")]
     public class ProductController : Controller
     {

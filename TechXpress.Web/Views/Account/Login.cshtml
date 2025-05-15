@@ -14,6 +14,7 @@
     <div class="col-md-6">
         <div id="login-message" class="alert d-none"></div>
         <form id="loginForm">
+            <input type="hidden" name="returnUrl" id="returnUrl" value="@ViewBag.ReturnUrl" />
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" type="email" class="form-control" id="Email" />

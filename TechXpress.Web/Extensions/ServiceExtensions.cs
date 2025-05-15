@@ -72,13 +72,6 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IPaymentGateway, StripeGateway>();
             services.AddScoped<IPaymentGateway, CashGateway>();
 
-            // Cookie Authentication Configuration
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.LoginPath = "/Account/Login";
-                options.AccessDeniedPath = "/Account/AccessDenied";
-            });
-
 
             return services;
         }

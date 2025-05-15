@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace YourNamespace.Controllers
 {
-    [Authorize]
+    [Authorize(Policy ="Auth")]
     [Area("Customer")]
     //[Route("[area]/[controller]/[action]")]
     public class CheckoutController : Controller

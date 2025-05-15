@@ -6,7 +6,7 @@ using TechXpress.Services.Base;
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Authorize]
+    [Authorize(Policy = "Auth")]
     public class WishlistController : Controller
     {
         private readonly IWishlistService _wishListItemService;

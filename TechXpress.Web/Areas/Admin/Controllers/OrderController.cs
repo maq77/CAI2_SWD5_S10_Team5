@@ -9,7 +9,7 @@ using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     [Area("Admin")]
     public class OrderController : Controller
     {
