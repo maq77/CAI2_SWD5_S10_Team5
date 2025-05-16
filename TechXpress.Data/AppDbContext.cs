@@ -86,7 +86,7 @@ namespace TechXpress.Data
                 .HasOne(od => od.Product)
                 .WithMany()
                 .HasForeignKey(od => od.ProductId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void ConfigureProductImage(ModelBuilder builder)
