@@ -6,10 +6,10 @@
 
 2. Follow the prompts to configure your database.
 
-The script will:
-- Configure `appsettings.json`
-- Apply EF migrations
-- Seed the database
+   The script will:
+   - Configure `appsettings.json`
+   - Apply EF migrations
+   - Seed the database
 
 3. Seed Data Manually
 - Uncomment line 38 in Program.cs
