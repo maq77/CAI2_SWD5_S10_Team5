@@ -12,7 +12,7 @@ The script will:
 - Seed the database
 
 3. Seed Data Manually
-- Uncomment in Program.cs line 38
+- Uncomment line 38 in Program.cs
 - Created Credintials are
 - Email : admin@gmail.com
 - Password : Admin@123
