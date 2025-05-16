@@ -10,3 +10,9 @@ The script will:
 - Configure `appsettings.json`
 - Apply EF migrations
 - Seed the database
+
+3. Seed Data Manually
+- Uncomment in Program.cs line 38
+- Created Credintials are
+- Email : admin@gmail.com
+- Password : Admin@123
