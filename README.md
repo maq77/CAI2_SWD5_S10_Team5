@@ -2,7 +2,7 @@
 
 1. Run the setup script:
    - Windows: `.\setup.ps1`
-   - Linux/macOS: `./setup.sh`
+   - Linux/macOS: `./setup.sh` ( Recommended ) 
 
 2. Follow the prompts to configure your database.
 
