@@ -2,11 +2,17 @@
 
 1. Run the setup script:
    - Windows: `.\setup.ps1`
-   - Linux/macOS: `./setup.sh`
+   - Linux/macOS: `./setup.sh` ( Recommended ) 
 
 2. Follow the prompts to configure your database.
 
-The script will:
-- Configure `appsettings.json`
-- Apply EF migrations
-- Seed the database
+   The script will:
+   - Configure `appsettings.json`
+   - Apply EF migrations
+   - Seed the database
+
+3. Seed Data Manually
+- Uncomment line 38 in Program.cs
+- Created Credintials are
+- Email : admin@gmail.com
+- Password : Admin@123
