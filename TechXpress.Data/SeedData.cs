@@ -87,7 +87,7 @@ namespace TechXpress.Data
         public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            string[] roles = { "Admin", "User", "Manager" };
+            string[] roles = { "Admin", "User", "Manager", "Customer" };
 
             foreach (var role in roles)
             {

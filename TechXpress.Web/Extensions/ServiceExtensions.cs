@@ -62,6 +62,12 @@ namespace TechXpress.Web.Extensions
                 return new StripeClient(stripeSettings.SecretKey); // secret key
             });
 
+            services.Configure<OpenAISettings>(
+                                    configuration.GetSection("OpenAI"));
+            services.Configure<HuggingFaceSettings>(
+                                    configuration.GetSection("HuggingFace"));
+
+
 
 
 

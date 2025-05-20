@@ -1,0 +1,52 @@
+﻿@* if you want to put style in here
+    you will face issue in keyframe 
+    just put @ behind @keyframe
+    it will be @@keyframe
+    this addition @ skips compiling issue
+*@
+
+<!-- Floating chat button -->
+<div class="chat-button" id="chat-button">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z"></path>
+        <path d="M7 9H17V11H7V9Z"></path>
+        <path d="M7 12H14V14H7V12Z"></path>
+        <path d="M7 6H17V8H7V6Z"></path>
+    </svg>
+</div>
+
+<!-- Chatbot container -->
+<div class="chatbot-container" id="chatbot-container">
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="header-title">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+                <circle cx="8" cy="9" r="1.5"></circle>
+                <circle cx="16" cy="9" r="1.5"></circle>
+                <path d="M8.5 15.5C9.83333 16.6667 14.1667 16.6667 15.5 15.5"></path>
+            </svg>
+            Hi! I'm TechXpress AI Model (Mistral)👋
+        </div>
+        <button class="close-button" id="close-button">×</button>
+    </div>
+
+    <!-- Conversation area -->
+    <div class="conversation" id="conversation">
+        <div class="message bot-message">
+            <div class="message-content">Hi! I'm TechXpress AI Model👋 it's great to see you!</div>
+        </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+        <input type="text" id="message-input" placeholder="Type your message here...">
+        <button id="send-button">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+            </svg>
+        </button>
+    </div>
+</div>
+<!-- JavaScript code -->
+<script src="~/js/chatbot.js"></script> 

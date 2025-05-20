@@ -1,0 +1,56 @@
+﻿/* admin.css */
+
+/* Body & layout */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Admin navbar */
+.admin-navbar {
+    background-color: #343a40;
+    color: white;
+}
+
+    .admin-navbar a {
+        color: white;
+    }
+
+        .admin-navbar a:hover {
+            color: #ffc107;
+        }
+
+/* Sidebar (if any) */
+.admin-sidebar {
+    background-color: #212529;
+    color: white;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+/* Cards */
+.admin-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+/* Buttons */
+.btn-admin {
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 5px;
+}
+
+    .btn-admin:hover {
+        background-color: #0b5ed7;
+    }
+
+/* Footer */
+.admin-footer {
+    background-color: #343a40;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
