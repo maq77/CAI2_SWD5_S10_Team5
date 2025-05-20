@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Customer\Views\Review\_EditReview.cshtml" />
     <Content Remove="C:\Users\maqmo\.nuget\packages\bootstrap\5.3.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js" />
     <Content Remove="C:\Users\maqmo\.nuget\packages\bootstrap\5.3.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js.map" />
     <Content Remove="C:\Users\maqmo\.nuget\packages\bootstrap\5.3.3\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js" />
@@ -56,6 +57,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Areas\Customer\Views\Shared\_EditReview.cshtml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -27,6 +27,7 @@ namespace TechXpress.Data.Repositories
             OrderDetails = new Repository<OrderDetail>(dp, _loggerFactory.CreateLogger<Repository<OrderDetail>>());
             WishListItems = new Repository<WishListItem>(dp, _loggerFactory.CreateLogger<Repository<WishListItem>>());
             ProductImages = new Repository<ProductImage>(dp, _loggerFactory.CreateLogger<Repository<ProductImage>>());
+            Reviews = new Repository<Review>(dp, _loggerFactory.CreateLogger<Repository<Review>>());
 
             _logger.LogInformation("UnitOfWork initialized.");
         }
@@ -42,6 +43,7 @@ namespace TechXpress.Data.Repositories
         public IRepository<ProductImage> ProductImages { get; private set; }
         public IRepository<OrderDetail> OrderDetails { get; private set; }
         public IRepository<WishListItem> WishListItems { get; private set; }
+        public IRepository<Review> Reviews { get; private set; }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {

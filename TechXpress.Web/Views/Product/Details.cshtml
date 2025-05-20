@@ -53,26 +53,30 @@
                     <div>
                         <div class="product-rating">
                             @{
-                                int fullStars = (int)Math.Floor(Model.Rating);
-                                int emptyStars = 5 - fullStars;
+                                int fullStars = (int)Math.Floor(Model.AverageRating);
+                                bool hasHalfStar = Model.AverageRating - fullStars >= 0.5;
+                                int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
                                 for (int i = 0; i < fullStars; i++)
                                 {
                                     <i class="fa fa-star"></i>
-                                    ;
+                                }
+                                if (hasHalfStar)
+                                {
+                                    <i class="fa fa-star-half-o"></i>
                                 }
                                 for (int i = 0; i < emptyStars; i++)
                                 {
                                     <i class="fa fa-star-o"></i>
-                                    ;
                                 }
                             }
                         </div>
-                        <a class="review-link" href="#">@Model.Rating Review(s)</a>
+                        <a class="review-link" href="#reviews-tab">@Model.ReviewCount Review(s) | Add your review</a>
                     </div>
                     <div>
                         <h3 class="product-price">@Model.Price.ToString("C")</h3>
                         <span class="product-available">
-                            @(Model.StockQuantity > 0 ? "In Stock" : "Out of Stock")
+                            @(Model.StockQuantity >= 0 ? "In Stock" : "Out of Stock")
                         </span>
                     </div>
                     <p>@Model.Description</p>
@@ -136,7 +140,7 @@
                         <a class="nav-link" id="details-tab" data-bs-toggle="tab" href="#details" role="tab">Details</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab">Reviews</a>
+                        <a class="nav-link" id="reviews-tab" data-bs-toggle="tab" href="#reviews" role="tab">Reviews (@Model.ReviewCount)</a>
                     </li>
                 </ul>
 
@@ -147,10 +151,10 @@
                     <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab">
                         <p>Stock: @Model.StockQuantity</p>
                         <p>Category: @Model.CategoryName</p>
-                        <p>Rating: @Model.Rating</p>
+                        <p>Rating: @Model.AverageRating.ToString("0.0")</p>
                     </div>
                     <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                        <p>No reviews available.</p>
+                        <partial name="_ReviewsPartial" model="Model" />
                     </div>
                 </div>
             </div>
@@ -159,3 +163,20 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // If reviews tab is in the URL, activate it
+            if (window.location.hash === '#reviews') {
+                $('#reviews-tab').tab('show');
+            }
+
+            // When clicking on review link, activate reviews tab
+            $('.review-link').on('click', function(e) {
+                e.preventDefault();
+                $('#reviews-tab').tab('show');
+            });
+        });
+    </script>
+}

@@ -17,6 +17,7 @@ namespace TechXpress.Data.Repositories.Base
         IRepository<Category> Categories { get; }
         IRepository<OrderDetail> OrderDetails { get; }
         IRepository<WishListItem> WishListItems{ get; }
+        IRepository<Review> Reviews{ get; }
 
         Task<IDbContextTransaction> BeginTransactionAsync();
         Task<bool> SaveAsync();

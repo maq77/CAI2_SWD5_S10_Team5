@@ -39,6 +39,26 @@ namespace TechXpress.Data.Repositories
             _logger.LogInformation("Fetching all {EntityName} records from the database.", typeof(T).Name);
             return await query.ToListAsync();
         }
+        public async Task<IEnumerable<T>> GetAll_includes(Expression<Func<T, bool>>? filter = null, string[]? includes = null)
+        {
+            IQueryable<T> query = _Set;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            _logger.LogInformation("Fetching all {EntityName} records from the database.", typeof(T).Name);
+            return await query.ToListAsync();
+        }
 
 
         public async Task<T?> GetById(int id)

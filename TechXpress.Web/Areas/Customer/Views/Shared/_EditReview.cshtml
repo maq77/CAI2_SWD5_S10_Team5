@@ -1,0 +1,42 @@
+<!-- Edit Review Modal -->
+<div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReviewModalLabel">Edit Your Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-area="Customer" asp-controller="Review" asp-action="UpdateReview" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-review-id" name="Id" />
+                    <input type="hidden" id="edit-product-id" name="ProductId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Your Rating</label>
+                        <div class="stars">
+                            <input type="radio" id="edit-rating-5" name="Rating" value="5">
+                            <label for="edit-rating-5"></label>
+                            <input type="radio" id="edit-rating-4" name="Rating" value="4">
+                            <label for="edit-rating-4"></label>
+                            <input type="radio" id="edit-rating-3" name="Rating" value="3">
+                            <label for="edit-rating-3"></label>
+                            <input type="radio" id="edit-rating-2" name="Rating" value="2">
+                            <label for="edit-rating-2"></label>
+                            <input type="radio" id="edit-rating-1" name="Rating" value="1">
+                            <label for="edit-rating-1"></label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-comment" class="form-label">Your Review</label>
+                        <textarea class="form-control" id="edit-comment" name="Comment" rows="4" required minlength="10"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,132 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.ProductDetailsViewModel
+
+<div class="row">
+    <!-- Rating Summary -->
+    <div class="col-md-3">
+        <div id="rating">
+            <div class="rating-avg">
+                <span>@Model.AverageRating.ToString("0.0")</span>
+                <div class="rating-stars">
+                    @{
+                        int fullStars = (int)Math.Floor(Model.AverageRating);
+                        bool hasHalfStar = Model.AverageRating - fullStars >= 0.5;
+                        int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                        for (int i = 0; i < fullStars; i++)
+                        {
+                            <i class="fa fa-star"></i>
+                        }
+                        if (hasHalfStar)
+                        {
+                            <i class="fa fa-star-half-o"></i>
+                        }
+                        for (int i = 0; i < emptyStars; i++)
+                        {
+                            <i class="fa fa-star-o"></i>
+                        }
+                    }
+                </div>
+            </div>
+            <ul class="rating">
+                @{
+                    for (int i = 5; i >= 1; i--)
+                    {
+                        int count = Model.Reviews.Count(r => r.Rating == i);
+                        int percentage = Model.ReviewCount > 0 ? (count * 100) / Model.ReviewCount : 0;
+
+                        <li>
+                            <div class="rating-stars">
+                                @for (int j = 0; j < i; j++)
+                                {
+                                    <i class="fa fa-star"></i>
+                                }
+                                @for (int j = 0; j < 5 - i; j++)
+                                {
+                                    <i class="fa fa-star-o"></i>
+                                }
+                            </div>
+                            <div class="rating-progress">
+                                <div style="width: @percentage%;"></div>
+                            </div>
+                            <span class="sum">@count</span>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+    <!-- /Rating Summary -->
+    <!-- Reviews List -->
+    <div class="col-md-6">
+        <div id="reviews">
+            @if (Model.Reviews.Any())
+            {
+                <ul class="reviews">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <li>
+                            <div class="review-heading">
+                                <h5 class="name">@review.UserName</h5>
+                                <p class="date">@review.Date.ToString("dd MMM yyyy, h:mm tt")</p>
+                                <div class="review-rating">
+                                    @for (int i = 0; i < review.Rating; i++)
+                                    {
+                                        <i class="fa fa-star"></i>
+                                    }
+                                    @for (int i = 0; i < 5 - review.Rating; i++)
+                                    {
+                                        <i class="fa fa-star-o empty"></i>
+                                    }
+                                </div>
+                            </div>
+                            <div class="review-body">
+                                <p>
+                                    @review.Comment
+                                </p>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                @if (Model.ReviewCount > 3)
+                {
+                    <ul class="reviews-pagination">
+                        <li class="active">1</li>
+                        @for (int i = 2; i <= Math.Ceiling((double)Model.ReviewCount / 3); i++)
+                        {
+                            <li><a href="?page=@i#reviews">@i</a></li>
+                        }
+                        <li><a href="?page=2#reviews"><i class="fa fa-angle-right"></i></a></li>
+                    </ul>
+                }
+            }
+            else
+            {
+                <p>No reviews yet. Be the first to review this product!</p>
+            }
+        </div>
+    </div>
+    <!-- /Reviews List -->
+    <!-- Review Form -->
+    <div class="col-md-3">
+        <div id="review-form">
+            <form class="review-form" asp-area="Customer" asp-controller="Review" asp-action="AddReview" method="post">
+                <input type="hidden" name="ProductId" value="@Model.Id" />
+                <input class="input" type="text" name="UserName" placeholder="Your Name" required>
+                <div class="input-rating">
+                    <span>Your Rating: </span>
+                    <div class="stars">
+                        <input id="star5" name="Rating" value="5" type="radio"><label for="star5"></label>
+                        <input id="star4" name="Rating" value="4" type="radio"><label for="star4"></label>
+                        <input id="star3" name="Rating" value="3" type="radio"><label for="star3"></label>
+                        <input id="star2" name="Rating" value="2" type="radio"><label for="star2"></label>
+                        <input id="star1" name="Rating" value="1" type="radio" checked><label for="star1"></label>
+                    </div>
+                </div>
+                <textarea class="input" name="Comment" placeholder="Your Review" required></textarea>
+                <button type="submit" class="primary-btn">Submit</button>
+            </form>
+        </div>
+    </div>
+    <!-- /Review Form -->
+</div>

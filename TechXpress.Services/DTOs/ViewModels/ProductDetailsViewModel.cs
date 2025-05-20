@@ -15,7 +15,10 @@ namespace TechXpress.Services.DTOs.ViewModels
         public List<ProductImageDTO> Images { get; set; } = new();
         public string CategoryName { get; set; } = string.Empty;
         public int StockQuantity { get; set; } = 0;
-        public double Rating { get; set; } = 5.0;
+        public byte Rating { get; set; } = 5;
+        public double AverageRating { get; set; } = 0;
+        public List<ReviewDTO> Reviews { get; set; } = new();
+        public int ReviewCount { get; set; } = 0;
         public bool IsInWishlist { get; set; } = false;
     }
 

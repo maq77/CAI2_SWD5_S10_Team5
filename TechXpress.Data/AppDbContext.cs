@@ -14,6 +14,7 @@ namespace TechXpress.Data
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<WishListItem> WishlistItems { get; set; }
+        public DbSet<Review> Reviews { get; set; }
         public DbSet<TokenInfo> TokenInfos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -21,11 +22,38 @@ namespace TechXpress.Data
             base.OnModelCreating(builder);
 
             ConfigureProduct(builder);
+            ConfigureReview(builder);
             ConfigureOrder(builder);
             ConfigureOrderDetail(builder);
             ConfigureProductImage(builder);
             ConfigureWishlistItem(builder);
             ConfigureToken(builder);
+        }
+        private void ConfigureReview(ModelBuilder builder)
+        {
+            builder.Entity<Review>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.HasAlternateKey(r => new { r.UserId, r.ProductId });
+                entity.Property(r => r.UserId)
+                      .IsRequired();
+                entity.Property(r => r.ProductId)
+                      .IsRequired();
+                entity.Property(r => r.Rating)
+                      .IsRequired();
+                entity.Property(r => r.Comment)
+                      .HasMaxLength(1000);
+                entity.HasOne(r => r.User)
+                      .WithMany()
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(r => r.Product)
+                      .WithMany()
+                      .HasForeignKey(r => r.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(c => c.Rating)
+                      .HasColumnType("TINYINT");
+            });
         }
         private void ConfigureToken(ModelBuilder builder)
         {

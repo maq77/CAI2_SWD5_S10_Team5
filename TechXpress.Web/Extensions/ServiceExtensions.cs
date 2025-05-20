@@ -10,6 +10,7 @@ using TechXpress.Services;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
 using ProductService = TechXpress.Services.ProductService;
+using ReviewService = TechXpress.Services.ReviewService;
 using TokenService = TechXpress.Services.TokenService;
 
 namespace TechXpress.Web.Extensions
@@ -44,6 +45,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IWishlistService, WishListItemService>();
             services.AddScoped<ITokenRepo, TokenRepo>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IReviewService, ReviewService>();
             //services.AddScoped<ITokenService, TokenService>();
 
             // Session Configuration

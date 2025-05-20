@@ -10,6 +10,7 @@ namespace TechXpress.Data.Repositories.Base
     public interface IRepository<T> where T : class
     {
         Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null, Func<IQueryable<T>, IQueryable<T>>? include = null);
+        Task<IEnumerable<T>> GetAll_includes(Expression<Func<T, bool>>? filter = null, string[]? includes = null);
         Task<T?> GetById(int id);
         Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate);
         Task<T?> Find_First(Expression<Func<T, bool>> predicate);
