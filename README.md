@@ -16,3 +16,6 @@
 - Created Credintials are
 - Email : admin@gmail.com
 - Password : Admin@123
+4. Use Chatbot when Production
+- uncomment line in send message in try block
+- it uses real AI Model (Mistral)
