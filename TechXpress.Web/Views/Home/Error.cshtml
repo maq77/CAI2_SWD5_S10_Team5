@@ -1,6 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Error";
-    var message = Context.Request.Query["message"].ToString();
+    //var message = Context.Request.Query["message"].ToString();
+    string error = ViewData["ErrorCode"]?.ToString() ?? "500";
+    string message = ViewData["ErrorMessage"]?.ToString() ?? "Something went wrong.";
 }
 
 <div class="text-center mt-5">
@@ -8,8 +10,8 @@
     <p class="lead">Something went wrong.</p>
     <hr />
     <p>
-        <strong>Error Details:</strong><br />
-        <span class="text-warning">@message</span>
+        <strong>Error Code:</strong> <span class="text-warning">@error</span><br />
+        <strong>Details:</strong> <span class="text-warning">@message</span>
     </p>
     <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-primary mt-3">
         Go Back Home

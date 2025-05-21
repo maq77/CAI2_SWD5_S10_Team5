@@ -40,7 +40,25 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+            var exception = exceptionHandlerPathFeature?.Error;
+
+            var error = "500";
+            var message = Uri.EscapeDataString(exception?.Message ?? "An unknown error occurred.");
+
+            //Loggging Errors
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogError(exception, "Unhandled exception caught in global handler.");
+
+
+            context.Response.Redirect($"/Home/Error?error={error}&message={message}");
+            await Task.CompletedTask;
+        });
+    });
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
@@ -52,6 +70,17 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseMiddleware<TokenRefreshMiddleware>();
 app.UseAuthorization();
+
+app.UseStatusCodePages(async context =>
+{
+    var response = context.HttpContext.Response;
+
+    if (response.StatusCode == 404)
+    {
+        var message = Uri.EscapeDataString("Page Not Found");
+        response.Redirect($"/Home/Error?error=404&message={message}");
+    }
+});
 
 // Configure Routing with Areas
 app.MapControllerRoute(

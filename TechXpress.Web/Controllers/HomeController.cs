@@ -82,6 +82,8 @@ namespace TechXpress.Web.Controllers
         }
         public  IActionResult Error(string error="", string message="")
         {
+            ViewData["ErrorCode"] = error;
+            ViewData["ErrorMessage"] = message;
             return View();
         }
 
