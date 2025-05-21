@@ -1,11 +1,50 @@
-﻿<!-- Sidebar -->
-<nav class="admin-sidebar p-3">
-    <h4 class="text-white">TechXpress Admin</h4>
-    <ul class="nav flex-column">
-        <li class="nav-item"><a class="nav-link text-white" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link text-white" asp-area="Admin" asp-controller="Product" asp-action="Index">Products</a></li>
-        <li class="nav-item"><a class="nav-link text-white" asp-area="Admin" asp-controller="Orders" asp-action="Index">Orders</a></li>
-        <li class="nav-item"><a class="nav-link text-white" asp-area="Admin" asp-controller="Users" asp-action="Index">Users</a></li>
-        <li class="nav-item"><a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Back to Site</a></li>
+﻿<div class="admin-sidebar">
+    <div class="sidebar-logo">
+        <img src="~/images/logo.png" alt="TechXpress" height="40">
+        <span class="ms-2 fw-bold text-white">TechXpress</span>
+    </div>
+    <ul class="sidebar-nav nav flex-column mt-4">
+        <li class="nav-item">
+            <a class="nav-link active" href="@Url.Action("Index", "Dashboard")">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "Product")">
+                <i class="fas fa-box"></i>
+                <span>Products</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "Order")">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Orders</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "UserManagement")">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "Category")">
+                <i class="fas fa-tags"></i>
+                <span>Categories</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "Report")">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="@Url.Action("Index", "Settings")">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </li>
     </ul>
-</nav>
+</div>

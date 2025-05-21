@@ -1,0 +1,35 @@
+﻿<nav class="admin-navbar navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <button class="btn btn-sm" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="d-flex ms-auto">
+            <div class="dropdown me-3">
+                <a class="btn btn-sm position-relative" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-bell"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        3
+                    </span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <h6 class="dropdown-header">Notifications</h6>
+                    <a class="dropdown-item" href="#">New order received</a>
+                    <a class="dropdown-item" href="#">Low stock alert</a>
+                    <a class="dropdown-item" href="#">Payment processed</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a class="d-flex align-items-center text-decoration-none dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                    <img src="~/images/ProfilePics/default-pic.png" alt="Admin" class="rounded-circle" width="32" height="32">
+                    <span class="ms-2 d-none d-lg-inline-block">Admin User</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a>
+                    <a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="javascript:void(0);" id="logoutBtn" class="dropdown-item"><i class="fas fa-sign-out-alt me-2"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
