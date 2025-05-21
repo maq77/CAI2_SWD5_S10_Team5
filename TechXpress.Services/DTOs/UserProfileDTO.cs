@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace TechXpress.Services.DTOs
         public string Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public string? ProfilePictureUrl { get; set; } // Optional
+        public IFormFile? Image { get; set; } //to upload a new image
+        public UserImageDTO? UserImage { get; set; } // to display the current image
     }
 }

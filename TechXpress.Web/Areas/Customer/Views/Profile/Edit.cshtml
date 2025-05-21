@@ -3,35 +3,141 @@
     ViewData["Title"] = "Edit Profile";
 }
 
-<div class="container mt-4">
-    <h2>Edit Profile</h2>
+<div class="container mt-5 edit-profile-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 fade-in">
+                <div class="card-header bg-secondary text-white">
+                    <h2 class="mb-0 slide-in"><i class="fas fa-user-edit me-2"></i>Edit Profile</h2>
+                </div>
 
-    <form asp-action="Edit" method="post">
-        <input type="hidden" asp-for="Id" />
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="edit-form" id="profileForm">
+                        <input type="hidden" asp-for="Id" />
 
-        <label>First Name</label>
-        <input asp-for="FirstName" class="form-control" />
+                        <div class="text-center mb-4 slide-in" style="animation-delay: 0.2s">
+                            <div class="profile-preview-container">
+                                @if (Model.UserImage.ImagePath != null)
+                                {
+                                    <img src="@Model.UserImage.ImagePath" id="profile-preview" class="rounded-circle profile-preview" alt="Current Profile Picture" />
+                                }
+                                else
+                                {
+                                    <img src="/images/ProfilePics/default-pic.png" id="profile-preview" class="rounded-circle profile-preview" alt="Default Profile Picture" />
+                                }
+                                <div class="profile-upload-overlay">
+                                    <i class="fas fa-camera text-white"></i>
+                                </div>
+                            </div>
+                            <label for="Image" class="btn btn-outline-primary mt-3 upload-btn">
+                                <i class="fas fa-upload me-2"></i>Change Picture
+                            </label>
+                            <input asp-for="Image" type="file" class="form-control d-none" id="Image" accept="image/*" onchange="previewImage(this)" />
+                        </div>
 
-        <label>Last Name</label>
-        <input asp-for="LastName" class="form-control" />
+                        <div class="row">
+                            <div class="col-md-6 mb-3 slide-in" style="animation-delay: 0.3s">
+                                <div class="form-floating">
+                                    <input asp-for="FirstName" class="form-control input-field" id="FirstName" placeholder="First Name" />
+                                    <label for="FirstName"><i class="fas fa-user me-2"></i>First Name</label>
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
 
-        <label>Email</label>
-        <input asp-for="Email" class="form-control" readonly/>
+                            <div class="col-md-6 mb-3 slide-in" style="animation-delay: 0.4s">
+                                <div class="form-floating">
+                                    <input asp-for="LastName" class="form-control input-field" id="LastName" placeholder="Last Name" />
+                                    <label for="LastName"><i class="fas fa-user me-2"></i>Last Name</label>
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
 
-        <label>Phone Number</label>
-        <input asp-for="PhoneNumber" class="form-control" />
+                        <div class="mb-3 slide-in" style="animation-delay: 0.5s">
+                            <div class="form-floating">
+                                <input asp-for="Email" class="form-control input-field" id="Email" placeholder="Email" readonly />
+                                <label for="Email"><i class="fas fa-envelope me-2"></i>Email</label>
+                            </div>
+                        </div>
 
-        <label>Address</label>
-        <input asp-for="Address" class="form-control" />
+                        <div class="mb-3 slide-in" style="animation-delay: 0.6s">
+                            <div class="form-floating">
+                                <input asp-for="PhoneNumber" class="form-control input-field" id="PhoneNumber" placeholder="Phone Number" />
+                                <label for="PhoneNumber"><i class="fas fa-phone me-2"></i>Phone Number</label>
+                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
 
-        <label>Profile Picture URL</label>
-        <input asp-for="ProfilePictureUrl" class="form-control" />
+                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                            <div class="form-floating">
+                                <input asp-for="Address" class="form-control input-field" id="Address" placeholder="Address" />
+                                <label for="Address"><i class="fas fa-map-marker-alt me-2"></i>Address</label>
+                                <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+                        </div>
 
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-
+                        <div class="d-flex justify-content-between mt-4 slide-in" style="animation-delay: 0.8s">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg pulse-button">
+                                <i class="fas fa-save me-2 text-white"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Image preview functionality
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#profile-preview').attr('src', e.target.result)
+                    .addClass('preview-animation');
+
+                    setTimeout(() => {
+                        $('#profile-preview').removeClass('preview-animation');
+                    }, 1000);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Click on overlay to trigger file input
+        $(document).ready(function() {
+            $('.profile-upload-overlay').click(function() {
+                $('#Image').click();
+            });
+
+            // Fancy form animations on focus
+            $('.input-field').focus(function() {
+                $(this).parent().addClass('focused');
+            }).blur(function() {
+                $(this).parent().removeClass('focused');
+            });
+
+            // Form submit animation
+            $('#profileForm').submit(function() {
+                $('.card').addClass('submitted');
+                return true;
+            });
+
+            // Initialize all elements with animation
+            setTimeout(function() {
+                $('.fade-in, .slide-in').css({
+                    'opacity': '1',
+                    'transform': 'translateY(0)'
+                });
+            }, 100);
+        });
+    </script>
 }

@@ -10,6 +10,7 @@ namespace TechXpress.Data
 
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<UserImage> UsersImages { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
@@ -26,8 +27,50 @@ namespace TechXpress.Data
             ConfigureOrder(builder);
             ConfigureOrderDetail(builder);
             ConfigureProductImage(builder);
+            ConfigureUserImage(builder);
             ConfigureWishlistItem(builder);
             ConfigureToken(builder);
+        }
+        private void ConfigureUser(ModelBuilder builder)
+        {
+            builder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id);
+                entity.Property(u => u.FirstName)
+                      .IsRequired()
+                      .HasMaxLength(50);
+                entity.Property(u => u.LastName)
+                      .IsRequired()
+                      .HasMaxLength(50);
+                entity.Property(u => u.Address)
+                      .IsRequired()
+                      .HasMaxLength(200);
+                entity.Property(u => u.City)
+                      .IsRequired()
+                      .HasMaxLength(100);
+                entity.Property(u => u.Country)
+                      .IsRequired()
+                      .HasMaxLength(100);
+                entity.Property(u => u.PostalCode)
+                      .HasMaxLength(20);
+            });
+            builder.Entity<User>()
+                .Navigation(p => p.UserImage).AutoInclude();
+        }
+        private void ConfigureUserImage(ModelBuilder builder)
+        {
+            builder.Entity<UserImage>(entity =>
+            {
+                entity.HasKey(ui => ui.Id);
+                entity.Property(ui => ui.UserId)
+                      .IsRequired();
+                entity.Property(ui => ui.ImagePath)
+                      .IsRequired();
+                entity.HasOne(ui => ui.User)
+                      .WithOne(u => u.UserImage)
+                      .HasForeignKey<UserImage>(ui => ui.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
         private void ConfigureReview(ModelBuilder builder)
         {

@@ -40,6 +40,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductImageService, ProductImageService>();
+            services.AddScoped<IUserImageService, UserImageService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IWishlistService, WishListItemService>();

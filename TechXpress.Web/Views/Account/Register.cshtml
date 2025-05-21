@@ -1,5 +1,4 @@
 ﻿@model TechXpress.Services.DTOs.RegisterDTO
-
 @{
     ViewData["Title"] = "Register";
     ViewData["BreadcrumbPath"] = new List<(string, string)>
@@ -8,38 +7,45 @@
                 ("/Register", "Register")
             };
 }
-
 <h2 class="text-center">Register</h2>
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div id="register-message" class="alert d-none"></div>
-        <form id="registerForm">
+        <form id="registerForm" enctype="multipart/form-data">
             <div class="mb-3">
                 <label asp-for="FirstName" class="form-label"></label>
                 <input asp-for="FirstName" class="form-control" id="FirstName" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="LastName" class="form-label"></label>
                 <input asp-for="LastName" class="form-control" id="LastName" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
                 <input asp-for="Email" type="email" class="form-control" id="Email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="Password" class="form-label"></label>
                 <input asp-for="Password" type="password" class="form-control" id="Password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="ConfirmPassword" class="form-label"></label>
                 <input asp-for="ConfirmPassword" type="password" class="form-control" id="ConfirmPassword" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Image" class="form-label"></label>
+                <input asp-for="Image" type="file" class="form-control" id="Image" />
+                <span asp-validation-for="Image" class="text-danger"></span>
             </div>
             <button type="button" id="registerBtn" class="btn btn-primary w-100">Register</button>
         </form>
     </div>
 </div>
-
-
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -52,9 +58,7 @@
         </ul>
     </div>
 }
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/auth.js"></script>
 }
-
-<script src="~/js/auth.js"></script>

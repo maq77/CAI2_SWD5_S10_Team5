@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TechXpress.Data.Constants;
 using TechXpress.Data.Model;
+using TechXpress.Data.Repositories.Base;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
 
@@ -18,18 +20,22 @@ namespace TechXpress.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenService _tokenService;
         private readonly ILogger<UserService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IUserImageService _userImageService;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUnitOfWork unitOfWork, IUserImageService userImageService, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _userImageService = userImageService;
         }
         public async Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
@@ -56,6 +62,9 @@ namespace TechXpress.Services
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                     return (new AuthResponse { IsSuccess=false,Message=errors}, "");
                 }
+                user = await _userManager.FindByEmailAsync(model.Email);
+
+                await _userImageService.UploadUserImageAsync(user.Id, model.Image);
 
                 await AssignRoleAsync(user.Email, "Customer");
                 await _signInManager.SignInAsync(user, isPersistent: false);
@@ -161,7 +170,7 @@ namespace TechXpress.Services
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return null;
-
+            var image = await _userImageService.GetImageByUserId(userId);
             return new UserProfileDTO
             {
                 Id = user.Id,
@@ -170,7 +179,7 @@ namespace TechXpress.Services
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 Address = user.Address,
-                ProfilePictureUrl = user.ProfilePictureUrl,
+                UserImage = image
             };
         }
         public async Task<bool> UpdateUserProfileAsync(string userId, UserProfileDTO profile)
@@ -183,14 +192,11 @@ namespace TechXpress.Services
             user.PhoneNumber = profile.PhoneNumber;
             user.Address = profile.Address;
 
-            // Only update profile picture if a new one is provided
-            if (!string.IsNullOrEmpty(profile.ProfilePictureUrl))
-            {
-                user.ProfilePictureUrl = profile.ProfilePictureUrl;
-            }
-
             var result = await _userManager.UpdateAsync(user);
-            return result.Succeeded;
+            if (!result.Succeeded) return false;
+
+            var res_img = await _userImageService.UpdateUserImageAsync(userId, profile.Image);
+            return res_img;
         }
         public async Task<bool> DeleteUserAsync(string email)
         {

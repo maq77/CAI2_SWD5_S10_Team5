@@ -46,8 +46,9 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return View(model);
         }
 
-        
-        [HttpGet("Edit")]
+
+        //[HttpGet("Edit")]
+        [HttpGet]
         public async Task<IActionResult> Edit()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -60,8 +61,9 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return View(userProfile);
         }
 
-        
-        [HttpPost("Edit")]
+
+        //[HttpPost("Edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserProfileDTO model)
         {

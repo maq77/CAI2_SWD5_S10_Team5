@@ -1,0 +1,166 @@
+﻿/* Edit Profile Specific Styles */
+.edit-profile-container {
+    margin-bottom: 50px;
+}
+
+.edit-form .form-floating {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+    .edit-form .form-floating label {
+        padding-left: 15px;
+    }
+
+    .edit-form .form-floating i {
+        color: var(--primary-color);
+    }
+
+.input-field {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+    .input-field:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(230, 46, 46, 0.25);
+    }
+
+    .input-field.readonly {
+        background-color: #f8f9fa;
+    }
+
+.profile-preview-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.profile-preview {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border: 4px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+    .profile-preview:hover {
+        transform: scale(1.05);
+    }
+
+.profile-upload-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: var(--primary-color);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.profile-preview-container:hover .profile-upload-overlay {
+    opacity: 0.9;
+    transform: scale(1.1);
+}
+
+.upload-btn {
+    transition: all 0.3s ease;
+}
+
+    .upload-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+/* Animation classes */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.slide-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.8s ease-out forwards;
+}
+
+.pulse-button {
+    animation: pulse 2s infinite;
+}
+
+    .pulse-button:hover {
+        animation: none;
+        transform: scale(1.05);
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Form validation styling */
+.field-validation-error {
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    display: block;
+    margin-top: 5px;
+    animation: shake 0.5s ease-in-out;
+}
+
+.input-validation-error {
+    border-color: var(--primary-color);
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
