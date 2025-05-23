@@ -21,15 +21,19 @@ namespace TechXpress.Services
     public class ProductService : IProductService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IWishlistService _wishlistService;
+        private readonly IReviewService _reviewService;
         private readonly IMemoryCache _cache;
         private readonly ILogger<ProductService> _logger;
         private const string ProductCacheKey = "ProductList";
         private const string PopularProductCacheKey = "PopularProducts";
         private const string CategoryCacheKey = "Categories";
 
-        public ProductService(IUnitOfWork unitOfWork, IMemoryCache cache, ILogger<ProductService> logger)
+        public ProductService(IUnitOfWork unitOfWork, IWishlistService wishlistService, IReviewService reviewService, IMemoryCache cache, ILogger<ProductService> logger)
         {
             _unitOfWork = unitOfWork;
+            _wishlistService = wishlistService;
+            _reviewService = reviewService;
             _cache = cache;
             _logger = logger;
         }
@@ -248,6 +252,7 @@ namespace TechXpress.Services
                             Id = img.Id,
                             ImagePath = img.ImagePath ?? "/images/default-product.png"
                         }).ToList()
+                        
                     });
 
                 //  Cache for 30 minutes

@@ -63,10 +63,24 @@
                                                 @* } *@
                                             </h4>
                                             <div class="product-rating">
-                                                @* @for (int i = 0; i < 5; i++) *@
-                                                @* { *@
-                                                @*     <i class="fa @(i < product.Rating ? "fa-star" : "fa-star-o")"></i> *@
-                                                @* } *@
+                                                @{
+                                                    int fullStars = (int)Math.Floor(product.AverageRating);
+                                                    bool hasHalfStar = product.AverageRating - fullStars >= 0.5;
+                                                    int emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+                                                    for (int i = 0; i < fullStars; i++)
+                                                    {
+                                                        <i class="fa fa-star"></i>
+                                                    }
+                                                    if (hasHalfStar)
+                                                    {
+                                                        <i class="fa fa-star-half-o"></i>
+                                                    }
+                                                    for (int i = 0; i < emptyStars; i++)
+                                                    {
+                                                        <i class="fa fa-star-o"></i>
+                                                    }
+                                                }
                                             </div>
                                             <div class="product-btns">
                                                 <button type="button" class="wishlist-toggle" data-product-id="@product.Id">
@@ -74,13 +88,16 @@
                                                     <span class="tooltipp">@(product.IsInWishlist ? "Remove from wishlist" : "Add to wishlist")</span>
                                                 </button>
 
+
                                                 <button class="add-to-compare">
                                                     <i class="fa fa-exchange"></i>
                                                     <span class="tooltipp">add to compare</span>
                                                 </button>
                                                 <button class="quick-view">
+                                                <a asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
                                                     <i class="fa fa-eye"></i>
                                                     <span class="tooltipp">quick view</span>
+                                                </a>
                                                 </button>
                                             </div>
                                         </div>

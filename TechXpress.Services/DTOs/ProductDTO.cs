@@ -24,6 +24,7 @@ namespace TechXpress.Services.DTOs
         public int SalesCount { get; set; } = 0;
         public List<ProductImageDTO> Images { get; set; } = new();
         public List<IFormFile>? UploadedImages { get; set; }
-        public bool IsInWishlist { get; set; }
+        public bool IsInWishlist { get; set; } = false;
+        public double AverageRating = 5;
     }
 }

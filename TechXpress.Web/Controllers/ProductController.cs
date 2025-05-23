@@ -70,7 +70,7 @@ namespace TechXpress.Web.Controllers
 
                 if (user!=null)
                 {
-                    product.IsInWishlist = await _wishlistService.IsInWishlistAsync(user.Id, product.Id);
+                    viewModel.IsInWishlist = await _wishlistService.IsInWishlistAsync(user.Id, product.Id);
                 }
                 // Show reviews tab if requested
                 if (showReviews)

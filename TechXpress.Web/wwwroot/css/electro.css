@@ -1759,6 +1759,8 @@ textarea.input {
 }
 
 .reviews .review-body {
+    padding-block-start: 20px;
+    margin-block-start: auto;
     min-height: 70px;
 }
 

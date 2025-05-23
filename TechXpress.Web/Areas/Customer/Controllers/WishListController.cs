@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.WebSockets;
+using TechXpress.Data.Model;
 using TechXpress.Services;
 using TechXpress.Services.Base;
 
@@ -10,23 +14,26 @@ namespace TechXpress.Web.Areas.Customer.Controllers
     public class WishlistController : Controller
     {
         private readonly IWishlistService _wishListItemService;
+        private readonly UserManager<User> _userManager;
 
-        public WishlistController(IWishlistService wishListItemService)
+        public WishlistController(IWishlistService wishListItemService, UserManager<User> userManager)
         {
             _wishListItemService = wishListItemService;
+            _userManager = userManager;
         }
-        [Authorize]
+
         [HttpPost]
         public async Task<IActionResult> AddToWishlist(int productId)
         {
-            var userId = User.Identity.Name; // Or use a UserManager if using Identity
+            //var userId = User.Identity.Name; // Or use a UserManager
+            var user = await _userManager.GetUserAsync(User);
 
-            if (string.IsNullOrEmpty(userId))
+            if (user==null)
             {
                 return Json(new { success = false, message = "User not authenticated." });
             }
 
-            var result = await _wishListItemService.AddToWishlistAsync(userId, productId);
+            var result = await _wishListItemService.AddToWishlistAsync(user.Id, productId);
             if (result)
             {
                 return Json(new { success = true, message = "Added to wishlist!" });
@@ -38,8 +45,13 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveFromWishlist(int productId)
         {
-            var userId = User.Identity.Name;
-            var result = await _wishListItemService.RemoveFromWishlistAsync(userId, productId);
+            //var userId = User.Identity.Name;
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not authenticated." });
+            }
+            var result = await _wishListItemService.RemoveFromWishlistAsync(user.Id, productId);
             if (result)
                 return Json(new { success = true, message = "Product removed from wishlist." });
 
@@ -49,17 +61,38 @@ namespace TechXpress.Web.Areas.Customer.Controllers
         public async Task<IActionResult> Index()
         {
             SetPageMeta();
-            var userId = User.Identity.Name; // Replace with actual user ID
-            var wishlist = await _wishListItemService.GetWishlistAsync(userId);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not authenticated." });
+            }
+            var wishlist = await _wishListItemService.GetWishlistAsync(user.Id);
             return View(wishlist);
         }
         [HttpGet]
         public async Task<IActionResult> GetWishlistCount()
         {
-            var userId = User.Identity.Name; // Ensure this retrieves the correct user ID
-            var wishlistItems = await _wishListItemService.GetWishlistAsync(userId);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not authenticated." });
+            }
+            var wishlistItems = await _wishListItemService.GetWishlistAsync(user.Id);
             int count = wishlistItems.Count(); // Get the count from the IEnumerable result
             return Json(new { count });
+        }
+        [HttpGet]
+        public async Task<IActionResult> IsinWishlist(int productId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not authenticated." });
+            }
+            var isInWishlist = await _wishListItemService.IsInWishlistAsync(user.Id, productId);
+            if (isInWishlist)
+                return Json(new { success = true, message = "Product is in wishlist." });
+            return Json(new { success = false, message = "Product is not in wishlist." });
         }
         #region Private Helper Methods
 

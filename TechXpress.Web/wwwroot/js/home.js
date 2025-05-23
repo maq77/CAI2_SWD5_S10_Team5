@@ -113,9 +113,38 @@
             }
         });
     });
+    function checkIfInWishlist(productId, button) {
+        $.ajax({
+            url: "/Customer/Wishlist/IsinWishlist",
+            type: "GET",
+            data: { productId: productId },
+            success: function (response) {
+                var icon = button.find("i");
+                var tooltip = button.find(".tooltipp");
+
+                if (response.success) {
+                    icon.removeClass("fa-heart-o").addClass("fa-heart text-danger");
+                    tooltip.text("Remove from wishlist");
+                } else {
+                    icon.removeClass("fa-heart text-danger").addClass("fa-heart-o");
+                    tooltip.text("Add to wishlist");
+                }
+            },
+            error: function () {
+                console.error("Error checking wishlist status.");
+            }
+        });
+    }
 
     $(document).ready(function () {
         updateWishlistCount();
+
+        /*// Sync all wishlist buttons with backend state
+        $(".wishlist-toggle").each(function () {
+            var button = $(this);
+            var productId = button.data("product-id");
+            checkIfInWishlist(productId, button);
+        });*/
     });
 
 
