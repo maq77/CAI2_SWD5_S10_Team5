@@ -62,11 +62,27 @@
         </div>
     </div>
 
-    <!-- Sales Chart -->
+    <!-- Charts -->
     <div class="chart-container mb-4">
         <h3 class="chart-title">Sales Analytics</h3>
         <canvas id="salesChart" height="100"></canvas>
     </div>
+
+    <div class="chart-container mb-4">
+        <h3 class="chart-title">Category Distribution</h3>
+        <canvas id="categoryChart" height="50"></canvas>
+    </div>
+
+    <div class="chart-container mb-4">
+        <h3 class="chart-title">User Registrations</h3>
+        <canvas id="userChart" height="100"></canvas>
+    </div>
+
+    <div class="chart-container mb-4">
+        <h3 class="chart-title">Products Added</h3>
+        <canvas id="productChart" height="100"></canvas>
+    </div>
+
 
     <!-- Quick Actions -->
     <div class="quick-actions mb-4">
@@ -81,7 +97,7 @@
             <a href="@Url.Action("Index", "UserManagement")" class="action-btn warning">
                 <i class="fas fa-users"></i> Manage Users
             </a>
-            <a href="@Url.Action("Index", "Report")" class="action-btn" style="background: var(--gradient-4);">
+            <a href="@Url.Action("Index", "Analytics")" class="action-btn" style="background: var(--gradient-4);">
                 <i class="fas fa-chart-bar"></i> Analytics
             </a>
         </div>
@@ -95,21 +111,7 @@
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animate stat numbers
-            document.querySelectorAll('.stat-number').forEach(function(el) {
-                const target = parseInt(el.getAttribute('data-target'));
-                let current = 0;
-                const increment = target / 50;
-                const timer = setInterval(function() {
-                    current += increment;
-                    el.textContent = Math.floor(current);
-                    if (current >= target) {
-                        el.textContent = target;
-                        clearInterval(timer);
-                    }
-                }, 30);
-            });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/dashboard-charts.js"></script>
+   
 }

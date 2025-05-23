@@ -117,7 +117,8 @@ namespace TechXpress.Services
                     {
                         Id = img.Id,
                         ImagePath = img.ImagePath ?? "/images/default-product.png"
-                    }).ToList()
+                    }).ToList(),
+                    CreatedAt = p.CreatedAt
                 });
 
                 // Cache for 10 minutes
@@ -314,7 +315,8 @@ namespace TechXpress.Services
                 {
                     Id = img.Id,
                     ImagePath = img.ImagePath
-                }).ToList()
+                }).ToList(),
+                CreatedAt = product.CreatedAt
             };
 
         }

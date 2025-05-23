@@ -47,6 +47,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<ITokenRepo, TokenRepo>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IAnalyticsService, AnalyticsService>();
             //services.AddScoped<ITokenService, TokenService>();
 
             // Session Configuration

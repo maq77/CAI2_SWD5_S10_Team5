@@ -1,0 +1,15 @@
+﻿<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Sales (Filtered)</h5>
+        <div class="d-flex gap-2">
+            <input type="date" id="fromDate" class="form-control" />
+            <input type="date" id="toDate" class="form-control" />
+            <button class="btn btn-primary" id="applyFilters">Apply</button>
+            <button class="btn btn-secondary export-btn" data-type="csv">CSV</button>
+            <button class="btn btn-danger export-btn" data-type="pdf">PDF</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="salesChart" height="120"></canvas>
+    </div>
+</div>

@@ -159,7 +159,8 @@ namespace TechXpress.Services
                     Email = user.Email,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Roles = roles.ToList()
+                    Roles = roles.ToList(),
+                    CreatedAt = user.CreatedAt
                 });
 
             }

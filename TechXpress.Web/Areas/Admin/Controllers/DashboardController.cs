@@ -44,6 +44,70 @@ namespace TechXpress.Web.Areas.Admin.Controllers
 
             return View(dashboardData);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetSalesChartData()
+        {
+            var orders = await _orderService.GetAllOrders();
+
+            var monthlySales = Enumerable.Range(1, 12)
+                .Select(month => new
+                {
+                    Month = month,
+                    Sales = orders
+                        .Where(o => o.OrderDate.Month == month)
+                        .Sum(o => o.TotalAmount),
+                    Revenue = orders
+                        .Where(o => o.OrderDate.Month == month)
+                        .Sum(o => o.TotalAmount * 0.8) // Adjust logic if needed
+                }).ToList();
+
+            return Json(monthlySales);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetProductChartData()
+        {
+            var products = await _productService.GetAllProducts(); // Include CreatedAt
+            var monthlyProducts = Enumerable.Range(1, 12)
+                .Select(month => new
+                {
+                    Month = month,
+                    Count = products.Count(p => p.CreatedAt.Month == month)
+                }).ToList();
+
+            return Json(monthlyProducts);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserChartData()
+        {
+            var users = await _userService.GetAllUsersAsync(); // Include CreatedDate or similar
+            var monthlyUsers = Enumerable.Range(1, 12)
+                .Select(month => new
+                {
+                    Month = month,
+                    Count = users.Count(u => u.CreatedAt.Month == month)
+                }).ToList();
+
+            return Json(monthlyUsers);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCategoryChartData()
+        {
+            var products = await _productService.GetAllProducts(); // Include Category
+            var categories = products
+                .GroupBy(p => p.CategoryName)
+                .Select(g => new
+                {
+                    Category = g.Key,
+                    Count = g.Count()
+                }).ToList();
+
+            return Json(categories);
+        }
+
+
         public async Task<IActionResult> Users()
         {
             var users = await _userService.GetAllUsersAsync();

@@ -22,6 +22,7 @@ namespace TechXpress.Services.DTOs
         public int CategoryId { get; set; } = int.MaxValue;
         public string? CategoryName { get; set; } = "UnCategorized";
         public int SalesCount { get; set; } = 0;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public List<ProductImageDTO> Images { get; set; } = new();
         public List<IFormFile>? UploadedImages { get; set; }
         public bool IsInWishlist { get; set; } = false;

@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Analytics Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">Analytics Dashboard</h2>
+
+<div class="mb-5">
+    @await Html.PartialAsync("_SalesAnalyticsPartial")
+</div>
+
+<div class="mb-5">
+    @await Html.PartialAsync("_ProductsChartPartial")
+</div>
+
+<div class="mb-5">
+    @await Html.PartialAsync("_UsersChartPartial")
+</div>
+
+<div class="mb-5">
+    @await Html.PartialAsync("_CategoriesChartPartial")
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="~/js/analytics/sales-analytics.js"></script>
+    <script src="~/js/analytics/product-chart.js"></script>
+    <script src="~/js/analytics/users-chart.js"></script>
+    <script src="~/js/analytics/categories-chart.js"></script>
+}

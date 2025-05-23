@@ -17,6 +17,8 @@ namespace TechXpress.Data.Model
         [NotMapped]
         public string FullName => $"{FirstName} {LastName}";
         public string Address { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public string City { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public string? PostalCode { get; set; } = string.Empty;

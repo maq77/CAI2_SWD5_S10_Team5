@@ -20,6 +20,8 @@ namespace TechXpress.Services.DTOs
         [Required]
         public List<string>? Roles { get; set; } = new();
 
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public string ProfilePictureUrl { get; set; }
     }
 }
