@@ -11,6 +11,7 @@ using TechXpress.Data.Model;
 using TechXpress.Data.Repositories.Base;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
+using TechXpress.Services.DTOs.ViewModels;
 
 
 namespace TechXpress.Services
@@ -179,7 +180,14 @@ namespace TechXpress.Services
                 LastName= user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Address = user.Address,
+                //Address = user.Address,
+                Address_ = new AddressViewModel
+                {
+                    Street=user.Address,
+                    City = user.City,
+                    Country = user.Country,
+                    PostalCode = user.PostalCode
+                },
                 UserImage = image
             };
         }
@@ -191,13 +199,24 @@ namespace TechXpress.Services
             user.FirstName = profile.FirstName;
             user.LastName = profile.LastName;
             user.PhoneNumber = profile.PhoneNumber;
-            user.Address = profile.Address;
+            //user.Address = profile.Address;
+            user.Address = profile.Address_.Street;
+            user.City = profile.Address_.City;
+            user.Country = profile.Address_.Country;
+            user.PostalCode = profile.Address_.PostalCode;
+
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded) return false;
 
             var res_img = await _userImageService.UpdateUserImageAsync(userId, profile.Image);
-            return res_img;
+            if (!res_img)
+            {
+                _logger.LogWarning($"Failed to update user image for {user.Email} or Image is null or ahven't updated image ,no new image provided");
+                //return false;
+            }
+
+            return true;
         }
         public async Task<bool> DeleteUserAsync(string email)
         {

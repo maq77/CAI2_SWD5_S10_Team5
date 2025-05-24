@@ -13,6 +13,9 @@ namespace TechXpress.Services.DTOs.ViewModels
         public IEnumerable<string> AvailablePaymentGateways { get; set; }
         public string SelectedPaymentGateway { get; set; }
 
+        public string UserAddress { get; set; } = string.Empty; // For saved user address
+
+        public AddressViewModel NewAddress { get; set; }
         /// 
         ///
         /// 

@@ -47,7 +47,8 @@ namespace YourNamespace.Controllers
         {
             // Get cart items from your existing cart service
             var cartItems = _cartService.GetCart();
-
+            var user = await _userManager.GetUserAsync(User);
+            string shippingAddress = $"{user.Address}, {user.City}, {user.PostalCode}, {user.Country}";
             if (!cartItems.Any())
             {
                 return RedirectToAction("Index", "Cart");
@@ -56,6 +57,7 @@ namespace YourNamespace.Controllers
             var checkoutModel = new CheckoutViewModel
             {
                 CartItems = cartItems,
+                UserAddress = shippingAddress,
                 AvailablePaymentGateways = _paymentService.GetAvailableGateways(),
                 StripePublishableKey = _stripeSettings.Value.PublishableKey,
                 PayPalClientId = _paypalSettings.Value.ClientId,
@@ -66,11 +68,14 @@ namespace YourNamespace.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ProcessPayment(string gatewayName)
+        public async Task<IActionResult> ProcessPayment(string gatewayName, CheckoutViewModel model, string UseSavedAddress)
         {
             try{
                 // Create a new order in pending state
                 var user = await _userManager.GetUserAsync(User);
+                string shippingAddress = UseSavedAddress == "true"
+                         ? user.Address + ", " + user.City + ", " + user.Country + ", " + user.PostalCode + ", " + user.Country
+                             : $"{model.NewAddress.Street}, {model.NewAddress.City}, {model.NewAddress.PostalCode}, {model.NewAddress.Country}";
                 var items = _cartService.GetCart();
                 var totalAmount = _cartService.GetCartTotal();
                 if (items == null || !items.Any())
@@ -88,7 +93,7 @@ namespace YourNamespace.Controllers
                     }).ToList(),
                     TotalAmount = totalAmount,
                     Status = OrderStatus.Pending,
-                    shipping_address = "DUMP Data", // Replace with actual shipping address
+                    shipping_address = shippingAddress, // Replace with actual shipping address
                     OrderDate = DateTime.UtcNow,
                     paymentMethod = gatewayName
                 };

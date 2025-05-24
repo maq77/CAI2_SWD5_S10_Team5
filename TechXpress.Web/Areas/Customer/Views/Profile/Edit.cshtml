@@ -68,11 +68,39 @@
                             </div>
                         </div>
 
-                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                        @*<div class="mb-4 slide-in" style="animation-delay: 0.7s">
                             <div class="form-floating">
                                 <input asp-for="Address" class="form-control input-field" id="Address" placeholder="Address" />
                                 <label for="Address"><i class="fas fa-map-marker-alt me-2"></i>Address</label>
                                 <span asp-validation-for="Address" class="text-danger"></span>
+                            </div>
+                        </div>*@
+                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                            <div class="form-floating">
+                                <input asp-for="Address_.Street" class="form-control input-field" id="Address_.Street" placeholder="Street..." />
+                                <label for="Address._Street"><i class="fas fa-map-marker-alt me-2"></i>Street</label>
+                                <span asp-validation-for="Address_.Street" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                            <div class="form-floating">
+                                <input asp-for="Address_.City" class="form-control input-field" id="Address_.City" placeholder="City..." />
+                                <label for="Address.City"><i class="fas fa-map-marker-alt me-2"></i>City</label>
+                                <span asp-validation-for="Address_.City" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                            <div class="form-floating">
+                                <input asp-for="Address_.Country" class="form-control input-field" id="Address_.Country" placeholder="Country..." />
+                                <label for="Address.Country"><i class="fas fa-map-marker-alt me-2"></i>Country</label>
+                                <span asp-validation-for="Address_.Country" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="mb-4 slide-in" style="animation-delay: 0.7s">
+                            <div class="form-floating">
+                                <input asp-for="Address_.PostalCode" class="form-control input-field" id="Address_.PostalCode" placeholder="PostalCode..." />
+                                <label for="Address.PostalCode"><i class="fas fa-map-marker-alt me-2"></i>PostalCode</label>
+                                <span asp-validation-for="Address_.PostalCode" class="text-danger"></span>
                             </div>
                         </div>
 

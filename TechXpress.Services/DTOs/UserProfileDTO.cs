@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Services.DTOs
 {
@@ -16,6 +17,7 @@ namespace TechXpress.Services.DTOs
         public string Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
+        public AddressViewModel Address_ { get; set; }
         public IFormFile? Image { get; set; } //to upload a new image
         public UserImageDTO? UserImage { get; set; } // to display the current image
     }
