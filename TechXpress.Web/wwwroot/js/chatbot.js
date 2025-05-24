@@ -47,6 +47,7 @@
             // Show typing indicator
             showTypingIndicator();
 
+            //comment this when in production , AI generated response XD
             // Get bot response after delay
             setTimeout(() => {
                 // Remove typing indicator
@@ -56,8 +57,9 @@
                 const response = getBotResponse(content);
                 addMessage(response, 'bot');
             }, 1000);
+
             //uncomment this when in production , AI generated response XD
-            /*try {
+            try {
                 const res = await fetch('/api/HuggingFace/ask', {
                     method: 'POST',
                     headers: {
@@ -72,7 +74,7 @@
             } catch (error) {
                 removeTypingIndicator();
                 addMessage("Oops! Something went wrong. 😞", 'bot');
-            }*/
+            }
 
 
             
