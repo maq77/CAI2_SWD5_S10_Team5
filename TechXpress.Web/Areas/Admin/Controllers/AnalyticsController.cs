@@ -40,7 +40,7 @@ namespace TechXpress.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProductChartData()
         {
-            var data = await _analyticsService.GetCategoryChartDataAsync();
+            var data = await _analyticsService.GetProductChartDataAsync();
             return Json(data);
         }
 

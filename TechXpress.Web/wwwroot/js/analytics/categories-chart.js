@@ -6,7 +6,7 @@
         new Chart(document.getElementById("categoriesChart"), {
             type: "bar",
             data: {
-                labels: data.map(d => monthNames[d.month-1]),
+                labels: data.map(d => monthNames[d.month - 1]),
                 datasets: [{
                     label: "Categories",
                     data: data.map(x => x.count),

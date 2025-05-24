@@ -10,7 +10,7 @@
             method: "GET",
             data: { from: from, to: to },
             success: function (data) {
-                const labels = data.map(x => monthNames[s.month-1]);
+                const labels = data.map(x => monthNames[x.month-1]);
                 const sales = data.map(x => x.sales);
                 const revenue = data.map(x => x.revenue);
 
