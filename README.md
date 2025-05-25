@@ -19,3 +19,6 @@
 4. Use Chatbot when Production
 - uncomment line in send message in try block
 - it uses real AI Model (Mistral)
+
+## Visit Demo
+=> http://maqmohamed8-001-site1.jtempurl.com/
