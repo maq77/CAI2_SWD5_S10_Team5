@@ -26,6 +26,6 @@ namespace TechXpress.Services.DTOs
         public List<ProductImageDTO> Images { get; set; } = new();
         public List<IFormFile>? UploadedImages { get; set; }
         public bool IsInWishlist { get; set; } = false;
-        public double AverageRating = 5;
+        public double AverageRating = 5.0;
     }
 }

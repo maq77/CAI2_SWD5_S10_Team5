@@ -19,6 +19,8 @@ namespace TechXpress.Services.DTOs.ViewModels
         public string CustomerName { get; set; } = string.Empty; 
         public string CustomerEmail { get; set; } = string.Empty;
         public string shipping_address { get; set; } = string.Empty;
+        public string paymentMethod { get; set; } = string.Empty;
+        public string transactionId { get; set; } = string.Empty;
         public List<OrderDetailViewModel> Items { get; set; } = new List<OrderDetailViewModel>();
 
         // Constructor to populate the Status SelectList

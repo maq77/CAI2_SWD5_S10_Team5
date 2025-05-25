@@ -15,6 +15,8 @@
                 <th>Customer Name</th>
                 <th>Customer Email</th>
                 <td>Shipping Address</td>
+                <td>Payment Method</td>
+                <td>Transaction Id</td>
                 <th>Date</th>
                 <th>Total Price</th>
                 <th>Status</th>
@@ -29,6 +31,8 @@
                     <td>@order.CustomerName</td>
                     <td>@order.CustomerEmail</td>
                     <td>@order.shipping_address</td>
+                    <td>@order.paymentMethod</td>
+                    <td>@order.transactionId</td>
                     <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
                     <td>@order.TotalAmount.ToString("C")</td>
                     <td>

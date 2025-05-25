@@ -12,6 +12,17 @@ namespace TechXpress.Data
 {
     public class DbSeeder
     {
+        public static async Task AddMigrations(IApplicationBuilder app)
+        {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.Migrate(); // or db.Database.EnsureCreated();
+            }
+
+            return;
+        }
+
         public static async Task SeedData(IApplicationBuilder app)
         {
             // Create a scoped service provider to resolve dependencies

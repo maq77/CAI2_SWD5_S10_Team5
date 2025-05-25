@@ -35,7 +35,7 @@ builder.Logging.AddFilter("Default", LogLevel.Warning);
 var app = builder.Build();
 
 //V2 of Seed Data ,, remove it when initilazing proj for 1st time
-await DbSeeder.SeedData(app);
+//await DbSeeder.SeedData(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

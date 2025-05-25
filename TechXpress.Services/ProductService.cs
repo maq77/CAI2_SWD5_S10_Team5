@@ -236,16 +236,17 @@ namespace TechXpress.Services
                     .Select(g => new { ProductId = g.Key, TotalSales = g.Sum(o => o.Quantity) })
                     .ToDictionary(x => x.ProductId, x => x.TotalSales);
 
-                popularProducts = products
+                var popularProducts_ = products
                     .OrderByDescending(p => salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0)
                     .Take(top)
-                    .Select(p => new ProductDTO
+                    .Select(async p => new ProductDTO
                     {
                         Id = p.Id,
                         Name = p.Name,
                         Price = p.Price,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category?.Name ?? "Uncategorized",
+                        AverageRating = await _reviewService.GetAverageRatingByProductIdAsync(p.Id),
                         StockQunatity = p.StockQuantity,
                         SalesCount = salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0,
                         Images = p.Images.Select(img => new ProductImageDTO
@@ -255,6 +256,8 @@ namespace TechXpress.Services
                         }).ToList()
                         
                     });
+                // this to convert (Ienum) into (Task Ienum) ,, because i used await inside ProductDTO 
+                popularProducts = await Task.WhenAll(popularProducts_);
 
                 //  Cache for 30 minutes
                 _cache.Set(PopularProductCacheKey, popularProducts, TimeSpan.FromSeconds(30));

@@ -40,6 +40,9 @@ namespace TechXpress.Web.Areas.Admin.Controllers
                     TotalAmount = order.TotalAmount,
                     OrderDate = order.OrderDate,
                     SelectedStatus = order.Status,
+                    shipping_address = order.shipping_address,
+                    paymentMethod = order.paymentMethod,
+                    transactionId = order.TransactionId ?? "NA",
                     CustomerName = user != null ? $"{user.FirstName} {user.LastName}" : "Unknown",
                     CustomerEmail = user?.Email ?? "Unknown",
                     Items = order.OrderDetails.Select(item => new OrderDetailViewModel

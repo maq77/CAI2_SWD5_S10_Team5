@@ -38,6 +38,7 @@
                                 {
                                     <!-- Product -->
                                     <div class="product">
+                                        <a asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
                                         <div class="product-img">
                                             <img src="@Url.Content(product.Images.FirstOrDefault()?.ImagePath ?? "/images/default-product.png")" alt="@product.Name">
                                             <div class="product-label">
@@ -48,6 +49,7 @@
                                                 <span class="new">NEW</span>
                                             </div>
                                         </div>
+                                        </a>
                                         <div class="product-body">
                                             <p class="product-category">@product.CategoryName</p>
                                             <h3 class="product-name">

@@ -32,7 +32,7 @@
         });
 
     // Send message function
-     function sendMessage() {
+    async function sendMessage() {
             const content = messageInput.value.trim();
 
             // Don't send empty messages
@@ -49,18 +49,18 @@
 
             //comment this when in production , AI generated response XD
             // Get bot response after delay
-            setTimeout(() => {
+            /*setTimeout(() => {
                 // Remove typing indicator
                 removeTypingIndicator();
                 
                 // Generate and add bot response
                 const response = getBotResponse(content);
                 addMessage(response, 'bot');
-            }, 1000);
+            }, 1000);*/
 
             //uncomment this when in production , AI generated response XD
             try {
-                const res = await fetch('/api/HuggingFace/ask', {
+                const res =  fetch('/api/HuggingFace/ask', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
