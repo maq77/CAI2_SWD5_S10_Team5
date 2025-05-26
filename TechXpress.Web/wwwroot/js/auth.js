@@ -87,4 +87,37 @@
             }
         });
     });
+
+    $('#resend-confirmation-btn').on("click", function (e) {
+        e.preventDefault();
+        $('#resend-message').text("Sending...").css('color', 'gray');
+
+        $.ajax({
+            url: '/Account/ResendConfirmationEmail',
+            method: 'POST',
+            success: function (response) {
+                showAnimatedMessage(response.message, response.success);
+            },
+            error: function () {
+                showAnimatedMessage("An error occurred. Please try again.", false);
+            }
+        });
+    });
+    function showAnimatedMessage(message, isSuccess) {
+        const $msg = $("#confirmation-message");
+        $msg.removeClass("d-none alert-success alert-danger show fade");
+
+        $msg
+            .addClass(isSuccess ? "alert-success" : "alert-danger")
+            .text(message)
+            .addClass("show fade")
+            .hide()
+            .fadeIn(500);
+
+        setTimeout(() => {
+            $msg.fadeOut(500, () => {
+                $msg.addClass("d-none");
+            });
+        }, 4000); // Message visible for 4 seconds
+    }
 });

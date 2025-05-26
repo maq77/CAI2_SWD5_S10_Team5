@@ -17,6 +17,7 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 // Initialize Stripe Client & Paypal Client
 builder.Services.Configure<PayPalSettings>(builder.Configuration.GetSection("PayPalSettings"));
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 
 

@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Net;
+using System.Security.Claims;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
+using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Web.Controllers
 {
@@ -13,11 +17,13 @@ namespace TechXpress.Web.Controllers
 
         private readonly IUserService _userService;
         private readonly ITokenService _tokenService;
+        private readonly IEmailServer _emailServer;
 
-        public AccountController(IUserService userService, ITokenService tokenService)
+        public AccountController(IUserService userService, ITokenService tokenService, IEmailServer emailServer)
         {
             _userService = userService;
             _tokenService = tokenService;
+            _emailServer = emailServer;
         }
         [HttpGet]
         public async Task<IActionResult> WhoAmI()
@@ -27,6 +33,7 @@ namespace TechXpress.Web.Controllers
         }
 
         public IActionResult Register() => View();
+        public IActionResult ForgotPassword() => View();
         public IActionResult AccessDenied() => View();
 
         [HttpPost]
@@ -44,6 +51,20 @@ namespace TechXpress.Web.Controllers
             return BadRequest(new { authResponse.IsSuccess, authResponse.Message});
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> ResendConfirmationEmail()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("User not Auth");
+            var authResponse = await _userService.SendEmailConfirmation(userId);
+            if (authResponse.IsSuccess)
+            {
+                return Json(new { authResponse.IsSuccess, authResponse.Message, authResponse.Token, authResponse.RefreshToken});
+            }
+            return BadRequest(new { authResponse.IsSuccess, authResponse.Message });
+        }
 
         public IActionResult Login(string? returnUrl = null)
         {
@@ -106,6 +127,71 @@ namespace TechXpress.Web.Controllers
                 return Json(new { success = true, redirectUrl = "/" });
             }
             return BadRequest(new { success = false, message = "Logout failed." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string email, string token)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
+                return BadRequest("Missing email or token.");
+
+            var user = await _userService.FindUserByEmail(email);
+            if (user == null)
+                return NotFound("User not found.");
+
+            var result = await _userService.ConfirmEmail(user, token);
+
+            if (result.Succeeded)
+            {
+                return View("ConfirmEmailSuccess");
+            }
+
+            return View("ConfirmEmailFailure");
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(string email)
+        {
+            var user = await _userService.FindUserByEmail(email);
+            if (user == null)
+            {
+                // Do not reveal that the user does not exist
+                return View("ForgotPasswordConfirmation");
+            }
+
+            var token = await _userService.GeneratePasswordResetToken(user);
+            var callbackUrl = Url.Action("ResetPassword", "Account",
+                new { userId = user.Id, token = token }, protocol: HttpContext.Request.Scheme);
+
+            await _emailServer.SendEmailAsync(
+                email,
+                "Reset Your Password",
+                $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
+
+            return View("ForgotPasswordConfirmation");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            var model = new ResetPasswordViewModel { UserId = userId, Token = token };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            var user = await _userService.FindUserById(model.UserId);
+            if (user == null) return View("ResetPasswordConfirmation");
+
+            var result = await _userService.ResetPassword(user, model.Token, model.Password);
+            if (result.Succeeded) return View("ResetPasswordConfirmation");
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError("", error.Description);
+
+            return View(model);
         }
 
         [HttpPost]

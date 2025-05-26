@@ -33,6 +33,21 @@
                             <i class="fas fa-envelope text-primary"></i>
                             <p>@Model.User.Email</p>
                         </div>
+                        <div class="info-item fade-in" style="animation-delay: 0.7s">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            @if (Model.User.IsConfirmed)
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else
+                            {
+                                <button id="resend-confirmation-btn" class="btn btn-warning btn-sm">
+                                    Resend Confirmation Email
+                                </button>
+                                //<span id="resend-result" class="text-muted small ms-2"></span>
+                                <div id="confirmation-message" class="alert d-none fade" role="alert"></div>
+                            }
+                        </div>
                         <div class="info-item fade-in" style="animation-delay: 0.4s">
                             <i class="fas fa-phone text-primary"></i>
                             <p>@Model.User.PhoneNumber</p>
@@ -161,5 +176,39 @@
                 observer.observe(el);
             });
         });
+
+            $('#resend-confirmation-btn').on("click", function (e) {
+            e.preventDefault();
+            $('#resend-message').text("Sending...").css('color', 'gray');
+
+            $.ajax({
+                url: '/Account/ResendConfirmationEmail',
+                method: 'POST',
+                success: function (response) {
+                showAnimatedMessage(response.message, response.success);
+            },
+            error: function () {
+                showAnimatedMessage("An error occurred. Please try again.", false);
+            }
+            });
+        });
+            function showAnimatedMessage(message, isSuccess) {
+            const $msg = $("#confirmation-message");
+            $msg.removeClass("d-none alert-success alert-danger show fade");
+
+            $msg
+                .addClass(isSuccess ? "alert-success" : "alert-danger")
+                .text(message)
+                .addClass("show fade")
+                .hide()
+                .fadeIn(500);
+
+            setTimeout(() => {
+                $msg.fadeOut(500, () => {
+                    $msg.addClass("d-none");
+                });
+            }, 4000); // Message visible for 4 seconds
+        }
     </script>
+
 }

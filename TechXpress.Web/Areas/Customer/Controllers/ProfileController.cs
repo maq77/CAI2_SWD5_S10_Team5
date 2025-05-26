@@ -6,6 +6,7 @@ using TechXpress.Services.DTOs;
 using TechXpress.Services;
 using System.Linq;
 using TechXpress.Services.Base;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace TechXpress.Web.Areas.Customer.Controllers
 {
@@ -106,7 +107,12 @@ namespace TechXpress.Web.Areas.Customer.Controllers
             return Ok(orders);
         }
 
-        
+        [HttpPost]
+        public async Task<IActionResult> ResendConfirmationEmail()
+        {
+            return Ok();
+        }
+
         private IActionResult Login()
         {
             return RedirectToAction("Login", "Account", new { area = "" });

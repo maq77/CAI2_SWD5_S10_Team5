@@ -22,6 +22,14 @@ namespace TechXpress.Services.Base
         Task<List<UserDTO>> GetAllUsersAsync();
         Task<bool> DeleteUserAsync(string email);
         Task<bool> UpdateUserProfileAsync(string userId, UserProfileDTO profile);
+        Task<User> FindUserByEmail(string email);
+        Task<User> FindUserById(string userId);
+        Task<string> GenerateEmailConfirmationToken(User user);
+        Task<AuthResponse> SendEmailConfirmation(string userId);
+        Task<IdentityResult> ConfirmEmail(User user, string token);
+        Task<bool> IsEmailConfirmed(User user);
+        Task<string> GeneratePasswordResetToken(User user);
+        Task<IdentityResult> ResetPassword(User user, string token, string password);
         Task<UserProfileDTO> GetUserProfileAsync(string userId);
     }
 }

@@ -81,6 +81,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IPaymentGateway, PayPalGateway>();
             services.AddScoped<IPaymentGateway, StripeGateway>();
             services.AddScoped<IPaymentGateway, CashGateway>();
+            services.AddScoped<IEmailServer, EmailServer>();
 
 
             return services;

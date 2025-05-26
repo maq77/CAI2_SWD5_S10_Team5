@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using TechXpress.Data.Constants;
 using TechXpress.Data.Model;
@@ -26,14 +27,16 @@ namespace TechXpress.Services
         private readonly ILogger<UserService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserImageService _userImageService;
+        private readonly IEmailServer _emailServer;
 
-        public UserService(IUnitOfWork unitOfWork, IUserImageService userImageService, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUnitOfWork unitOfWork, IEmailServer emailServer, IUserImageService userImageService, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
+            _emailServer = emailServer;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _userImageService = userImageService;
@@ -42,9 +45,13 @@ namespace TechXpress.Services
         {
             try
             {
-                if (await _userManager.Users.AnyAsync(u => u.Email == model.Email))
+                if (await _userManager.Users.AnyAsync(u => u.NormalizedEmail == model.Email.ToUpper()))
                 {
-                    return (new AuthResponse {IsSuccess=false,Message= "This email is already registered." }, "");
+                    return (new AuthResponse
+                    {
+                        IsSuccess = false,
+                        Message = "This email is already registered."
+                    }, "");
                 }
 
                 var user = new User
@@ -53,7 +60,7 @@ namespace TechXpress.Services
                     Email = model.Email,
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    EmailConfirmed = true
+                    EmailConfirmed = false
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -74,7 +81,13 @@ namespace TechXpress.Services
                 var claims = await GenerateClaims(user);
                 var accessToken = await _tokenService.GenerateAccessToken(claims);
                 var tokenInfo = await _tokenService.CreateToken(user.Id);
-                return (new AuthResponse {IsSuccess= true, Token=accessToken, RefreshToken=tokenInfo.RefreshToken, Message="Registration successful." }, "/Home/Index"); // Ensure the redirect URL is returned
+
+                //Email Confirmation
+                var token = await GenerateEmailConfirmationToken(user);
+
+                await _emailServer.SendVerificationEmailAsync(user.Email, token);
+
+                return (new AuthResponse {IsSuccess= true, Token=accessToken, RefreshToken=tokenInfo.RefreshToken, Message = "User registered successfully. Please check your email to verify your account." }, "/Home/Index"); // Ensure the redirect URL is returned
             }
             catch (Exception ex)
             {
@@ -179,8 +192,8 @@ namespace TechXpress.Services
                 FirstName= user.FirstName,
                 LastName= user.LastName,
                 Email = user.Email,
+                IsConfirmed = user.EmailConfirmed,
                 PhoneNumber = user.PhoneNumber,
-                //Address = user.Address,
                 Address_ = new AddressViewModel
                 {
                     Street=user.Address,
@@ -225,6 +238,79 @@ namespace TechXpress.Services
 
             await _userManager.DeleteAsync(user);
             return true;
+        }
+        public async Task<User> FindUserByEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return user;
+        }
+        public async Task<User> FindUserById(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning($"User with ID {userId} not found.");
+                return null;
+            }
+            return user;
+        }
+        public async Task<AuthResponse> SendEmailConfirmation(string userId)
+        {
+            try
+            {
+                var user = await FindUserById(userId);
+                if (user == null)
+                    return (new AuthResponse { IsSuccess = false, Message = "User Not found!" });
+
+                if (await IsEmailConfirmed(user))
+                {
+                    return (new AuthResponse { IsSuccess = false, Message = "Email is Already Confirmed!" });
+                }
+
+                var token = await GenerateEmailConfirmationToken(user);
+                Console.WriteLine($"[SEND] UserId: {user.Email}, Token: {token.Length}");
+
+
+                await _emailServer.SendVerificationEmailAsync(user.Email, token);
+
+                return (new AuthResponse{ IsSuccess=true, Message="Sent Confirmation Email Successfully!" });
+            }catch (Exception)
+            {
+                return (new AuthResponse { IsSuccess = false, Message = "Something went wrong!" });
+            }
+        }
+        public async Task<string> GenerateEmailConfirmationToken(User user)
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            return token;
+        }
+        public async Task<IdentityResult> ConfirmEmail(User user, string token)
+        {
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            return result;
+        }
+        public async Task<bool> IsEmailConfirmed(User user)
+        {
+            return await _userManager.IsEmailConfirmedAsync(user);
+        }
+        public async Task<string> GeneratePasswordResetToken(User user)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            return token;
+        }
+        public async Task<IdentityResult> ResetPassword(User user, string token, string password)
+        {
+            var result = await _userManager.ResetPasswordAsync(user, token, password);
+            if (result.Succeeded)
+            {
+                _logger.LogInformation($"Password reset successful for {user.Email}");
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning($"Password reset failed for {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                return result;
+            }
         }
         public async Task<List<Claim>> GenerateClaims(User user)
         {

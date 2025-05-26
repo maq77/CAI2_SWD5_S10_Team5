@@ -27,6 +27,10 @@
                 <input asp-for="RememberMe" class="form-check-input" id="RememberMe" />
                 <label asp-for="RememberMe" class="form-check-label"></label>
             </div>
+            <!-- Forgot Password Link -->
+            <div class="mb-3 text-end">
+                <a asp-area="" asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a>
+            </div>
             <button type="button" id="loginBtn" class="btn btn-success w-100">Login</button>
         </form>
     </div>
