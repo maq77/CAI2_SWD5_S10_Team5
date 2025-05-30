@@ -19,8 +19,15 @@ namespace TechXpress.Data.Repositories.Base
         IRepository<OrderDetail> OrderDetails { get; }
         IRepository<WishListItem> WishListItems{ get; }
         IRepository<Review> Reviews{ get; }
+        IRepository<AppSetting> AppSettings{ get; }
+
 
         Task<IDbContextTransaction> BeginTransactionAsync();
+        Task BeginTransactionAsync_();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
+        Task<T> ExecuteWithStrategyAsync_<T>(Func<Task<T>> operation);
+        Task<IExecutionStrategy> ExecuteWithStrategyAsync();
         Task<bool> SaveAsync();
 
     }

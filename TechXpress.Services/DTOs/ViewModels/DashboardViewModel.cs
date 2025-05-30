@@ -1,4 +1,4 @@
-﻿namespace TechXpress.ViewModels.Admin
+﻿namespace TechXpress.Services.DTOs.ViewModels
 {
     public class DashboardViewModel
     {

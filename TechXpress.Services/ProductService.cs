@@ -228,25 +228,34 @@ namespace TechXpress.Services
             if (!_cache.TryGetValue(PopularProductCacheKey, out IEnumerable<ProductDTO>? popularProducts)||popularProducts==null)
             {
                 _logger.LogInformation("Cache miss for popular products. Fetching from database.");
-                var products = await _unitOfWork.Products.GetAllProducts();
-                var orderDetails = await _unitOfWork.OrderDetails.GetAll();
+                //fix
+                var products = (await _unitOfWork.Products.GetAllProducts()).ToList();
+                var orderDetails = (await _unitOfWork.OrderDetails.GetAll()).ToList();
 
                 var salesData = orderDetails
                     .GroupBy(o => o.ProductId)
                     .Select(g => new { ProductId = g.Key, TotalSales = g.Sum(o => o.Quantity) })
                     .ToDictionary(x => x.ProductId, x => x.TotalSales);
 
-                var popularProducts_ = products
+                // Sort products by sales count
+                var popularProductList = products
                     .OrderByDescending(p => salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0)
                     .Take(top)
-                    .Select(async p => new ProductDTO
+                    .ToList();
+
+                // Now create DTOs one by one to avoid concurrent DbContext access
+                var popularDTOs = new List<ProductDTO>();
+
+                foreach (var p in popularProductList)
+                {
+                    var dto = new ProductDTO
                     {
                         Id = p.Id,
                         Name = p.Name,
                         Price = p.Price,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category?.Name ?? "Uncategorized",
-                        AverageRating = await _reviewService.GetAverageRatingByProductIdAsync(p.Id),
+                        AverageRating = await _reviewService.GetAverageRatingByProductIdAsync(p.Id), // safe: sequential
                         StockQunatity = p.StockQuantity,
                         SalesCount = salesData.ContainsKey(p.Id) ? salesData[p.Id] : 0,
                         Images = p.Images.Select(img => new ProductImageDTO
@@ -254,14 +263,15 @@ namespace TechXpress.Services
                             Id = img.Id,
                             ImagePath = img.ImagePath ?? "/images/default-product.png"
                         }).ToList()
-                        
-                    });
-                // this to convert (Ienum) into (Task Ienum) ,, because i used await inside ProductDTO 
-                popularProducts = await Task.WhenAll(popularProducts_);
+                    };
+                    popularDTOs.Add(dto);
+                }
+
 
                 //  Cache for 30 minutes
-                _cache.Set(PopularProductCacheKey, popularProducts, TimeSpan.FromSeconds(30));
+                _cache.Set(PopularProductCacheKey, popularDTOs, TimeSpan.FromSeconds(30));
                 _logger.LogInformation("Cached popular products for less than 1 minute.");
+                return popularDTOs;
             }
             else
             {

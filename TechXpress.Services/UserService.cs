@@ -43,58 +43,96 @@ namespace TechXpress.Services
         }
         public async Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
-            try
+            var strategy = await _unitOfWork.ExecuteWithStrategyAsync();
+
+            return await strategy.ExecuteAsync(async () =>
             {
-                if (await _userManager.Users.AnyAsync(u => u.NormalizedEmail == model.Email.ToUpper()))
+                using var transaction = await _unitOfWork.BeginTransactionAsync();
+
+                try
                 {
+                    var normalizedEmail = model.Email.ToUpper().Trim();
+                    if (await _userManager.Users.AnyAsync(u => u.NormalizedEmail == normalizedEmail))
+                    {
+                        return (new AuthResponse
+                        {
+                            IsSuccess = false,
+                            Message = "This email is already registered."
+                        }, "");
+                    }
+
+                    var user = new User
+                    {
+                        UserName = model.Email.Trim(),
+                        Email = model.Email.Trim(),
+                        FirstName = model.FirstName?.Trim(),
+                        LastName = model.LastName?.Trim(),
+                        EmailConfirmed = false
+                    };
+
+                    var result = await _userManager.CreateAsync(user, model.Password);
+                    if (!result.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                        return (new AuthResponse { IsSuccess = false, Message = errors }, "");
+                    }
+
+                    await _unitOfWork.SaveAsync();
+                    user = await _userManager.FindByEmailAsync(model.Email.Trim());
+
+                    if (user == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return (new AuthResponse { IsSuccess = false, Message = "Failed to create user." }, "");
+                    }
+
+                    await _userImageService.UploadUserImageAsync(user.Id, model.Image);
+                    /*
+                    if (model.Image != null)
+                    {
+                        var imageUploadResult = await _userImageService.UploadUserImageAsync(user.Id, model.Image);
+                        if (!imageUploadResult)
+                        {
+                            _logger.LogWarning("Failed to upload image for user {UserId}, but continuing registration", user.Id);
+                        }
+                    }
+                    */
+
+                    var roleResult = await AssignRoleAsync(user.Email, "Customer");
+                    if (!roleResult)
+                    {
+                        _logger.LogWarning("Failed to assign role to user {UserId}", user.Id);
+                    }
+
+                    var claims = await GenerateClaims(user);
+                    var accessToken = await _tokenService.GenerateAccessToken(claims);
+                    var tokenInfo = await _tokenService.CreateToken(user.Id);
+
+                    var emailToken = await GenerateEmailConfirmationToken(user);
+                    await _emailServer.SendVerificationEmailAsync(user.Email, emailToken);
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    await transaction.CommitAsync();
+
                     return (new AuthResponse
                     {
-                        IsSuccess = false,
-                        Message = "This email is already registered."
-                    }, "");
+                        IsSuccess = true,
+                        Token = accessToken,
+                        RefreshToken = tokenInfo.RefreshToken,
+                        Message = "User registered successfully. Please check your email to verify your account."
+                    }, "/Home/Index");
                 }
-
-                var user = new User
+                catch (Exception ex)
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    EmailConfirmed = false
-                };
-
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (!result.Succeeded)
-                {
-                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                    return (new AuthResponse { IsSuccess=false,Message=errors}, "");
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Exception in RegisterAsync for {Email}", model.Email);
+                    return (new AuthResponse { IsSuccess = false, Message = "An error occurred while registering." }, "");
                 }
-                user = await _userManager.FindByEmailAsync(model.Email);
-
-                await _userImageService.UploadUserImageAsync(user.Id, model.Image);
-
-                await AssignRoleAsync(user.Email, "Customer");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-                // Generate tokens
-                var claims = await GenerateClaims(user);
-                var accessToken = await _tokenService.GenerateAccessToken(claims);
-                var tokenInfo = await _tokenService.CreateToken(user.Id);
-
-                //Email Confirmation
-                var token = await GenerateEmailConfirmationToken(user);
-
-                await _emailServer.SendVerificationEmailAsync(user.Email, token);
-
-                return (new AuthResponse {IsSuccess= true, Token=accessToken, RefreshToken=tokenInfo.RefreshToken, Message = "User registered successfully. Please check your email to verify your account." }, "/Home/Index"); // Ensure the redirect URL is returned
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception in RegisterAsync for {Email}", model.Email);
-                return (new AuthResponse {IsSuccess= false,Message= "An error occurred while registering." }, "");
-            }
+            });
         }
+
         public async Task<(AuthResponse authResponse, string RedirectUrl)> LoginAsync(LoginDTO model)
         {
             try

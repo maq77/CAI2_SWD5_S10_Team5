@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Services.Base;
 using TechXpress.Services.DTOs;
-using TechXpress.ViewModels.Admin;
+using TechXpress.Services.DTOs.ViewModels;
 
 namespace TechXpress.Web.Areas.Admin.Controllers
 {

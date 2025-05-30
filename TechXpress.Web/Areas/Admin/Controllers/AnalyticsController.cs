@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using TechXpress.Services.Base;
 
 namespace TechXpress.Areas.Admin.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     [Area("Admin")]
     public class AnalyticsController : Controller
     {

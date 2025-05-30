@@ -29,6 +29,7 @@ namespace TechXpress.Data.Repositories
             ProductImages = new Repository<ProductImage>(dp, _loggerFactory.CreateLogger<Repository<ProductImage>>());
             UsersImages = new Repository<UserImage>(dp, _loggerFactory.CreateLogger<Repository<UserImage>>());
             Reviews = new Repository<Review>(dp, _loggerFactory.CreateLogger<Repository<Review>>());
+            AppSettings = new Repository<AppSetting>(dp, _loggerFactory.CreateLogger<Repository<AppSetting>>());
 
             _logger.LogInformation("UnitOfWork initialized.");
         }
@@ -46,11 +47,35 @@ namespace TechXpress.Data.Repositories
         public IRepository<OrderDetail> OrderDetails { get; private set; }
         public IRepository<WishListItem> WishListItems { get; private set; }
         public IRepository<Review> Reviews { get; private set; }
+        public IRepository<AppSetting> AppSettings { get; private set; }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
             _transaction = await _dp.Database.BeginTransactionAsync();
             return _transaction;
+        }
+        public async Task BeginTransactionAsync_()
+        {
+            _transaction = await _dp.Database.BeginTransactionAsync();
+        }
+        public async Task CommitTransactionAsync()
+        {
+            await _transaction?.CommitAsync();
+        }
+
+        public async Task RollbackTransactionAsync()
+        {
+            await _transaction?.RollbackAsync();
+        }
+        public async Task<T> ExecuteWithStrategyAsync_<T>(Func<Task<T>> operation)
+        {
+            var strategy = _dp.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(operation);
+        }
+        public async Task<IExecutionStrategy> ExecuteWithStrategyAsync()
+        {
+            var strategy = _dp.Database.CreateExecutionStrategy();
+            return strategy;
         }
         public void Dispose()
         {

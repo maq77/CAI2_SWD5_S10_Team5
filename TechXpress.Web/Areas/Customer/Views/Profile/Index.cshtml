@@ -48,23 +48,14 @@
                                 <div id="confirmation-message" class="alert d-none fade" role="alert"></div>
                             }
                         </div>
-                        <div class="info-item fade-in" style="animation-delay: 0.4s">
-                            <i class="fas fa-phone text-primary"></i>
-                            <p>@Model.User.PhoneNumber</p>
-                        </div>
                         <div class="info-item fade-in" style="animation-delay: 0.6s">
                             <i class="fas fa-map-marker-alt text-primary"></i>
-                            <p>@Model.User.Address_.Street</p>
-                        </div>
-                        <div class="info-item fade-in" style="animation-delay: 0.6s">
-                            <i class="fas fa-map-marker-alt text-primary"></i>
-                            <p>@Model.User.Address_.City</p>
-                        </div><div class="info-item fade-in" style="animation-delay: 0.6s">
-                            <i class="fas fa-map-marker-alt text-primary"></i>
-                            <p>@Model.User.Address_.Country</p>
-                        </div><div class="info-item fade-in" style="animation-delay: 0.6s">
-                            <i class="fas fa-map-marker-alt text-primary"></i>
-                            <p>@Model.User.Address_.PostalCode</p>
+                            <div class="text-start ms-2">
+                                <p>@Model.User.Address_.Street</p>
+                                <p>@Model.User.Address_.City</p>
+                                <p>@Model.User.Address_.Country</p>
+                                <p>@Model.User.Address_.PostalCode</p>
+                            </div>
                         </div>
                     </div>
 
@@ -123,7 +114,7 @@
                                             <td class="fw-bold">@order.TotalAmount.ToString("C")</td>
                                             <td>
                                                 <a asp-area="Customer" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
-                                                    <i class="fas fa-eye text-white"></i>
+                                                    <i class="fas fa-eye text-primary"></i>
                                                 </a>
                                             </td>
                                         </tr>
@@ -150,9 +141,6 @@
     </div>
 </div>
 
-<!-- Font Awesome CSS - Add this to your _Layout.cshtml or to this specific view -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 @section Scripts {
     <script>
         // Initialize tooltips
@@ -177,21 +165,6 @@
             });
         });
 
-            $('#resend-confirmation-btn').on("click", function (e) {
-            e.preventDefault();
-            $('#resend-message').text("Sending...").css('color', 'gray');
-
-            $.ajax({
-                url: '/Account/ResendConfirmationEmail',
-                method: 'POST',
-                success: function (response) {
-                showAnimatedMessage(response.message, response.success);
-            },
-            error: function () {
-                showAnimatedMessage("An error occurred. Please try again.", false);
-            }
-            });
-        });
             function showAnimatedMessage(message, isSuccess) {
             const $msg = $("#confirmation-message");
             $msg.removeClass("d-none alert-success alert-danger show fade");

@@ -17,7 +17,7 @@
 
                         <div class="text-center mb-4 slide-in" style="animation-delay: 0.2s">
                             <div class="profile-preview-container">
-                                @if (Model.UserImage.ImagePath != null)
+                                @if (!string.IsNullOrEmpty(Model.UserImage?.ImagePath))
                                 {
                                     <img src="@Model.UserImage.ImagePath" id="profile-preview" class="rounded-circle profile-preview" alt="Current Profile Picture" />
                                 }

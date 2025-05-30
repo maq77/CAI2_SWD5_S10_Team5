@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -104,6 +105,51 @@ namespace TechXpress.Data
             {
                 if (!await roleManager.RoleExistsAsync(role))
                     await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        public static async Task appsetting_SeedAsync(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+            // Flatten config keys (like "AI:ApiUrl") and values into dictionary
+            var flatSettings = new Dictionary<string, string>();
+            FlattenConfiguration(configuration, flatSettings);
+
+            // Get all existing keys from DB to avoid duplicates
+            var existingKeys = new HashSet<string>(await dbContext.AppSettings.Select(x => x.Key).ToListAsync());
+
+            foreach (var kvp in flatSettings)
+            {
+                if (!existingKeys.Contains(kvp.Key))
+                {
+                    dbContext.AppSettings.Add(new AppSetting
+                    {
+                        Key = kvp.Key,
+                        Value = kvp.Value
+                    });
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        // Helper method to recursively flatten IConfiguration into dictionary
+        private static void FlattenConfiguration(IConfiguration config, Dictionary<string, string> dict, string parentKey = "")
+        {
+            foreach (var section in config.GetChildren())
+            {
+                var key = string.IsNullOrEmpty(parentKey) ? section.Key : $"{parentKey}:{section.Key}";
+                if (section.GetChildren().Any())
+                {
+                    FlattenConfiguration(section, dict, key);
+                }
+                else
+                {
+                    dict[key] = section.Value ?? "";
+                }
             }
         }
     }

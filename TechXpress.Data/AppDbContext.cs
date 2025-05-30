@@ -17,6 +17,8 @@ namespace TechXpress.Data
         public DbSet<WishListItem> WishlistItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<TokenInfo> TokenInfos { get; set; }
+        public DbSet<AppSetting> AppSettings { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

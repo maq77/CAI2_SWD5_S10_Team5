@@ -38,9 +38,7 @@ namespace TechXpress.Services
             var defaultImagePath = Path.Combine(_imageFolder, DefaultImageName);
             if (!File.Exists(defaultImagePath))
             {
-                // Create a blank  copy from a known location
                 using var fs = new FileStream(defaultImagePath, FileMode.Create);
-                // Optional: write a placeholder or transparent image bytes here
             }
         }
 

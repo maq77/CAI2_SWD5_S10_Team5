@@ -21,8 +21,15 @@ namespace TechXpress.Web.Extensions
         {
             // Database Configuration
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("MyCon"),
-                b => b.MigrationsAssembly("TechXpress.Data")));
+            options.UseSqlServer(configuration.GetConnectionString("MyCon"), sqlOptions =>
+            {
+                sqlOptions.MigrationsAssembly("TechXpress.Data");
+                sqlOptions.CommandTimeout(60);
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                    errorNumbersToAdd: null);
+            }));
 
             // Identity Configuration
             services.AddIdentity<User, IdentityRole>()
@@ -48,6 +55,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IAnalyticsService, AnalyticsService>();
+            services.AddScoped<IAppSettingService, AppSettingService>();
             //services.AddScoped<ITokenService, TokenService>();
 
             // Session Configuration

@@ -18,8 +18,8 @@ namespace TechXpress.Services.DTOs
         public bool   IsConfirmed { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
-        public AddressViewModel Address_ { get; set; }
+        public AddressViewModel Address_ { get; set; } = new();
         public IFormFile? Image { get; set; } //to upload a new image
-        public UserImageDTO? UserImage { get; set; } // to display the current image
+        public UserImageDTO UserImage { get; set; } = new(); // to display the current image
     }
 }
