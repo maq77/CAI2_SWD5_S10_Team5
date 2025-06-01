@@ -10,6 +10,7 @@ namespace TechXpress.Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class HuggingFaceController : ControllerBase
     {
         private readonly HttpClient _httpClient;
@@ -99,18 +100,35 @@ namespace TechXpress.Web.Controllers
                         });
                     }
 
-                    return BadRequest(new { Success = false, Message = "Error from AI service", Error = failReason });
+                    return Ok(new HttpChatGPTResponse
+                    {
+                        Success = false,
+                        Data = null,
+                        Error = "Error from AI service: " + failReason
+                    });
+
                 }
             }
             catch (JsonException jsonEx)
             {
                 Console.WriteLine($"JSON Parsing Error: {jsonEx.Message}");
-                return StatusCode(500, new { Success = false, Message = "Error parsing AI response", Error = jsonEx.Message });
+                return Ok(new HttpChatGPTResponse
+                {
+                    Success = false,
+                    Data = null,
+                    Error = "Message content cannot be empty"
+                });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"General Error: {ex.Message}");
-                return StatusCode(500, new { Success = false, Message = "An unexpected error occurred", Error = ex.Message });
+                return Ok(new HttpChatGPTResponse
+                {
+                    Success = false,
+                    Data = null,
+                    Error = "An unexpected error occurred: " + ex.Message
+                });
+
             }
         }
     }

@@ -1,6 +1,4 @@
 ﻿
-
-    // Paste JavaScript here
     document.addEventListener('DOMContentLoaded', function () {
         // DOM Elements
     const chatButton = document.getElementById('chat-button');
@@ -31,36 +29,20 @@
             }, 500);
         });
 
-    // Send message function
+    // Fixed sendMessage function
     async function sendMessage() {
             const content = messageInput.value.trim();
 
-            // Don't send empty messages
             if (content === '') return;
 
-            // Add user message to conversation
             addMessage(content, 'user');
-
-            // Clear input field
             messageInput.value = '';
-
-            // Show typing indicator
             showTypingIndicator();
 
-            //comment this when in production , AI generated response XD
-            // Get bot response after delay
-            /*setTimeout(() => {
-                // Remove typing indicator
-                removeTypingIndicator();
-                
-                // Generate and add bot response
-                const response = getBotResponse(content);
-                addMessage(response, 'bot');
-            }, 1000);*/
-
-            //uncomment this when in production , AI generated response XD
             try {
-                const res =  fetch('/api/HuggingFace/ask', {
+                console.log("Starting fetch request...");
+
+                const res = await fetch('/api/HuggingFace/ask', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -68,18 +50,44 @@
                     body: JSON.stringify({ content })
                 });
 
-                const response = await res.json();
-                removeTypingIndicator();
-                addMessage(response.data || response.Data || "No response from AI", 'bot');
+                console.log("Fetch completed, status:", res.status);
+                console.log("Response headers:", res.headers);
+
+                // Check if response is ok
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                // Get response text first to see what we're getting
+                const responseText = await res.text();
+                console.log("Raw response text:", responseText);
+
+                // Try to parse as JSON
+                let response;
+                try {
+                    response = JSON.parse(responseText);
+                    console.log("Parsed response:", response);
+                } catch (parseError) {
+                    console.error("JSON parse error:", parseError);
+                    throw new Error("Invalid JSON response from server");
+                }
+
+                if (response.success || response.Success) {  // Check both cases
+                    removeTypingIndicator();
+                    addMessage(response.data || response.Data || "No response from AI", 'bot');
+                } else {
+                    removeTypingIndicator();
+                    addMessage(`Error: ${response.error || response.Error || "Unknown error from AI"}`, 'bot');
+                }
             } catch (error) {
                 removeTypingIndicator();
-                addMessage("Oops! Something went wrong. 😞", 'bot');
+                console.error('Full error details:', error);
+                console.error('Error type:', typeof error);
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                addMessage(`Oops! Something went wrong. 😞 ${error.message || error}`, 'bot');
             }
-
-
-            
         }
-
     // Send message on button click
     sendButton.addEventListener('click', sendMessage);
 
