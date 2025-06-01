@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace TechXpress.Services
 {
@@ -26,15 +27,36 @@ namespace TechXpress.Services
             _configuration = configuration;
             _logger = logger;
         }
+
         public async Task<IEnumerable<AppSetting>> GetAllAsync()
         {
             return await _unitOfWork.AppSettings.GetAll();
         }
+
         public async Task<T?> GetValueAsync<T>(string key)
         {
             var val = await GetValueAsync(key);
-            return val is not null ? JsonConvert.DeserializeObject<T>(val) : default;
+            if (string.IsNullOrEmpty(val))
+                return default(T);
+
+            var type = typeof(T);
+            if (type == typeof(string))
+                return (T)(object)val;
+            if (type.IsPrimitive || type.IsValueType)
+                return (T)Convert.ChangeType(val, type);
+
+            // Only try JSON deserialization for complex objects, not for simple types
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(val);
+            }
+            catch (JsonReaderException)
+            {
+                // If JSON deserialization fails, return default
+                return default(T);
+            }
         }
+
         public async Task<string?> GetValueAsync(string key)
         {
             var setting = await _unitOfWork.AppSettings
@@ -47,18 +69,18 @@ namespace TechXpress.Services
             _logger.LogWarning($" GET Key = {key}, Val = {val}, Conf = {_configuration[key]} ");
             return val;
         }
+
         public async Task<bool> UpdateAppSettingAsync(AppSetting setting)
         {
             if (setting == null)
                 throw new ArgumentNullException(nameof(setting));
-
             if (string.IsNullOrEmpty(setting.Value))
                 setting.Value = "";  // default
-
             await _unitOfWork.AppSettings.Update(setting, log => Console.WriteLine(log));
             var result = await _unitOfWork.SaveAsync();
             return result;
         }
+
         public async Task SetValueAsync(string key, string value)
         {
             var setting = await _unitOfWork.AppSettings.Find_First(x => x.Key == key);
@@ -69,11 +91,10 @@ namespace TechXpress.Services
             else
             {
                 setting = new AppSetting { Key = key, Value = value };
-                await  _unitOfWork.AppSettings.Add(setting, log => Console.WriteLine(log));
+                await _unitOfWork.AppSettings.Add(setting, log => Console.WriteLine(log));
             }
             _logger.LogWarning($" POST Key = {key}, Val = {setting.Value}, Conf = {_configuration[key]} ");
             await _unitOfWork.SaveAsync();
         }
     }
-
 }

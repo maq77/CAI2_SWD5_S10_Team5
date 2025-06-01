@@ -38,7 +38,7 @@ var app = builder.Build();
 
 //V2 of Seed Data ,, remove it when initilazing proj for 1st time
 //await DbSeeder.SeedData(app);
-await DbSeeder.appsetting_SeedAsync(app.Services);
+//await DbSeeder.appsetting_SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -114,16 +114,25 @@ namespace TechXpress.Data
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-            // Flatten config keys (like "AI:ApiUrl") and values into dictionary
             var flatSettings = new Dictionary<string, string>();
             FlattenConfiguration(configuration, flatSettings);
 
-            // Get all existing keys from DB to avoid duplicates
+            var allowedPrefixes = new[]
+            {
+                    "JwtSettings",
+                    "StripeSettings",
+                    "PayPalSettings",
+                    "OpenAI",
+                    "HuggingFace",
+                    "EmailSettings"
+            };
+
             var existingKeys = new HashSet<string>(await dbContext.AppSettings.Select(x => x.Key).ToListAsync());
 
             foreach (var kvp in flatSettings)
             {
-                if (!existingKeys.Contains(kvp.Key))
+                // Include only if key starts with an allowed prefix
+                if (allowedPrefixes.Any(prefix => kvp.Key.StartsWith(prefix)) && !existingKeys.Contains(kvp.Key))
                 {
                     dbContext.AppSettings.Add(new AppSetting
                     {
@@ -135,6 +144,7 @@ namespace TechXpress.Data
 
             await dbContext.SaveChangesAsync();
         }
+
 
         // Helper method to recursively flatten IConfiguration into dictionary
         private static void FlattenConfiguration(IConfiguration config, Dictionary<string, string> dict, string parentKey = "")

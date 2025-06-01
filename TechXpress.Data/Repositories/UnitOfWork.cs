@@ -49,10 +49,26 @@ namespace TechXpress.Data.Repositories
         public IRepository<Review> Reviews { get; private set; }
         public IRepository<AppSetting> AppSettings { get; private set; }
 
+        public async Task<int> SaveChangesCountAsync()
+        {
+            return _dp.ChangeTracker.Entries()
+                .Count(e => e.State == EntityState.Added ||
+                           e.State == EntityState.Modified ||
+                           e.State == EntityState.Deleted);
+        }
+
+        public DbContext GetContext()
+        {
+            return _dp;
+        }
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            _transaction = await _dp.Database.BeginTransactionAsync();
-            return _transaction;
+            if (_dp.Database.CurrentTransaction != null)
+            {
+                return _dp.Database.CurrentTransaction;
+            }
+
+            return await _dp.Database.BeginTransactionAsync();
         }
         public async Task BeginTransactionAsync_()
         {
@@ -104,7 +120,7 @@ namespace TechXpress.Data.Repositories
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred in SaveAsync.");
-                throw new Exception($"Error Saving Order in SaveAsync(): {ex.Message}", ex);
+                throw new Exception($"Error Saving  in SaveAsync(): {ex.Message}", ex);
             }
         }
 

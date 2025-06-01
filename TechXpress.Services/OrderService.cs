@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 using TechXpress.Data.Enums;
 using TechXpress.Data.Model;
 using TechXpress.Data.Repositories.Base;
@@ -10,10 +12,12 @@ namespace TechXpress.Services
     public class OrderService : IOrderService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<OrderService> _logger;
 
-        public OrderService(IUnitOfWork unitOfWork)
+        public OrderService(IUnitOfWork unitOfWork, ILogger<OrderService> logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<OrderDTO>> GetAllOrders()
@@ -64,92 +68,125 @@ namespace TechXpress.Services
 
         public async Task<int> CreateOrder(OrderDTO orderDto)
         {
-            var transaction = await _unitOfWork.BeginTransactionAsync();
-            bool transactionCompleted = false;
+            // Input validation
+            if (orderDto == null)
+                throw new ArgumentNullException(nameof(orderDto));
 
-            try
+            if (!orderDto.OrderDetails?.Any() == true)
+                throw new ArgumentException("Order must contain at least one item", nameof(orderDto));
+
+            var strategy = _unitOfWork.GetContext().Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
             {
-                if (orderDto.OrderDetails.Any())
+                using var transaction = await _unitOfWork.BeginTransactionAsync();
+
+                try
                 {
-                    var order_details = orderDto.OrderDetails.Select(i => new OrderDetail
+                    var orderDetails = orderDto.OrderDetails.Select(item => new OrderDetail
                     {
-                        ProductId = i.ProductId,
-                        Quantity = i.Quantity,
-                        Price = i.Price
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        Price = item.Price
                     }).ToList();
 
                     var order = new Order
                     {
                         UserId = orderDto.UserId,
-                        TotalAmount = orderDto.OrderDetails.Sum(i => i.Quantity * i.Price),
+                        TotalAmount = orderDetails.Sum(item => item.Quantity * item.Price),
                         OrderDate = DateTime.UtcNow,
                         Status = OrderStatus.Pending,
                         ShippingAddress = orderDto.shipping_address,
                         PaymentMethod = orderDto.paymentMethod,
                         TransactionId = orderDto.TransactionId,
-                        OrderDetails = order_details
+                        OrderDetails = orderDetails
                     };
 
-                    foreach (var order_item in order_details)
-                    {
-                        var prod = await _unitOfWork.Products.GetById(order_item.ProductId);
-                        if (prod != null)
-                        {
-                            if (prod.StockQuantity < order_item.Quantity)
-                            {
-                                throw new Exception($"Not enough stock for product {prod.Name}. Available: {prod.StockQuantity}");
-                            }
+                    var productIds = orderDetails.Select(item => item.ProductId).Distinct().ToList();
+                    var products = await _unitOfWork.Products.GetByIds(productIds);
 
-                            prod.StockQuantity -= order_item.Quantity;
-                            await _unitOfWork.Products.Update(prod, log => Console.WriteLine(log));
+                    var productDict = products.ToDictionary(p => p.Id, p => p);
+
+                    foreach (var orderItem in orderDetails)
+                    {
+                        if (!productDict.TryGetValue(orderItem.ProductId, out var product))
+                        {
+                            throw new InvalidOperationException($"Product with ID {orderItem.ProductId} not found");
                         }
+
+                        if (product.StockQuantity < orderItem.Quantity)
+                        {
+                            throw new InvalidOperationException(
+                                $"Insufficient stock for product '{product.Name}'. " +
+                                $"Available: {product.StockQuantity}, Requested: {orderItem.Quantity}");
+                        }
+
+                        product.StockQuantity -= orderItem.Quantity;
+                        await _unitOfWork.Products.Update(product, log => _logger?.LogInformation(log));
                     }
 
-                    await _unitOfWork.Orders.Add(order, log => Console.WriteLine(log));
+                    await _unitOfWork.Orders.Add(order, log => _logger?.LogInformation(log));
 
-                    Console.WriteLine($"Order Total: {order.TotalAmount}");
-                    Console.WriteLine($"Order Items Count: {order.OrderDetails.Count}");
+                    _logger?.LogInformation($"Creating order - Total: {order.TotalAmount:C}, Items: {order.OrderDetails.Count}");
+
                     foreach (var item in order.OrderDetails)
                     {
-                        Console.WriteLine($"Item: ProductId={item.ProductId}, Qty={item.Quantity}, Price={item.Price}");
+                        _logger?.LogDebug($"Order item - ProductId: {item.ProductId}, Quantity: {item.Quantity}, Price: {item.Price:C}");
                     }
 
+                    var saveResult = await _unitOfWork.SaveAsync();
 
-                    bool result = await _unitOfWork.SaveAsync();
-                    /////////////////////// Error Creating
-                    //if (!result)
+                    //if (!saveResult)
                     //{
-                    //    throw new Exception("Error saving order");
+                    //    throw new InvalidOperationException("Failed to save order to database");
                     //}
 
+                    // Commit transaction
                     await transaction.CommitAsync();
-                    transactionCompleted = true;
+
+                    _logger?.LogInformation($"Order {order.Id} created successfully for user {orderDto.UserId}");
 
                     return order.Id;
                 }
-                else
+                catch (Exception ex)
                 {
-                    throw new Exception("No Order Details");
+                    _logger?.LogError(ex, "Error creating order for user {UserId}: {ErrorMessage}",
+                        orderDto.UserId, ex.Message);
+                    throw;
                 }
+            });
+        }
+
+        private async Task<string> GetValidationErrors()
+        {
+            try
+            {
+                var context = _unitOfWork.GetContext(); // You'll need to expose this from UnitOfWork
+                var entities = context.ChangeTracker.Entries()
+                    .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
+                    .Select(e => e.Entity);
+
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(context);
+
+                foreach (var entity in entities)
+                {
+                    var entityValidationResults = new List<ValidationResult>();
+                    var isValid = Validator.TryValidateObject(entity, new ValidationContext(entity), entityValidationResults, true);
+
+                    if (!isValid)
+                    {
+                        validationResults.AddRange(entityValidationResults);
+                    }
+                }
+
+                return validationResults.Any()
+                    ? string.Join("; ", validationResults.Select(vr => vr.ErrorMessage))
+                    : "No validation errors found";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating order: {ex.Message}");
-                throw; // Rethrow the original exception
-            }
-            finally
-            {
-                if (!transactionCompleted)
-                {
-                    try
-                    {
-                        await transaction.RollbackAsync();
-                    }
-                    catch (Exception rollbackEx)
-                    {
-                        Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
-                    }
-                }
+                return $"Could not retrieve validation errors: {ex.Message}";
             }
         }
 

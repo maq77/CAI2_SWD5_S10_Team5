@@ -18,6 +18,22 @@ namespace TechXpress.Data.Repositories
             _dp = dp;
         }
         private readonly AppDbContext _dp;
+
+        public async Task<IEnumerable<Product>> GetByIds(IEnumerable<int> ids)
+        {
+            if (ids == null || !ids.Any())
+                return new List<Product>();
+
+            // Remove duplicates and filter out invalid IDs
+            var validIds = ids.Where(id => id > 0).Distinct().ToList();
+
+            if (!validIds.Any())
+                return new List<Product>();
+
+            return await _dp.Set<Product>()
+                .Where(p => validIds.Contains(p.Id))
+                .ToListAsync();
+        }
         public async Task<IEnumerable<Product>> GetProductsByCategoryId(int CategoryId)
         {
             return await _dp.Products

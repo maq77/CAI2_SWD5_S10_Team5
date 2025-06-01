@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,8 @@ namespace TechXpress.Data.Repositories.Base
         Task<T> ExecuteWithStrategyAsync_<T>(Func<Task<T>> operation);
         Task<IExecutionStrategy> ExecuteWithStrategyAsync();
         Task<bool> SaveAsync();
+        Task<int> SaveChangesCountAsync();
+        DbContext GetContext();
 
     }
 }

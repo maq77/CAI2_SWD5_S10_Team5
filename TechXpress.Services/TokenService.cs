@@ -20,17 +20,21 @@ namespace TechXpress.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
-        private readonly JwtSettings _jwtSettings;
+        private JwtSettings _jwtSettings;
         private readonly IUnitOfWork _unitOfWork;
-        public TokenService(IUnitOfWork unitOfWork,IConfiguration configuration,IOptions<JwtSettings> jwtSettings)
+        // add dynamic settings
+        private readonly IDynamicSettingsService _dynamicSettings;
+        public TokenService(IUnitOfWork unitOfWork, IConfiguration configuration, IOptions<JwtSettings> jwtSettings, IDynamicSettingsService dynamicSettings)
         {
             _configuration = configuration;
             _unitOfWork = unitOfWork;
             _jwtSettings = jwtSettings.Value;
+            _dynamicSettings = dynamicSettings;
         }
 
         public async Task<string> GenerateAccessToken(IEnumerable<Claim> claims)
         {
+            _jwtSettings = await _dynamicSettings.GetSectionAsync<JwtSettings>("JwtSettings");
             var tokenHandler = new JwtSecurityTokenHandler();
 
             // Create a symmetric security key using the secret key from the configuration.
@@ -99,7 +103,7 @@ namespace TechXpress.Services
         }
         public async Task<ClaimsPrincipal> GetPrincipalFromExpiredToken(string accessToken)
         {
-
+            _jwtSettings = await _dynamicSettings.GetSectionAsync<JwtSettings>("JwtSettings");
             //var signing = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
             var signing = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             // Define the token validation parameters used to validate the token.
@@ -134,6 +138,7 @@ namespace TechXpress.Services
         }
         public async Task<DateTime> GetRefreshTokenExpiryTime()
         {
+            _jwtSettings = await _dynamicSettings.GetSectionAsync<JwtSettings>("JwtSettings");
             //int expiryDays = _configuration.GetValue<int>("JwtSettings:RefreshTokenExpiryDays", 7);
             int expiryDays = _jwtSettings.RefreshTokenExpiryDays;
             return DateTime.UtcNow.AddDays(expiryDays);

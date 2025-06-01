@@ -43,7 +43,7 @@ namespace TechXpress.Services
         }
         public async Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
-            var strategy = await _unitOfWork.ExecuteWithStrategyAsync();
+            var strategy = _unitOfWork.GetContext().Database.CreateExecutionStrategy();
 
             return await strategy.ExecuteAsync(async () =>
             {

@@ -10,6 +10,7 @@ namespace TechXpress.Data.Repositories.Base
 {
     public interface IProductRepo : IRepository<Product>
     {
+        Task<IEnumerable<Product>> GetByIds(IEnumerable<int> ids);
         Task<IEnumerable<Product>> GetAllProducts(Expression<Func<Product, bool>>? filter = null, string[]? includes = null);
 
         //override Task<IEnumerable<Product>> GetAll(Expression<Func<Product, bool>>? filter = null, string[]? includes = null);

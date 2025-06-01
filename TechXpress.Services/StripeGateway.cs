@@ -12,19 +12,30 @@ namespace TechXpress.Services
 {
     public class StripeGateway : IPaymentGateway
     {
-        private readonly IStripeClient _stripeClient;
+        private  IStripeClient _stripeClient;
+        private readonly IDynamicSettingsService _dynamicSettings;
 
         public string Name => "Stripe";
 
-        public StripeGateway(IStripeClient stripeClient, IOptions<StripeSettings> stripeSettings)
+        public StripeGateway(IDynamicSettingsService dynamicSettings)
         {
-            _stripeClient = stripeClient ?? throw new ArgumentNullException(nameof(stripeClient));
+            _dynamicSettings = dynamicSettings ?? throw new ArgumentNullException(nameof(dynamicSettings));
         }
 
+        private async Task<IStripeClient> GetStripeClientAsync()
+        {
+            if (_stripeClient == null)
+            {
+                var stripeSettings = await _dynamicSettings.GetSectionAsync<StripeSettings>("StripeSettings");
+                _stripeClient = new StripeClient(stripeSettings.SecretKey);
+            }
+            return _stripeClient;
+        }
         public async Task<PaymentResponse> ProcessPaymentAsync(PaymentRequest request)
         {
             try
             {
+                _stripeClient = await GetStripeClientAsync();
                 var options = new SessionCreateOptions
                 {
                     PaymentMethodTypes = new List<string> { "card" },
@@ -85,6 +96,7 @@ namespace TechXpress.Services
         {
             try
             {
+                _stripeClient = await GetStripeClientAsync();
                 var sessionId = request.Query["session_id"].ToString();
 
                 if (string.IsNullOrWhiteSpace(sessionId))
