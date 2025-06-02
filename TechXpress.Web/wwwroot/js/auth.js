@@ -70,21 +70,47 @@
 
 
     $("#logoutBtn").on("click", function () {
+        // Optional: Show loading state
+        $(this).prop('disabled', true).text('Logging out...');
+
         $.ajax({
             url: "/Account/Logout",
             type: "POST",
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
             success: function (response) {
                 console.log("Logout Response:", response);
                 if (response.success) {
-                    window.location.href = response.redirectUrl || "/"; // Redirect to login page
+                    localStorage.clear();
+                    sessionStorage.clear();
+
+                    window.location.href = response.redirectUrl || "/Account/Login";
                 } else {
-                    alert("Logout failed.");
+                    alert("Logout failed: " + (response.message || "Unknown error"));
+                    $("#logoutBtn").prop('disabled', false).text('Logout');
                 }
             },
-            error: function (xhr) {
-                console.log("Logout Error:", xhr.responseText);
-                alert("An error occurred during logout.");
-            }
+            error: function (xhr, status, error) {
+                console.error("Logout Error:", {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+
+                let errorMessage = "An error occurred during logout.";
+                if (xhr.status === 403) {
+                    errorMessage = "Session expired. Please refresh the page.";
+                } else if (xhr.status === 500) {
+                    errorMessage = "Server error. Please try again.";
+                }
+
+                alert(errorMessage);
+
+                $("#logoutBtn").prop('disabled', false).text('Logout');
+            },
+            timeout: 10000 // 10 sec timeout //new feature
         });
     });
 

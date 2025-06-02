@@ -46,7 +46,7 @@
                     </td>
                     <td>
                         <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id" class="btn btn-primary">Details</a>
-                        <a asp-area="Admin" asp-controller="Order" asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger">Delete</a>
+                        <a asp-area="Admin" asp-controller="Order" asp-action="Delete" asp-route-id="@order.Id" class="btn btn-danger" onclick="return confirm('Are you sure?');">Delete</a>
                     </td>
                 </tr>
             }
