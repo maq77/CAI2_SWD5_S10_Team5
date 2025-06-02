@@ -165,4 +165,31 @@
             }
         }, 30);
     });
+
+    document.querySelectorAll('.export-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const exportType = this.getAttribute('data-type');
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+
+            // Build URL with parameters
+            let url = `/Admin/Analytics/ExportSalesData?type=${exportType}`;
+            if (fromDate) url += `&from=${fromDate}`;
+            if (toDate) url += `&to=${toDate}`;
+
+            // Show loading state
+            const originalText = this.textContent;
+            this.disabled = true;
+            this.textContent = 'Exporting...';
+
+            // Trigger download
+            window.open(url, '_blank');
+
+            // Reset button after short delay
+            setTimeout(() => {
+                this.disabled = false;
+                this.textContent = originalText;
+            }, 1000);
+        });
+    });
 });

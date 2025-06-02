@@ -67,9 +67,12 @@
         });
     });
 
-
-
     $("#logoutBtn").on("click", function () {
+        // Show confirmation modal instead of alert
+        $('#logoutModal').modal('show');
+    });
+
+    /*$("#logoutBtn").on("click", function () {
         // Optional: Show loading state
         $(this).prop('disabled', true).text('Logging out...');
 
@@ -111,6 +114,50 @@
                 $("#logoutBtn").prop('disabled', false).text('Logout');
             },
             timeout: 10000 // 10 sec timeout //new feature
+        });
+    });*/
+
+    $("#confirmLogoutBtn").on("click", function () {
+        // Hide the modal
+        $('#logoutModal').modal('hide');
+
+        // Show loading state on original logout button
+        $("#logoutBtn").prop('disabled', true).text('Logging out...');
+
+        $.ajax({
+            url: "/Account/Logout",
+            type: "POST",
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (response) {
+                console.log("Logout Response:", response);
+                if (response.success) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.href = response.redirectUrl || "/Account/Login";
+                } else {
+                    alert("Logout failed: " + (response.message || "Unknown error"));
+                    $("#logoutBtn").prop('disabled', false).text('Logout');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Logout Error:", {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                let errorMessage = "An error occurred during logout.";
+                if (xhr.status === 403) {
+                    errorMessage = "Session expired. Please refresh the page.";
+                } else if (xhr.status === 500) {
+                    errorMessage = "Server error. Please try again.";
+                }
+                alert(errorMessage);
+                $("#logoutBtn").prop('disabled', false).text('Logout');
+            },
+            timeout: 10000 // 10 sec timeout
         });
     });
 

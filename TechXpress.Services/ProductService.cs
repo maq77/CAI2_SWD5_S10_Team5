@@ -268,7 +268,7 @@ namespace TechXpress.Services
                 }
 
 
-                //  Cache for 30 minutes
+                //  Cache for 30 sec
                 _cache.Set(PopularProductCacheKey, popularDTOs, TimeSpan.FromSeconds(30));
                 _logger.LogInformation("Cached popular products for less than 1 minute.");
                 return popularDTOs;
@@ -363,19 +363,21 @@ namespace TechXpress.Services
 
         public async Task<bool> DeleteProduct(int id)
         {
-            await _unitOfWork.Products.Delete(id, log => _logger.LogInformation(log));
-            var saved = await _unitOfWork.SaveAsync();
-            if (saved)
+            try
             {
+                await _unitOfWork.Products.Delete(id, log => _logger.LogInformation(log));
+                await _unitOfWork.SaveAsync();
                 _cache.Remove(ProductCacheKey);
                 _cache.Remove(PopularProductCacheKey);
                 _logger.LogInformation($"Product with ID {id} deleted successfully.");
+
+                return true;
             }
-            else
+            catch
             {
                 _logger.LogError($"Failed to delete product with ID {id}.");
+                return false;
             }
-            return saved;
         }
 
 

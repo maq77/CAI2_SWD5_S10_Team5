@@ -28,13 +28,7 @@ public class CategoryService : ICategoryService
             var categoryEntities = await _unitOfWork.Categories.GetAll();
             categories = categoryEntities.Select(c => new CategoryDTO { Id = c.Id, Name = c.Name }).ToList();
 
-            var cacheOptions = new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10),
-                SlidingExpiration = TimeSpan.FromMinutes(10)
-            };
-
-            _cache.Set(CacheKey, categories, cacheOptions);
+            _cache.Set(CacheKey, categories, TimeSpan.FromSeconds(30));
         }
         else
         {
@@ -56,11 +50,10 @@ public class CategoryService : ICategoryService
         var category = new Category { Name = model.Name };
         await _unitOfWork.Categories.Add(category, log=>Console.WriteLine(log));
         bool result = await _unitOfWork.SaveAsync();
-        if (result)
-        {
-            _cache.Remove(CacheKey); // Clear cache after adding
-            _logger.LogInformation("Category '{CategoryName}' added successfully!", model.Name);
-        }
+        
+        _cache.Remove(CacheKey); // Clear cache after adding
+        _logger.LogInformation("Category '{CategoryName}' added successfully!", model.Name);
+        
 
         return result;
     }
@@ -72,12 +65,12 @@ public class CategoryService : ICategoryService
 
         category.Name = model.Name;
         await _unitOfWork.Categories.Update(category, log => _logger.LogInformation(log));
-        bool result = await _unitOfWork.SaveAsync();
-        if (result)
-        {
-            _cache.Remove(CacheKey); // Clear cache after updating
-            _logger.LogInformation("Category ID: {CategoryId} updated successfully!", model.Id);
-        }
+        bool result=await _unitOfWork.SaveAsync();
+
+
+        _cache.Remove(CacheKey); // Clear cache after updating
+        _logger.LogInformation("Category ID: {CategoryId} updated successfully!", model.Id);
+
 
         return result;
     }
@@ -86,11 +79,9 @@ public class CategoryService : ICategoryService
     {
         await _unitOfWork.Categories.Delete(id, log => _logger.LogInformation(log));
         bool result = await _unitOfWork.SaveAsync();
-        if (result)
-        {
-            _cache.Remove(CacheKey); // Clear cache after deleting
-            _logger.LogInformation("Category ID: {CategoryId} deleted successfully!", id);
-        }
+
+        _cache.Remove(CacheKey); // Clear cache after deleting
+        _logger.LogInformation("Category ID: {CategoryId} deleted successfully!", id);
 
         return result;
     }
