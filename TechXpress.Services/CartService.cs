@@ -21,9 +21,9 @@ namespace TechXpress.Services
 
         public CartService(IHttpContextAccessor httpContextAccessor, ILogger<CartService> logger , IUnitOfWork unitOfWork)
         {
-            _httpContextAccessor = httpContextAccessor; //session caching
-            _logger = logger; //logger
-            _unitOfWork = unitOfWork; //unit of work
+            _httpContextAccessor = httpContextAccessor; 
+            _logger = logger;
+            _unitOfWork = unitOfWork; 
         }
 
         public OrderDetailDTO? GetCartItem(int productId)

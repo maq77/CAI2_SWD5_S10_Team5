@@ -13,11 +13,14 @@ namespace TechXpress.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<OrderService> _logger;
+        private readonly IErrorLoggingService _errorLoggingService;
 
-        public OrderService(IUnitOfWork unitOfWork, ILogger<OrderService> logger)
+        public OrderService(IUnitOfWork unitOfWork, ILogger<OrderService> logger, IErrorLoggingService errorLoggingService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _errorLoggingService = errorLoggingService;
+
         }
 
         public async Task<IEnumerable<OrderDTO>> GetAllOrders()
@@ -68,7 +71,6 @@ namespace TechXpress.Services
 
         public async Task<int> CreateOrder(OrderDTO orderDto)
         {
-            // Input validation
             if (orderDto == null)
                 throw new ArgumentNullException(nameof(orderDto));
 
@@ -145,6 +147,7 @@ namespace TechXpress.Services
                     await transaction.CommitAsync();
 
                     _logger?.LogInformation($"Order {order.Id} created successfully for user {orderDto.UserId}");
+                    await _errorLoggingService.LogInfoAsync($"Order {order.Id} with Total - {orderDto.TotalAmount} created successfully for user {orderDto.UserId}","OrderService.CreateOrder",$"{orderDto.UserId}");
 
                     return order.Id;
                 }
@@ -152,6 +155,7 @@ namespace TechXpress.Services
                 {
                     _logger?.LogError(ex, "Error creating order for user {UserId}: {ErrorMessage}",
                         orderDto.UserId, ex.Message);
+                    await _errorLoggingService.LogErrorAsync(ex, "OrderService.CreateOrder",$"{orderDto.UserId}");
                     throw;
                 }
             });
@@ -161,7 +165,7 @@ namespace TechXpress.Services
         {
             try
             {
-                var context = _unitOfWork.GetContext(); // You'll need to expose this from UnitOfWork
+                var context = _unitOfWork.GetContext(); 
                 var entities = context.ChangeTracker.Entries()
                     .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified)
                     .Select(e => e.Entity);
@@ -199,16 +203,14 @@ namespace TechXpress.Services
             var order = await _unitOfWork.Orders.GetById(id);
             if (order == null) return false;
 
-            // Validation
             if (!Enum.TryParse<OrderStatus>(status, out OrderStatus orderStatus))
             {
                 return false; // Invalid status string
             }
 
-            // Add status transition validation
             if (!IsValidStatusTransition(order.Status, orderStatus))
             {
-                return false; // Invalid transition
+                return false; 
             }
 
             order.Status = orderStatus;
@@ -217,13 +219,10 @@ namespace TechXpress.Services
         //Helper method
         private bool IsValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus)
         {
-            // Example rules (adjust as needed for your business logic):
 
-            // Can't change status of delivered or canceled orders
             if (currentStatus == OrderStatus.Delivered || currentStatus == OrderStatus.Canceled)
                 return false;
 
-            // Can't skip steps (e.g., Pending → Shipped without Processing)
             if (currentStatus == OrderStatus.Pending && newStatus == OrderStatus.Shipped)
                 return false;
 
@@ -252,13 +251,11 @@ namespace TechXpress.Services
                 includes: new[] { "OrderDetails", "OrderDetails.Product" }
             );
 
-            //  Ensure we always return a valid list, preventing NullReferenceExceptions
             if (orders == null || !orders.Any())
             {
                 return new List<OrderDTO>();
             }
 
-            //  Use `.AsNoTracking()` in `GetAllOrders()` to improve performance if not modifying data
             return orders.Select(o => new OrderDTO
             {
                 Id = o.Id,
@@ -274,7 +271,7 @@ namespace TechXpress.Services
                     ProductId = d.ProductId,
                     Quantity = d.Quantity,
                     Price = d.Price
-                }).ToList() ?? new List<OrderDetailDTO>() // Ensure list is never null
+                }).ToList() ?? new List<OrderDetailDTO>() 
             }).ToList();
         }
 
@@ -318,7 +315,7 @@ namespace TechXpress.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error deleting order: {ex.Message}");
+                await _errorLoggingService.LogErrorAsync(ex, "OrderService.DeleteOrder");
                 throw;
             }
             finally
@@ -331,6 +328,7 @@ namespace TechXpress.Services
                     }
                     catch (Exception rollbackEx)
                     {
+                        await _errorLoggingService.LogErrorAsync(rollbackEx, "OrderService.DeleteOrder");
                         Console.WriteLine($"Rollback failed: {rollbackEx.Message}");
                     }
                 }
@@ -347,20 +345,15 @@ namespace TechXpress.Services
                 var order = await _unitOfWork.Orders.GetById(orderId);
                 if (order == null) return;
 
-                // Validate the transition
                 if (!IsValidStatusTransition(order.Status, OrderStatus.Delivered))
                 {
-                    throw new Exception(" error "); // Cannot complete order from current status
+                    throw new Exception(" error "); 
                 }
 
-                // Set order to delivered
                 order.PaymentMethod = paymentMethod;
                 order.TransactionId = transactionId;
 
-
-                // Save changes
                 bool result = await _unitOfWork.SaveAsync();
-                // Log warning but don't throw exception
                 if (!result)
                 {
                     Console.WriteLine("Warning: SaveAsync returned false when completing order, but continuing with transaction");
@@ -400,19 +393,15 @@ namespace TechXpress.Services
                 var order = await _unitOfWork.Orders.GetById(id);
                 if (order == null) return false;
 
-                // Validate the transition
                 if (!IsValidStatusTransition(order.Status, OrderStatus.Delivered))
                 {
-                    return false; // Cannot complete order from current status
+                    return false;
                 }
 
-                // Set order to delivered
                 order.Status = OrderStatus.Delivered;
 
-                // Save changes
                 await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
                 bool result = await _unitOfWork.SaveAsync();
-                // Log warning but don't throw exception
                 if (!result)
                 {
                     Console.WriteLine("Warning: SaveAsync returned false when completing order, but continuing with transaction");
@@ -453,13 +442,11 @@ namespace TechXpress.Services
                 var order = await _unitOfWork.Orders.GetById(id);
                 if (order == null) return false;
 
-                // Validate the transition
                 if (!IsValidStatusTransition(order.Status, OrderStatus.Canceled))
                 {
-                    return false; // Cannot cancel order from current status
+                    return false; 
                 }
 
-                // Return items to inventory only if the order was not already canceled
                 if (order.Status != OrderStatus.Canceled && order.OrderDetails != null)
                 {
                     foreach (var detail in order.OrderDetails)
@@ -467,20 +454,17 @@ namespace TechXpress.Services
                         var product = await _unitOfWork.Products.GetById(detail.ProductId);
                         if (product != null)
                         {
-                            // Return the quantity back to stock
                             product.StockQuantity += detail.Quantity;
                             await _unitOfWork.Products.Update(product, log => Console.WriteLine(log));
                         }
                     }
                 }
 
-                // Set order to canceled
                 order.Status = OrderStatus.Canceled;
 
-                // Save changes
                 await _unitOfWork.Orders.Update(order, log => Console.WriteLine(log));
                 bool result = await _unitOfWork.SaveAsync();
-                // Log warning but don't throw exception
+
                 if (!result)
                 {
                     Console.WriteLine("Warning: SaveAsync returned false when canceling order, but continuing with transaction");

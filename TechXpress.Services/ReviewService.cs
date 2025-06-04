@@ -15,10 +15,12 @@ namespace TechXpress.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReviewService> _logger;
-        public ReviewService(IUnitOfWork unitOfWork, ILogger<ReviewService> logger)
+        private readonly IErrorLoggingService _errorLoggingService;
+        public ReviewService(IUnitOfWork unitOfWork, ILogger<ReviewService> logger, IErrorLoggingService errorLoggingService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _errorLoggingService = errorLoggingService;
         }
         public async Task<bool> AddReviewAsync(ReviewDTO review)
         {
@@ -58,12 +60,14 @@ namespace TechXpress.Services
                 };
                 await _unitOfWork.Reviews.Add(reviewEntity, log=>Console.WriteLine(log));
                 _logger.LogInformation($"Review added successfully for productId: {review.ProductId} with customerId: {review.UserId}.");
+                await _errorLoggingService.LogInfoAsync($"Review added successfully for productId: {review.ProductId} with customerId: {review.UserId}","ReviewServic.Create",$"{review.UserName}");
                 await _unitOfWork.SaveAsync();
                 return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding review");
+                await _errorLoggingService.LogErrorAsync(ex,"ReviewService.Create",$"{review.UserName}");
                 return false;
             }
         }
@@ -82,12 +86,14 @@ namespace TechXpress.Services
                 _logger.LogInformation("Review with ID: {ReviewId} found. Proceeding to delete.", reviewId);
                 await _unitOfWork.Reviews.Delete(reviewId, log => Console.WriteLine(log));
                 _logger.LogInformation("Review with ID: {ReviewId} deleted successfully.", reviewId);
+                await _errorLoggingService.LogInfoAsync($"Review with ID: {reviewId} deleted successfully","ReviewService.Delete",$"{review.UserId}");
                 await _unitOfWork.SaveAsync();
                 return true;
             }
             catch(Exception ex) 
             {
                 _logger.LogError(ex, "Error deleting review");
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.Delete");
                 return false;
             }
         }
@@ -113,6 +119,7 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting average rating for product ID: {ProductId}", productId);
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.GetAVG");
                 return 0;
             }
         }
@@ -144,6 +151,7 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting review by ID: {ReviewId}", reviewId);
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.GetReviewById");
                 return null;
             }
         }
@@ -178,6 +186,7 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting reviews for product ID: {ProductId}", productId);
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.GetByProdId");
                 return new List<ReviewDTO>();
             }
         }
@@ -212,6 +221,7 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting reviews for user ID: {UserId}", userId);
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.GetByUserId");
                 return new List<ReviewDTO>();
             }
         }
@@ -241,6 +251,7 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating review ID: {ReviewId}", review.Id);
+                await _errorLoggingService.LogErrorAsync(ex, "ReviewService.Update");
                 return false;
             }
         }

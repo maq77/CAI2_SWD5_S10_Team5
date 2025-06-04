@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using TechXpress.Data.Constants;
 using TechXpress.Data.Model;
@@ -27,9 +28,10 @@ namespace TechXpress.Services
         private readonly ILogger<UserService> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUserImageService _userImageService;
+        private readonly IErrorLoggingService _errorLoggingService;
         private readonly IEmailServer _emailServer;
 
-        public UserService(IUnitOfWork unitOfWork, IEmailServer emailServer, IUserImageService userImageService, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
+        public UserService(IUnitOfWork unitOfWork, IEmailServer emailServer, IUserImageService userImageService, IErrorLoggingService errorLoggingService, UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, ILogger<UserService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -40,6 +42,7 @@ namespace TechXpress.Services
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
             _userImageService = userImageService;
+            _errorLoggingService = errorLoggingService;
         }
         public async Task<(AuthResponse authResponse, string RedirectUrl)> RegisterAsync(RegisterDTO model)
         {
@@ -103,6 +106,7 @@ namespace TechXpress.Services
                     if (!roleResult)
                     {
                         _logger.LogWarning("Failed to assign role to user {UserId}", user.Id);
+                        await _errorLoggingService.LogWarningAsync($"Failed to assign role to user {user.Id}","UserService.Create");
                     }
 
                     var claims = await GenerateClaims(user);
@@ -128,6 +132,7 @@ namespace TechXpress.Services
                 {
                     await transaction.RollbackAsync();
                     _logger.LogError(ex, "Exception in RegisterAsync for {Email}", model.Email);
+                    await _errorLoggingService.LogErrorAsync(ex,"UserService.Create");
                     return (new AuthResponse { IsSuccess = false, Message = "An error occurred while registering." }, "");
                 }
             });
@@ -141,6 +146,7 @@ namespace TechXpress.Services
                 if (!result.Succeeded)
                 {
                     _logger.LogWarning($"Login failed for {model.Email}");
+                    await _errorLoggingService.LogWarningAsync($"Login failed", "UserService.Login",$"{model.Email}");
                     
                     return (new AuthResponse { IsSuccess =false , Message="Invalid Credintials!"}, "");
                 }
@@ -158,8 +164,25 @@ namespace TechXpress.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception in LoginAsync for {Email}", model.Email);
+                await _errorLoggingService.LogErrorAsync(ex,"UserService.Login", $"{model.Email}",$"{GetClientIpAddress()}",$"{model.returnUrl}");
                 return (new AuthResponse { IsSuccess = false, Message="Exception in Login could be server error, Try Again! " }, "");
             }
+        }
+        private string GetRequestPath()
+        {
+            return _httpContextAccessor.HttpContext?.Request?.Path ?? "Unknown Path";
+        }
+        private string GetCurrentUserId()
+        {
+            return _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown User"; 
+        }
+
+        private string GetClientIpAddress()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            return httpContext?.Connection?.RemoteIpAddress?.ToString() ??
+                   httpContext?.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
+                   "Unknown IP";
         }
         private async Task<bool> IsAdmin(User user) => await _userManager.IsInRoleAsync(user, "Admin");
         public async Task<bool> LogoutAsync()
@@ -264,6 +287,8 @@ namespace TechXpress.Services
             if (!res_img)
             {
                 _logger.LogWarning($"Failed to update user image for {user.Email} or Image is null or ahven't updated image ,no new image provided");
+                await _errorLoggingService.LogWarningAsync($"Failed to update user image for {user.Email} or Image is null or ahven't updated image ,no new image provided",
+                    $"UserService.UpdateUserProfile",$"{user.Email}");
                 //return false;
             }
 
@@ -288,6 +313,7 @@ namespace TechXpress.Services
             if (user == null)
             {
                 _logger.LogWarning($"User with ID {userId} not found.");
+                await _errorLoggingService.LogWarningAsync($"User with ID {userId} not found.","UserService.FindById",$"{userId}");
                 return null;
             }
             return user;
@@ -307,13 +333,14 @@ namespace TechXpress.Services
 
                 var token = await GenerateEmailConfirmationToken(user);
                 Console.WriteLine($"[SEND] UserId: {user.Email}, Token: {token.Length}");
-
+                await _errorLoggingService.LogInfoAsync($"[SEND] UserId: {user.Email}, Token: {token.Length}",$"UserService.SendEmailConfirmation",$"{user.Email}");
 
                 await _emailServer.SendVerificationEmailAsync(user.Email, token);
 
                 return (new AuthResponse{ IsSuccess=true, Message="Sent Confirmation Email Successfully!" });
-            }catch (Exception)
+            }catch (Exception ex)
             {
+                await _errorLoggingService.LogErrorAsync(ex, $"UserService.SendEmailConfirmation", GetCurrentUserId(),GetClientIpAddress(), GetRequestPath());
                 return (new AuthResponse { IsSuccess = false, Message = "Something went wrong!" });
             }
         }
@@ -342,11 +369,15 @@ namespace TechXpress.Services
             if (result.Succeeded)
             {
                 _logger.LogInformation($"Password reset successful for {user.Email}");
+                await _errorLoggingService.LogInfoAsync($"Password reset successful for {user.Email}","UserService.ResetPassword",$"{user.Email}");
                 return result;
             }
             else
             {
                 _logger.LogWarning($"Password reset failed for {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                await _errorLoggingService.LogWarningAsync($"Password reset failed for {user.Email}: {string.Join(", ", result.Errors.Select(e => e.Description))}"
+                                                        , "UserService.ResetPassword", $"{user.Email}");
+
                 return result;
             }
         }
