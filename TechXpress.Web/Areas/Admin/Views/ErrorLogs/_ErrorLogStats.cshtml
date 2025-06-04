@@ -1,0 +1,36 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.ErrorLogIndexViewModel
+
+<div class="row mb-4" id="statsContainer">
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="stats-number text-danger" id="errorCount">@Model.ErrorCount</div>
+            <div class="text-muted">
+                <i class="fas fa-times-circle me-2"></i>Errors
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="stats-number text-warning" id="warningCount">@Model.WarningCount</div>
+            <div class="text-muted">
+                <i class="fas fa-exclamation-triangle me-2"></i>Warnings
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="stats-number text-info" id="infoCount">@Model.InfoCount</div>
+            <div class="text-muted">
+                <i class="fas fa-info-circle me-2"></i>Info
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card">
+            <div class="stats-number text-success" id="totalCount">@Model.TotalLogCount</div>
+            <div class="text-muted">
+                <i class="fas fa-list me-2"></i>Total Logs
+            </div>
+        </div>
+    </div>
+</div>

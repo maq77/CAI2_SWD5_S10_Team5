@@ -1,0 +1,63 @@
+﻿@model TechXpress.Services.DTOs.ErrorLogDTO
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Date & Time</label>
+        <div>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Severity</label>
+        <div>
+            <span class="severity-badge severity-@Model.Severity.ToLower()">
+                <i class="fas fa-@(Model.Severity == "Error" ? "times-circle" : Model.Severity == "Warning" ? "exclamation-triangle" : "info-circle") me-1"></i>
+                @Model.Severity
+            </span>
+        </div>
+    </div>
+    <div class="col-12 mb-3">
+        <label class="form-label fw-semibold">Message</label>
+        <div class="p-3 bg-light border rounded">
+            @Model.Message
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Source</label>
+        <div><code>@(Model.Source ?? "-")</code></div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">User</label>
+        <div>@(Model.UserName ?? "-")</div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">IP Address</label>
+        <div>@(Model.IpAddress ?? "-")</div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <label class="form-label fw-semibold">Request URL</label>
+        <div>
+            @if (!string.IsNullOrEmpty(Model.RequestUrl))
+            {
+                <a href="@Model.RequestUrl" class="text-decoration-none">@Model.RequestUrl</a>
+            }
+            else
+            {
+                <span>-</span>
+            }
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.StackTrace))
+    {
+        <div class="col-12 mb-3">
+            <label class="form-label fw-semibold">Stack Trace</label>
+            <pre class="bg-dark text-light p-3 rounded small" style="max-height: 300px; overflow-y: auto;">@Model.StackTrace</pre>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(Model.AdditionalInfo))
+    {
+        <div class="col-12">
+            <label class="form-label fw-semibold">Additional Information</label>
+            <div class="p-3 bg-light border rounded">
+                @Model.AdditionalInfo
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,36 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.ErrorLogIndexViewModel
+<div class="filters-section">
+    <h5 class="mb-3">
+        <i class="fas fa-filter me-2"></i>Filters & Search
+    </h5>
+    <form id="filtersForm">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Severity</label>
+                <select class="form-select" id="severityFilter" name="severity" asp-for="Severity">
+                    <option value="">All Severities</option>
+                    <option value="Error">Error</option>
+                    <option value="Warning">Warning</option>
+                    <option value="Info">Info</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control" id="dateFrom" name="dateFrom" asp-for="DateFrom" />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control" id="dateTo" name="dateTo" asp-for="DateTo" />
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" name="search" asp-for="Search" placeholder="Search in messages..." />
+                    <button class="btn btn-outline-secondary" type="button" onclick="ErrorLog.clearFilters()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

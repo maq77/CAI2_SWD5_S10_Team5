@@ -1,0 +1,72 @@
+﻿@model TechXpress.Services.DTOs.ViewModels.ErrorLogIndexViewModel
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead>
+            <tr>
+                <th width="5%">
+                    <input type="checkbox" class="form-check-input" id="selectAll" />
+                </th>
+                <th width="12%">Date/Time</th>
+                <th width="10%">Severity</th>
+                <th width="25%">Message</th>
+                <th width="15%">Source</th>
+                <th width="12%">User</th>
+                <th width="10%">IP Address</th>
+                <th width="11%">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="errorTableBody">
+            @if (Model.Errors.Any())
+            {
+                @foreach (var error in Model.Errors)
+                {
+                    <tr class="expandable" data-error-id="@error.Id">
+                        <td>
+                            <input type="checkbox" class="form-check-input row-checkbox" value="@error.Id" />
+                        </td>
+                        <td>
+                            <div class="fw-semibold">@error.CreatedDate.ToString("yyyy-MM-dd")</div>
+                            <small class="text-muted">@error.CreatedDate.ToString("HH:mm:ss")</small>
+                        </td>
+                        <td>
+                            <span class="severity-badge severity-@error.Severity.ToLower()">
+                                <i class="fas fa-@(error.Severity == "Error" ? "times-circle" : error.Severity == "Warning" ? "exclamation-triangle" : "info-circle") me-1"></i>
+                                @error.Severity
+                            </span>
+                        </td>
+                        <td>
+                            <div class="error-message" title="@error.Message">
+                                @error.Message
+                            </div>
+                        </td>
+                        <td>
+                            <code class="small">@(error.Source ?? "-")</code>
+                        </td>
+                        <td>@(error.UserName ?? "-")</td>
+                        <td>@(error.IpAddress ?? "-")</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-action btn-view" onclick="ErrorLog.viewErrorDetails(@error.Id)" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="ErrorLog.confirmDelete(@error.Id)" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5>No Error Logs Found</h5>
+                        <p class="text-muted">No error logs match your current filters.</p>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -16,6 +16,7 @@ namespace TechXpress.Data
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<WishListItem> WishlistItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<ErrorLog> ErrorLogs { get; set; }
         public DbSet<TokenInfo> TokenInfos { get; set; }
         public DbSet<AppSetting> AppSettings { get; set; }
 
@@ -26,12 +27,33 @@ namespace TechXpress.Data
 
             ConfigureProduct(builder);
             ConfigureReview(builder);
+            ConfigureErrorLog(builder);
             ConfigureOrder(builder);
             ConfigureOrderDetail(builder);
             ConfigureProductImage(builder);
             ConfigureUserImage(builder);
             ConfigureWishlistItem(builder);
             ConfigureToken(builder);
+        }
+        private void ConfigureErrorLog(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ErrorLog>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Message)
+                      .IsRequired()
+                      .HasMaxLength(500);
+                entity.Property(e => e.Source)
+                      .HasMaxLength(200);
+                entity.Property(e => e.RequestUrl)
+                      .HasMaxLength(500);
+                entity.Property(e => e.UserName)
+                      .HasMaxLength(100);
+                entity.Property(e => e.IpAddress)
+                      .HasMaxLength(50);
+                entity.Property(e => e.Severity)
+                      .HasMaxLength(50);
+            });
         }
         private void ConfigureUser(ModelBuilder builder)
         {

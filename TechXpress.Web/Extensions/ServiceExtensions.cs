@@ -34,6 +34,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IProductRepo, ProductRepo>();
             services.AddScoped<IOrderRepo, OrderRepo>();
+            services.AddScoped<IErrorLogRepo, ErrorLogRepo>();
 
             // Register Services
             services.AddScoped<IUserService, UserService>();
@@ -50,6 +51,7 @@ namespace TechXpress.Web.Extensions
             services.AddScoped<IAnalyticsService, AnalyticsService>();
             services.AddScoped<IAppSettingService, AppSettingService>();
             services.AddScoped<IDynamicSettingsService, DynamicSettingsService>();
+            services.AddScoped<IErrorLoggingService, ErrorLoggingService>();
             //services.AddScoped<ITokenService, TokenService>();
 
             // Session Configuration
