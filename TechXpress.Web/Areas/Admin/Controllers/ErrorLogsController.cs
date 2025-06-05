@@ -95,19 +95,19 @@ namespace TechXpress.Web.Areas.Admin.Controllers
         {
             try
             {
-               // var error = await _errorLoggingService.GetErrorByIdAsync(id);
-                if (true) // error == null
+                var error = await _errorLoggingService.GetErrorById(id);
+                if (error == null) // error == null
                 {
                     return NotFound();
                 }
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    //return PartialView("_ErrorDetails", error);
+                    return PartialView("_ErrorDetails", error);
                 }
 
-                //return View(error);
-                return Json(new { success = true, message = "Error details loaded successfully." }); // Mock response //del
+                return View(error);
+                //return Json(new { success = true, message = "Error details loaded successfully." }); // Mock response //del
             }
             catch (Exception ex)
             {
@@ -121,8 +121,8 @@ namespace TechXpress.Web.Areas.Admin.Controllers
         {
             try
             {
-               // var success = await _errorLoggingService.DeleteErrorAsync(id);
-                if (true) //success
+                var success = await _errorLoggingService.DeleteErrorById(id);
+                if (success) 
                 {
                     return Json(new { success = true, message = "Error log deleted successfully." });
                 }
@@ -140,9 +140,9 @@ namespace TechXpress.Web.Areas.Admin.Controllers
         {
             try
             {
-                // var deletedCount = await _errorLoggingService.BulkDeleteErrorsAsync(ids);
-                // return Json(new { success = true, message = $"{deletedCount} error logs deleted successfully.", count = deletedCount });
-                return Json(new { success = true, message = $"{ids.Length} error logs deleted successfully.", count = ids.Length }); // Mock response //del
+                var deletedCount = await _errorLoggingService.BulkDeleteErrors(ids);
+                return Json(new { success = true, message = $"{deletedCount} error logs deleted successfully.", count = deletedCount });
+                //return Json(new { success = true, message = $"{ids.Length} error logs deleted successfully.", count = ids.Length }); // Mock response //del
             }
             catch (Exception ex)
             {

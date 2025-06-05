@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -28,6 +30,12 @@
 </head>
 <body>
     <div class="container-fluid p-0">
+
+        <input type="hidden"
+               id="RequestVerificationToken"
+               name="__RequestVerificationToken"
+               value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
+
         <!-- Header Partial -->
         @await Html.PartialAsync("_Header")
 

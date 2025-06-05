@@ -1,4 +1,4 @@
-﻿// wwwroot/js/errorlog.js
+﻿
 var ErrorLog = {
     // Configuration
     config: {

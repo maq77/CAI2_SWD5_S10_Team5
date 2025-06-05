@@ -6,5 +6,6 @@
         public int TotalOrders { get; set; }
         public int TotalUsers { get; set; }
         public double TotalRevenue { get; set; }
+        public List<ActivityItem>? ActivityItems { get; set; }
     }
 }

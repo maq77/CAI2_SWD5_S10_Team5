@@ -15,16 +15,18 @@ namespace TechXpress.Services
 {
     public class EmailServer : IEmailServer
     {
-        private readonly EmailSettings _settings;
+        private  EmailSettings _settings;
+        private readonly IDynamicSettingsService _dynamicSettings;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public EmailServer(IOptions<EmailSettings> options, IHttpContextAccessor httpContextAccessor)
+        public EmailServer(IOptions<EmailSettings> options, IDynamicSettingsService dynamicSettings, IHttpContextAccessor httpContextAccessor)
         {
             _settings = options.Value;
+            _dynamicSettings = dynamicSettings;
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private string GetBaseUrl()
+        private async Task<string> GetBaseUrlAsync()
         {
             var request = _httpContextAccessor.HttpContext?.Request;
             if (request != null)
@@ -33,7 +35,7 @@ namespace TechXpress.Services
                 var host = request.Host.Value; // domain and port (if there)
                 return $"{scheme}://{host}";
             }
-
+            _settings.ClientAppUrl = await _dynamicSettings.GetValueAsync("EmailSettings:ClientAppUrl");
             // Fallback to configuration if HTTP context not available
             return _settings.ClientAppUrl ?? "https://localhost";
         }
@@ -65,7 +67,7 @@ namespace TechXpress.Services
 
         public async Task SendVerificationEmailAsync(string to, string token)
         {
-            var baseUrl = GetBaseUrl();
+            var baseUrl = GetBaseUrlAsync();
             var encodedToken = WebUtility.UrlEncode(token);
             Console.WriteLine($"[DEBUG] Using base URL: {baseUrl}");
             Console.WriteLine($"[DEBUG] Raw token: {token}");
@@ -160,6 +162,7 @@ The TechXpress Team
 
         private MailMessage CreateBaseEmail(string toEmail, string subject)
         {
+            _settings = _dynamicSettings.GetSectionAsync<EmailSettings>("EmailSettings").GetAwaiter().GetResult();
             var email = new MailMessage
             {
                 From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
@@ -168,7 +171,7 @@ The TechXpress Team
             };
 
             email.To.Add(toEmail);
-            var baseUrl = GetBaseUrl();
+            var baseUrl = GetBaseUrlAsync();
             // Add  headers for deliverability
             email.Headers.Add("List-Unsubscribe", $"<{baseUrl}/unsubscribe>");
             email.Headers.Add("X-Mailer", "TechXpress-EmailService/1.0");
@@ -179,6 +182,7 @@ The TechXpress Team
 
         private async Task SendEmailWithClient(MailMessage email)
         {
+            _settings = _dynamicSettings.GetSectionAsync<EmailSettings>("EmailSettings").GetAwaiter().GetResult();
             using var client = new SmtpClient(_settings.SmtpServer, _settings.SmtpPort)
             {
                 Credentials = new NetworkCredential(_settings.Username, _settings.Password),

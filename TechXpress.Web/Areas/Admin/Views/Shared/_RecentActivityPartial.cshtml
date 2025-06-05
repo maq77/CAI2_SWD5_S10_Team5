@@ -1,36 +1,29 @@
-﻿<div class="activity-item">
-    <div class="activity-icon" style="background: var(--gradient-2);">
-        <i class="fas fa-shopping-cart"></i>
+﻿@model List<TechXpress.Services.DTOs.ActivityItem>
+
+@if (Model != null && Model.Any())
+{
+    @foreach (var activity in Model)
+    {
+        <div class="activity-item">
+            <div class="activity-icon" style="background: @activity.GradientClass;">
+                <i class="@activity.Icon"></i>
+            </div>
+            <div>
+                <strong>@activity.Title</strong><br>
+                <small class="text-muted">@activity.Description • @activity.TimeAgo</small>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="activity-item">
+        <div class="activity-icon" style="background: var(--gradient-1);">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+            <strong>No Recent Activity</strong><br>
+            <small class="text-muted">Check back later for updates</small>
+        </div>
     </div>
-    <div>
-        <strong>New Order #1847</strong><br>
-        <small class="text-muted">iPhone 15 Pro - $999.00 • 2 minutes ago</small>
-    </div>
-</div>
-<div class="activity-item">
-    <div class="activity-icon" style="background: var(--gradient-1);">
-        <i class="fas fa-user-plus"></i>
-    </div>
-    <div>
-        <strong>New User Registration</strong><br>
-        <small class="text-muted">john.doe@example.com • 5 minutes ago</small>
-    </div>
-</div>
-<div class="activity-item">
-    <div class="activity-icon" style="background: var(--gradient-3);">
-        <i class="fas fa-box"></i>
-    </div>
-    <div>
-        <strong>Product Updated</strong><br>
-        <small class="text-muted">Samsung Galaxy S24 • 8 minutes ago</small>
-    </div>
-</div>
-<div class="activity-item">
-    <div class="activity-icon" style="background: var(--gradient-4);">
-        <i class="fas fa-star"></i>
-    </div>
-    <div>
-        <strong>New Review Received</strong><br>
-        <small class="text-muted">5 stars for MacBook Pro • 12 minutes ago</small>
-    </div>
-</div>
+}

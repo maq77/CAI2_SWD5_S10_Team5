@@ -25,15 +25,17 @@ namespace TechXpress.Services
         private readonly IReviewService _reviewService;
         private readonly IMemoryCache _cache;
         private readonly ILogger<ProductService> _logger;
+        private readonly IErrorLoggingService _errorLoggingService;
         private const string ProductCacheKey = "ProductList";
         private const string PopularProductCacheKey = "PopularProducts";
         private const string CategoryCacheKey = "Categories";
 
-        public ProductService(IUnitOfWork unitOfWork, IWishlistService wishlistService, IReviewService reviewService, IMemoryCache cache, ILogger<ProductService> logger)
+        public ProductService(IUnitOfWork unitOfWork, IWishlistService wishlistService, IReviewService reviewService, IErrorLoggingService errorLoggingService, IMemoryCache cache, ILogger<ProductService> logger)
         {
             _unitOfWork = unitOfWork;
             _wishlistService = wishlistService;
             _reviewService = reviewService;
+            _errorLoggingService = errorLoggingService;
             _cache = cache;
             _logger = logger;
         }
@@ -95,6 +97,7 @@ namespace TechXpress.Services
             _cache.Remove(ProductCacheKey);
             _cache.Remove(PopularProductCacheKey);
             _logger.LogInformation($"Product '{product.Name}' added successfully.");
+            await _errorLoggingService.LogInfoAsync($"Product '{product.Name}' added successfully. Category: {category.Name}","ProductService.Create");
             return true;
         }
 
@@ -356,7 +359,7 @@ namespace TechXpress.Services
             _cache.Remove(ProductCacheKey);
             _cache.Remove(PopularProductCacheKey);
             _logger.LogInformation($"Product '{product.Name}' updated successfully.");
-
+            await _errorLoggingService.LogInfoAsync($"Updated Product {product.Name}", "ProductService.Update");
 
             return true;
         }
@@ -370,12 +373,13 @@ namespace TechXpress.Services
                 _cache.Remove(ProductCacheKey);
                 _cache.Remove(PopularProductCacheKey);
                 _logger.LogInformation($"Product with ID {id} deleted successfully.");
-
+                await _errorLoggingService.LogInfoAsync($"Deleted Product with ID: {id}", "ProductService.Delete");
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 _logger.LogError($"Failed to delete product with ID {id}.");
+                await _errorLoggingService.LogErrorAsync(ex, "ProductService.Update");
                 return false;
             }
         }

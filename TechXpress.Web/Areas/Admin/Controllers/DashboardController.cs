@@ -14,12 +14,14 @@ namespace TechXpress.Web.Areas.Admin.Controllers
         private readonly IProductService _productService;
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
+        private readonly IErrorLoggingService _errorLogService;
 
-        public DashboardController(IProductService productService, IOrderService orderService, IUserService userService)
+        public DashboardController(IProductService productService, IOrderService orderService, IUserService userService, IErrorLoggingService errorLoggingService)
         {
             _productService = productService;
             _orderService = orderService;
             _userService = userService;
+            _errorLogService = errorLoggingService;
         }
 
         public async Task<IActionResult> Index()
@@ -33,13 +35,14 @@ namespace TechXpress.Web.Areas.Admin.Controllers
             var products = await _productService.GetAllProducts();
             var orders = await _orderService.GetAllOrders();
             var users = await _userService.GetAllUsersAsync();
-
+            var recentActivity = await _errorLogService.GetRecentActivityAsync();
             var dashboardData = new DashboardViewModel
             {
                 TotalProducts = products.Count(),
                 TotalOrders = orders.Count(),
                 TotalUsers = users.Count(),
-                TotalRevenue = orders.Sum(o => (double?)o.TotalAmount) ?? 0 // Handles null values
+                TotalRevenue = orders.Sum(o => (double?)o.TotalAmount) ?? 0, // Handles null values
+                ActivityItems = recentActivity
             };
 
             return View(dashboardData);

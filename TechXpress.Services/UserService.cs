@@ -119,6 +119,7 @@ namespace TechXpress.Services
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
                     await transaction.CommitAsync();
+                    await _errorLoggingService.LogInfoAsync("User registered successfully", $"UserService.Create", $"{user.Email}", $"Ip = {GetClientIpAddress()} , Path = {GetRequestPath()}");
 
                     return (new AuthResponse
                     {
